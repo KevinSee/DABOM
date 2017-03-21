@@ -1,29 +1,25 @@
-#' @title lgr2SCOBI: Format adult data from LGTrappingDB for SCOBI
+#' @title validTagList: Generate valid PIT tag list from LGTrappingDB
 #'
-#' @description lgr2SCOBI() is a function to convert raw data exported or 'dumped' out of the LGTrappingDB to a format that is ready
-#' to be analyzed by the \link{SCOBI}() function. It is to be used on one species/spawn year combination (e.g., SY2015 steelhead) at a time. It will
-#' write a csv file ready to be used as the \code{adultData} argument of the SCOBI() function.
+#' @description validTagList() is a function to generate a valid tag list using the LGTrappingDB.
 #'
-#' @param input the name of the csv file containing adult data exported from the LGTrappingDB. Can also accept an \code{object} of a similar
-#' format. See \code{\link[SCOBI]{exRawSthdAdultData}}
-#' @param species what is the species of the data you are attempting to format for SCOBI. The default option is \code{"chnk"} for
-#' Chinook salmon. Simply set as \code{"sthd"} for steelhead.
-#' @param exportFile What would you like to name your exported file containing your data formatted for SCOBI analysis? By
-#' default \code{lgr2SCOBI()} exports the formatted data as a csv file which is the preferred format for SCOBI.
+#' @param input the name of the tab-delimited text file containing all of the records from the LGTrappingDB.
+#' @param spawnYear the desired spawn year
+#' @param species which species?
+#' @param exportFile name of export file?
 #'
 #' @author Mike Ackerman
 #'
-#' @examples lgr2SCOBI(input = exRawSthdAdultData, species = "sthd", exportFile = "SthdScobiInput")
+#' @examples validTagList(input = LGTrappingDB_03192017, species )
 #'
-#' @import stringr car
+#' @import dplyr
 #' @export
 #' @return NULL
 
-lgr2SCOBI <- function(input = NULL, species = "chnk", exportFile = NULL)
+validTagList <- function(input = NULL, spawnYear = NULL, species = 'chnk', exportFile = NULL)
 {
-  # IMPORT UNFORMATTED DATA DUMPED FROM THE LGRTrappingDB
-  if(is.character(input) == TRUE) { rawData <- read.table(file = input, header = TRUE, sep = ",", na.strings = c("","NA"), comment.char = "")
-  } else { rawData <- input }
-  data   <- subset(rawData, select = c("WeekNumber","CollectionDate","SpawnYear","MasterID","BioSamplesID","SRR","LGDMarkAD","LGDFLmm","GenSex",
-                                       "GenStock","GenStockProb","BioScaleFinalAge","GenPBT_ByHat","GenPBT_RGroup","GenParentHatchery","GenBY","BiosamplesValid","LGDValid",
-                                       "LGDNumPIT"))
+  # IMPORT UNFORMATTED DATA DOWNLOADED FROM LGTRAPPINGDB
+  if(is.character(input) == TRUE)
+  { lgtrappingdb <- read.table(file = input, header = TRUE, sep ='\t') }
+  else { lgtrappingdb <- input }
+}
+
