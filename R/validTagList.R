@@ -6,7 +6,8 @@
 #' @param spawnYear Which spawn year do you want to pull records for? Should be in character format. For example, to
 #' pull records for spawn year 2016 use \code{"SY2016"}.
 #' @param species which species?
-#' @param exportFile name of export file?
+#' @param validTagFile name of valid tag list file? Will be exported as tab delimited .txt
+#' @param validTagData name of file for all data associated with the valid tag list
 #'
 #' @author Mike Ackerman
 #'
@@ -16,16 +17,51 @@
 #' @export
 #' @return NULL
 
-validTagList <- function(input = NULL, spawnYear = NULL, species = 'chnk', exportFile = NULL)
+validTagList <- function(input = NULL, spawnYear = 'SY2016', species = 'chnk',
+                         validTagFile = 'validTagFile.txt', validTagData = 'validTagData.csv')
 {
-  # IMPORT UNFORMATTED DATA DOWNLOADED FROM LGTRAPPINGDB
+  # 1. IMPORT UNFORMATTED DATA DOWNLOADED FROM LGTRAPPINGDB
   if(is.character(input) == TRUE)
-  { LGtrapDB <- read.table(file = input, header = TRUE, sep ='\t') }
-  else { LGtrapDB <- input }
+  { LGTrapDB <- read.table(file = input, header = TRUE, sep ='\t') }
+  else { LGTrapDB <- input }
 
-  # GRAB ONLY THOSE COLUMNS THAT WE DESIRE
-  syLGTrapDB <- filter(LGTrapDB, SpawnYear == spawnYear)
+  # 2. SELECT ONLY COLUMNS WE'RE INTERESTED IN
+  LGTrapDB <- select(LGTrapDB, MasterID, LGDNumPIT, CollectionDate, SpawnYear, BioSamplesID, LGDFLmm, SRR, GenRear, LGDLifeStage,
+                     GenSex, GenStock, GenStockProb, GenParentHatchery, GenBY, GenPBT_ByHat, GenPBT_RGroup,
+                     BioScaleFinalAge, PtagisEventSites, PtagisLastEventSite, PtagisLastEventDate,
+                     PtagisEventLastSpawnSite, RepeatSpawner, BiosamplesValid, LGDValid, LGDInjuryiesAll, LGDMarksAll,
+                     LGDMarkAD)
 
+  # 3. SELECT ONLY ADULTS (RETURNING FISH)
+  LGTrapDB <- filter(LGTrapDB, LGDLifeStage == 'RF')
 
+  # 4. POPULATE ALL BLANK CELLS WITH NA
+  LGTrapDB[LGTrapDB == ''] <- NA
+
+  # 5. FILTER ONLY RECORDS FROM THE DESIRED SPAWN YEAR
+  LGTrapDB <- filter(LGTrapDB, SpawnYear == spawnYear)
+
+  # 6. FILTER ONLY RECORDS FROM THE DESIRED SPECIES
+  if(species == "chnk") { LGTrapDB <- LGTrapDB[grepl('^1', LGTrapDB$SRR),] }
+  if(species == "sthd") { LGTrapDB <- LGTrapDB[grepl('^3', LGTrapDB$SRR),] }
+
+  # 7. FILTER ONLY RECORDS WITH LGDValid == 1
+  LGTrapDB <- filter(LGTrapDB, LGDValid == 1)
+
+  # 8. FILTER ONLY AD-INTACT RECORDS
+  LGTrapDB <- filter(LGTrapDB, LGDMarkAD == 'AI')
+
+  # 9. REMOVE ALL RECORDS WITH NO LGDNumPIT
+  LGTrapDB <- filter(LGTrapDB, LGDNumPIT != 'NA')
+
+  # 10. GRAB THE VALID TAG LIST
+  validTagList <- as.character(LGTrapDB$LGDNumPIT)
+  write.table(validTagList, file = validTagFile, quote = FALSE, sep = '\t',
+              row.names = FALSE, col.names = FALSE)
+
+  # 11. EXPORT ALL OF THE DATA FOR THE VALID TAG LIST
+  write.csv(LGTrapDB, file = validTagData, row.names = FALSE)
 }
+
+
 
