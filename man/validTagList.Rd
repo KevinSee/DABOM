@@ -4,8 +4,8 @@
 \alias{validTagList}
 \title{validTagList: Generate valid PIT tag list from LGTrappingDB}
 \usage{
-validTagList(input = NULL, spawnYear = NULL, species = "chnk",
-  exportFile = NULL)
+validTagList(input = NULL, spawnYear = "SY2016", species = "chnk",
+  validTagFile = "validTagFile.txt", validTagData = "validTagData.csv")
 }
 \arguments{
 \item{input}{the name of the tab-delimited text file containing all of the records from the LGTrappingDB.}
@@ -15,7 +15,9 @@ pull records for spawn year 2016 use \code{"SY2016"}.}
 
 \item{species}{which species?}
 
-\item{exportFile}{name of export file?}
+\item{validTagFile}{name of valid tag list file? Will be exported as tab delimited .txt}
+
+\item{validTagData}{name of file for all data associated with the valid tag list}
 }
 \description{
 validTagList() is a function to generate a valid tag list using the LGTrappingDB.
