@@ -10,7 +10,8 @@ validTagList(input = NULL, spawnYear = NULL, species = "chnk",
 \arguments{
 \item{input}{the name of the tab-delimited text file containing all of the records from the LGTrappingDB.}
 
-\item{spawnYear}{the desired spawn year}
+\item{spawnYear}{Which spawn year do you want to pull records for? Should be in character format. For example, to
+pull records for spawn year 2016 use \code{"SY2016"}.}
 
 \item{species}{which species?}
 

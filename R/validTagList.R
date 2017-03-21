@@ -3,7 +3,8 @@
 #' @description validTagList() is a function to generate a valid tag list using the LGTrappingDB.
 #'
 #' @param input the name of the tab-delimited text file containing all of the records from the LGTrappingDB.
-#' @param spawnYear the desired spawn year
+#' @param spawnYear Which spawn year do you want to pull records for? Should be in character format. For example, to
+#' pull records for spawn year 2016 use \code{"SY2016"}.
 #' @param species which species?
 #' @param exportFile name of export file?
 #'
@@ -19,7 +20,12 @@ validTagList <- function(input = NULL, spawnYear = NULL, species = 'chnk', expor
 {
   # IMPORT UNFORMATTED DATA DOWNLOADED FROM LGTRAPPINGDB
   if(is.character(input) == TRUE)
-  { lgtrappingdb <- read.table(file = input, header = TRUE, sep ='\t') }
-  else { lgtrappingdb <- input }
+  { LGtrapDB <- read.table(file = input, header = TRUE, sep ='\t') }
+  else { LGtrapDB <- input }
+
+  # GRAB ONLY THOSE COLUMNS THAT WE DESIRE
+  syLGTrapDB <- filter(LGTrapDB, SpawnYear == spawnYear)
+
+
 }
 
