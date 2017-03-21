@@ -9,7 +9,7 @@
 #'
 #' @author Mike Ackerman
 #'
-#' @examples validTagList(input = LGTrappingDB_03192017, species )
+#' @examples validTagList(input = LGTrappingDB_03192017, spawnYear = "SY2016", species = "chnk", exportFile = "sy2016chnkValidTagList.txt") )
 #'
 #' @import dplyr
 #' @export

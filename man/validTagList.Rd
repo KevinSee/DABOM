@@ -20,7 +20,7 @@ validTagList(input = NULL, spawnYear = NULL, species = "chnk",
 validTagList() is a function to generate a valid tag list using the LGTrappingDB.
 }
 \examples{
-validTagList(input = LGTrappingDB_03192017, species )
+validTagList(input = LGTrappingDB_03192017, spawnYear = "SY2016", species = "chnk", exportFile = "sy2016chnkValidTagList.txt") )
 
 }
 \author{
