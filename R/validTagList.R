@@ -22,8 +22,8 @@ validTagList <- function(input = NULL, spawnYear = 'SY2016', species = 'chnk',
 {
   # 1. IMPORT UNFORMATTED DATA DOWNLOADED FROM LGTRAPPINGDB
   if(is.character(input) == TRUE)
-  { LGtrapDB <- read.table(file = input, header = TRUE, sep ='\t') }
-  else { LGtrapDB <- input }
+  { LGTrapDB <- read.table(file = input, header = TRUE, sep ='\t') }
+  else { LGTrapDB <- input }
 
   # 2. SELECT ONLY COLUMNS WE'RE INTERESTED IN
   LGTrapDB <- select(LGTrapDB, MasterID, LGDNumPIT, CollectionDate, SpawnYear, BioSamplesID, LGDFLmm, SRR, GenRear, LGDLifeStage,
