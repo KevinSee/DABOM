@@ -15,7 +15,8 @@
 #'
 #' @examples spawnerPaths()
 #'
-#' @import dplyr, lubridate
+#' @import dplyr
+#' @import lubridate
 #' @export
 #' @return NULL
 #'

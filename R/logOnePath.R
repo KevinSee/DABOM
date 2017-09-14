@@ -13,7 +13,8 @@
 #'
 #' @examples logOnePath()
 #'
-#' @import dplyr, readr
+#' @import dplyr
+#' @import readr
 #' @export
 #' @return NULL
 #' #log path from given site to root (mouth of river)

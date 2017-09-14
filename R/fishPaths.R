@@ -15,7 +15,8 @@
 #'
 #' @examples fishPaths()
 #'
-#' @import dplyr, lubridate
+#' @import dplyr
+#' @import lubridate
 #' @export
 #' @return NULL
 #'

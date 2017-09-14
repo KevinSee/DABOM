@@ -1,0 +1,142 @@
+---
+title: "Data Preparation for the DABOM Model"
+author: "Ryan N. Kinzer"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output:
+  html_document:
+    collapsed: yes
+    fig_caption: yes
+    fig_height: 8
+    fig_width: 8
+    smooth_scroll: yes
+    theme: cerulean
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+  html_vignette: null
+link-citations: yes
+csl: /Users/ryank/Documents/Ryan Sync/Templates/american-fisheries-society.csl
+bibliography: /Users/ryank/Documents/Ryan Sync/References/simulation.bib
+vignette: |
+  %\VignetteIndexEntry{DABOM} %\VignetteEngine{knitr::rmarkdown} %\VignetteEncoding{UTF-8}
+---
+`r #  rmarkdown::html_vignette`
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(eval=FALSE, echo=TRUE, warning=FALSE, message=FALSE)
+```
+
+### Load Package
+
+The current beta version of the __DABOM__ R package is stored in [Ryan Kinzer's GitHub repository](https://github.com/ryankinzer/DABOM) and is freely accessible. The repository was originally forked from [Mike Ackerman's working repository](https://github.com/mackerman/DABOM).  To obtain the beta version first install Hadley Wickam's __devtools__ from R CRAN. The function *install_github()* will retrieve the latest copy of __DABOM__ from GitHub and install it to a local R library.
+
+```{r}
+install.packages('devtools')
+devtools::install_github("ryankinzer/DABOM")
+```
+
+After installing __DABOM__ it is necessary to load the package into the current R session with *library('DABOM')* before using any built in functions. The package also requires the R packages __dplyr__, __lubridate__ and __RODBC__ which are available on CRAN to operate.
+
+```{r}
+library(DABOM)
+#library(dplyr)
+#library(lubridate)
+#library(RODBC)
+```
+
+To prepare DABOM input data it's first necessary to retrieve Lower Granite Trapping data from the Idaho Fish and Game's [IFWIS website](https://collaboration.idfg.idaho.gov/default.aspx) and save it to a 'local' folder on your computer. The trapping data is stored in an Microsoft Access database named "LGTrappingExportJodyW.accdb", which is updated weekly and saved in the "QCI Downloads" folder on the site. Permission must be obtained from Idaho Fish and Game before viewing, accessing and retreiving data from the site. Once the Access database has been stored to a 'local' folder, the first __DABOM__ function, *LGTrapData()*, can be run to query data from the database.
+
+```{r}
+#------------------------------------------------------------------------------
+# load trap data
+#------------------------------------------------------------------------------
+trap_df <- LGTrapData(filename = '../data/Data_Input/LGTrappingExportJodyW.accdb',
+                      species = 'Chinook',
+                      spawnyear = '2015')
+```
+
+The *LGTrapData()* function opens an ODBC connection with the database using the __RODBC__ package.  After the connection is made, the database is queried for only those records matching the selected species (Chinook or Steelhead), spawn year and having a lifestage designation of 'RF' for returning fish. The function returns an R data frame object.  
+
+The next function, *validTags()*, subsets the data frame returned from *LGTrapData()* to individual fish that are considered vaild for the branching model input.  The supplied data frame is trimmed by three main fields; LGDValid, LGDMarkAD, and LGDNumPIT.  Where valid records for model processing contain LGDValid = 1, LGDMarkAD = 'AI' and LGDNumPIT is not blank.  In addition, if the supplied trap data contains Chinook records, only those records with a run type of '5' in the SRR field are kept.
+
+```{r}
+#------------------------------------------------------------------------------
+# select valid tag records only
+# if you don't have access to the database, uncomment the read_excel line
+# and load the example dataset
+#------------------------------------------------------------------------------
+valid_tags <- validTags(trapdata = trap_df)
+# missing one fish from RO's example file: 2015 Chinook tag list ro 9-6-17.xlsx
+#valid_tags <- readxl::read_excel('./data/Data_Input/2015 Chinook tag list ro 9-6-17.xlsx')
+```
+
+The valid tag numbers now need to be exported into a '.txt' file for loading into [PTAGIS](http://PTAGIS.org) to perform an interrogation detail query (in the future maybe we can write a function to do this step through R using DART's or PTAGIS's open API).   We only need to export the contents of the TagID field which contains the unique PIT-tag codes.
+
+```{r}
+tag_codes <- valid_tags$TagID
+write.table(tag_codes, file = '../data/Data_Output/tag_codes.txt',quote = FALSE, sep = '\t',
+              row.names = FALSE, col.names = FALSE)
+```
+
+After running the PTAGIS interrogation detail query load the result into the R environment as a data frame.
+
+```{r}
+#------------------------------------------------------------------------------
+# load tag observation file
+#------------------------------------------------------------------------------
+obs <- readxl::read_excel('../data/Data_Input/Complete Tag History SY2015 Chinook 9-6-17.xlsx')
+# need to double check with RO because I'm not sure how he created this file.
+```
+
+Now load the two configuration files to assign model nodes to the observation file and to build a list of all acceptable fish pathways.
+
+```{r}
+#------------------------------------------------------------------------------
+# load configuration files
+#------------------------------------------------------------------------------
+config <- readxl::read_excel('../data/Config_Files/Data_Site_Config_RO_9-6-17.xlsx')
+parentchild <- readxl::read_excel('../data/Config_Files/Parent-Child Table RO 9-6-17.xlsx')
+```
+
+The function *nodeAssign()* completes two tasks.  First, the function assigns model nodes based on the unique combinations of SiteID, AntennaID and ConfigID listed in the configuration file. And second, if *truncate = TRUE*, all tag observation records that occur prior to the individuals capture at the Lower Granite trap or occuring at invalid nodes are removed. In addition, only the record with a minimum observation date is kept from a group of observations occuring at a single node during the same observation event (i.e., multiple detections at a single node that are not interupted with a detection at a different node).  Truncating the data to only the essential observation records necessary for the branch model greatly reduces the processing time for validating the travel paths of each individual fish at a later step. (However, this function still requires some time to compute because of a for loop. Maybe we can change this later.) 
+
+```{r, message=FALSE, warning=FALSE}
+valid_obs_dat <- nodeAssign(valid_tags = valid_tags, observation = obs,
+                           configuration = config, truncate = TRUE)
+```
+The following function, *validPaths()*, uses the parent-child table and maps all available fish paths from a single parent (i.e., path root) to each node. The function then builds a character string which labels all nodes a fish would past to reach the observed location. The function was created by Greg Kliewer and originally worked from querying a SQLite database which housed the data.
+
+```{r, message=FALSE, warning=FALSE}
+#------------------------------------------------------------------------------
+# create a data frame with all valid paths identified in the parent child table
+valid_paths <- validPaths(parent_child = parentchild)
+```
+
+We now have a data frame with the minimum number of valid observations which need to be checked against all the valid fish pathways.  Two functions exist to check the observations and label them as acceptable observations or fish routes to the spawning grounds or as observations needing to be checked by the biologist.  The first function was originally created by Greg Kliewer and worked against the SQLite database. I followed the steps/logic that Greg developed and mimiced his output using only R commands, thus, eliminating the need for the SQLite backend. (Takes a little time because it loops through all the obs and then writes a call to a dataframe one obs at a time.)  
+
+```{r}
+#------------------------------------------------------------------------------
+# Greg's original process and logic
+#------------------------------------------------------------------------------
+fish_obs <- fishPaths(valid_obs_dat, valid_paths)
+# 
+# fish_obs %>%
+#   filter(UserProcStatus == '') %>%
+#   distinct(TagID) %>%
+#   summarise(n())
+```
+The second function identifies the direction of travel for each individual fish by checking the current and previous node locations against the valid path string.  In addition, if the previous node is not detected in the current path string the observation is labeled as invalid (i.e., detects fish being observed in two valid paths).  Then only upstream moving records with the minimum observation date at each unique node occuring prior to the observed node with the highest upstream order are identified as "ModelObs = TRUE".  
+
+```{r}
+# figure out if fish movement is upstream or downstream, and in the same path
+# then truncate to only model observations
+# RK and Rick thought process.
+fish_obs2 <- spawnerPaths(valid_obs_dat, valid_paths)
+
+# fish_obs2 %>%
+#     filter(is.na(Direction)) %>%
+#     distinct(TagID) %>%
+#     nrow()
+```
+
+The end.

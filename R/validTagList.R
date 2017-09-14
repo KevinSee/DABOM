@@ -20,39 +20,20 @@
 validTagList <- function(input = NULL, spawnYear = 'SY2016', species = 'chnk',
                          validTagFile = 'validTagFile.txt', validTagData = 'validTagData.csv')
 {
-  # 1. IMPORT UNFORMATTED DATA DOWNLOADED FROM LGTRAPPINGDB
-  if(is.character(input) == TRUE)
-  { LGTrapDB <- read.table(file = input, header = TRUE, sep ='\t') }
-  else { LGTrapDB <- input }
+  if(spp == '1'){
+    df <- df %>%
+      filter(LGDValid == 1,
+             LGDMarkAD == 'AI',
+             !is.na(LGDNumPIT),
+             grepl('5',SRR))
+  }
 
-  # 2. SELECT ONLY COLUMNS WE'RE INTERESTED IN
-  LGTrapDB <- select(LGTrapDB, MasterID, LGDNumPIT, CollectionDate, SpawnYear, BioSamplesID, LGDFLmm, SRR, GenRear, LGDLifeStage,
-                     GenSex, GenStock, GenStockProb, GenParentHatchery, GenBY, GenPBT_ByHat, GenPBT_RGroup,
-                     BioScaleFinalAge, PtagisEventSites, PtagisLastEventSite, PtagisLastEventDate,
-                     PtagisEventLastSpawnSite, RepeatSpawner, BiosamplesValid, LGDValid, LGDInjuryiesAll, LGDMarksAll,
-                     LGDMarkAD)
-
-  # 3. SELECT ONLY ADULTS (RETURNING FISH)
-  LGTrapDB <- filter(LGTrapDB, LGDLifeStage == 'RF')
-
-  # 4. POPULATE ALL BLANK CELLS WITH NA
-  LGTrapDB[LGTrapDB == ''] <- NA
-
-  # 5. FILTER ONLY RECORDS FROM THE DESIRED SPAWN YEAR
-  LGTrapDB <- filter(LGTrapDB, SpawnYear == spawnYear)
-
-  # 6. FILTER ONLY RECORDS FROM THE DESIRED SPECIES
-  if(species == "chnk") { LGTrapDB <- LGTrapDB[grepl('^1', LGTrapDB$SRR),] }
-  if(species == "sthd") { LGTrapDB <- LGTrapDB[grepl('^3', LGTrapDB$SRR),] }
-
-  # 7. FILTER ONLY RECORDS WITH LGDValid == 1
-  LGTrapDB <- filter(LGTrapDB, LGDValid == 1)
-
-  # 8. FILTER ONLY AD-INTACT RECORDS
-  LGTrapDB <- filter(LGTrapDB, LGDMarkAD == 'AI')
-
-  # 9. REMOVE ALL RECORDS WITH NO LGDNumPIT
-  LGTrapDB <- filter(LGTrapDB, LGDNumPIT != 'NA')
+  if(spp == '3'){
+    df <- df %>%
+      filter(LGDValid == 1,
+             LGDMarkAD == 'AI',
+             !is.na(LGDNumPIT))
+  }
 
   # 10. GRAB THE VALID TAG LIST
   validTagList <- as.character(LGTrapDB$LGDNumPIT)

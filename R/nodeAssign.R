@@ -34,7 +34,8 @@
 #'
 #' @examples nodeAssign()
 #'
-#' @import dplyr, readr
+#' @import dplyr
+#' @import readr
 #' @export
 #' @return NULL
 
@@ -106,6 +107,12 @@ if(truncate == TRUE){
     filter(ValidDate == TRUE,
            ValidNode == TRUE) %>%
     mutate(min_obs = NA)
+
+#   # test
+# tmp <- valid_obs %>%
+#   group_by(TagID, Node) %>%
+#   slice(which.min(ObsDate))
+#   # end test
 
   iloop <- nrow(valid_obs)
 

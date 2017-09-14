@@ -13,7 +13,8 @@
 #'
 #' @examples validPaths()
 #'
-#' @import dplyr, readr
+#' @import dplyr
+#' @import readr
 #' @export
 #' @return NULL
 
