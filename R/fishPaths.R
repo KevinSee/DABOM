@@ -17,6 +17,7 @@
 #'
 #' @import dplyr
 #' @import lubridate
+#' @import stringr
 #' @export
 #' @return NULL
 #'
