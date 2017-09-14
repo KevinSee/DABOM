@@ -8,47 +8,49 @@ knitr::opts_chunk$set(eval=FALSE, echo=TRUE, warning=FALSE, message=FALSE)
 ## ------------------------------------------------------------------------
 #  library(DABOM)
 #  library(dplyr)
-#  library(readxl)
 
 ## ------------------------------------------------------------------------
 #  #------------------------------------------------------------------------------
 #  # load trap data
 #  #------------------------------------------------------------------------------
-#  trap_df <- LGTrapData(filename = '../data/Data_Input/LGTrappingExportJodyW_2015_Example.accdb',
-#                        species = 'Chinook',
-#                        spawnyear = '2015')
+#  View(chinook15_trapdata)
+#  # chinook15_trapdata <- LGTrapData(filename = 'dbase_path',
+#  #                       species = 'Chinook',
+#  #                       spawnyear = '2015')
 
 ## ------------------------------------------------------------------------
 #  #------------------------------------------------------------------------------
 #  # select valid tag records only
-#  # if you don't have access to the database, uncomment the read_excel line
-#  # and load the example dataset from Rick O.
+#  # if you don't have access to the database, an example data set is installed
+#  # with the package
+#  # you could load RO's original tag list, but you would also need to change
+#  # a couple field names.
 #  #------------------------------------------------------------------------------
-#  valid_tags <- validTags(trapdata = trap_df)
-#  # missing one fish from RO's example file: 2015 Chinook tag list ro 9-6-17.xlsx
-#  # valid_tags <- readxl::read_excel('../data/Data_Input/2015 Chinook tag list ro 9-6-17.xlsx')
+#  valid_tags <- validTags(trapdata = chinook15_trapdata)
 
 ## ------------------------------------------------------------------------
 #  tag_codes <- valid_tags$TagID
-#  write.table(tag_codes, file = '../data/Data_Output/tag_codes.txt',quote = FALSE, sep = '\t',
-#                row.names = FALSE, col.names = FALSE)
+#  # write.table(tag_codes, file = '.../tag_codes.txt',quote = FALSE, sep = '\t',
+#  #               row.names = FALSE, col.names = FALSE)
 
 ## ------------------------------------------------------------------------
 #  #------------------------------------------------------------------------------
 #  # load tag observation file
 #  #------------------------------------------------------------------------------
-#  obs <- readxl::read_excel('../data/Data_Input/Complete Tag History.xlsx')
-#  #obs <- readxl::read_excel('../data/Data_Input/Complete Tag History SY2015 Chinook 9-6-17.xlsx')
+#  View(chinook15_obs)
+#  # Examples to read in the observation data
+#  # chinook15_obs <- readxl::read_excel('filepath')
+#  # chinook15_obs <- readr::read_csv('filepath')
 
 ## ------------------------------------------------------------------------
 #  #------------------------------------------------------------------------------
-#  # load configuration files
+#  # load configuration and parent-child files
 #  #------------------------------------------------------------------------------
-#  config <- readxl::read_excel('../data/Config_Files/Data_Site_Config_RO_9-6-17.xlsx')
-#  parentchild <- readxl::read_excel('../data/Config_Files/Parent-Child Table RO 9-6-17.xlsx')
+#  View(config)
+#  View(parentchild)
 
 ## ---- message=FALSE, warning=FALSE---------------------------------------
-#  valid_obs_dat <- nodeAssign(valid_tags = valid_tags, observation = obs,
+#  valid_obs_dat <- nodeAssign(valid_tags = valid_tags, observation = chinook15_obs,
 #                             configuration = config, truncate = TRUE)
 
 ## ---- message=FALSE, warning=FALSE---------------------------------------
@@ -79,6 +81,6 @@ knitr::opts_chunk$set(eval=FALSE, echo=TRUE, warning=FALSE, message=FALSE)
 #  #     nrow()
 
 ## ------------------------------------------------------------------------
-#  write.csv(fish_obs, file = '../data/Data_Output/fishPaths_fnc_output.csv')
-#  write.csv(fish_obs2, file = '../data/Data_Output/spawnerPaths_fnc_output.csv')
+#  write.csv(fish_obs, file = './data/Data_Output/fishPaths_fnc_output.csv')
+#  write.csv(fish_obs2, file = './data/Data_Output/spawnerPaths_fnc_output.csv')
 
