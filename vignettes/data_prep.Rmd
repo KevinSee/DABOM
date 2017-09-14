@@ -27,20 +27,20 @@ After installing __DABOM__ it is necessary to load the package into the current 
 ```{r}
 library(DABOM)
 library(dplyr)
-library(readxl)
 ```
 
-To prepare DABOM input data it's first necessary to save the Lower Granite Trapping data to a 'local' folder on your computer.  The data can be retreived from the "QCI Downloads" folder on the Idaho Fish and Game's [IFWIS website](https://collaboration.idfg.idaho.gov/default.aspx). The trapping data is stored in an Microsoft Access database that is updated weekly and named "LGTrappingExportJodyW.accdb". Permission must be obtained from Idaho Fish and Game before viewing, accessing and retreiving data from the site. To make the package run I have placed a similar database with only spawn year 2015 data in the package's "data" folder called "LGTrappingJodyW_2015_Example.accdb". 
+To prepare DABOM input data it's first necessary to save the Lower Granite Trapping data to a 'local' folder on your computer.  The data can be retreived from the "QCI Downloads" folder on the Idaho Fish and Game's [IFWIS website](https://collaboration.idfg.idaho.gov/default.aspx). The trapping data is stored in an Microsoft Access database that is updated weekly and named "LGTrappingExportJodyW.accdb". Permission must be obtained from Idaho Fish and Game before viewing, accessing and retreiving data from the site. To make the package run without having access to the database an example dataset is provided with the package, "chinook15_trapdata". 
 
-To query the example or full Access database, after its been stored to a 'local' folder, for the species or spawn year of interest run the __DABOM__ function, *LGTrapData()* wiht the selected species and spawn year.
+If the full Access database is saved to a 'local' folder, the commented out *LGTrapData()* can be used to retrieve all trapping data matching the selected species and spawn year.
 
 ```{r}
 #------------------------------------------------------------------------------
 # load trap data
 #------------------------------------------------------------------------------
-trap_df <- LGTrapData(filename = '../data/Data_Input/LGTrappingExportJodyW_2015_Example.accdb',
-                      species = 'Chinook',
-                      spawnyear = '2015')
+View(chinook15_trapdata)
+# chinook15_trapdata <- LGTrapData(filename = 'dbase_path',
+#                       species = 'Chinook',
+#                       spawnyear = '2015')
 ```
 
 The *LGTrapData()* function opens an ODBC connection with the database using the __RODBC__ package.  After the connection is made, the database is queried for only those records matching the selected species (Chinook or Steelhead), spawn year and having a lifestage designation of 'RF' for returning fish. The function returns an R data frame object.  
@@ -50,46 +50,48 @@ The next function, *validTags()*, subsets the data frame returned from *LGTrapDa
 ```{r}
 #------------------------------------------------------------------------------
 # select valid tag records only
-# if you don't have access to the database, uncomment the read_excel line
-# and load the example dataset from Rick O.
+# if you don't have access to the database, an example data set is installed
+# with the package
+# you could load RO's original tag list, but you would also need to change
+# a couple field names.
 #------------------------------------------------------------------------------
-valid_tags <- validTags(trapdata = trap_df)
-# missing one fish from RO's example file: 2015 Chinook tag list ro 9-6-17.xlsx
-# valid_tags <- readxl::read_excel('../data/Data_Input/2015 Chinook tag list ro 9-6-17.xlsx')
+valid_tags <- validTags(trapdata = chinook15_trapdata)
 ```
 
-The valid tag numbers now need to be exported into a '.txt' file for loading into [PTAGIS](http://PTAGIS.org) to perform a 'Complete Tag History' query (in the future maybe we can write a function to do this step through R using DART's or PTAGIS's open API).   We only need to export the contents of the TagID field which contains the unique PIT-tag codes.
+The valid tag numbers now need to be exported into a '.txt' file for loading into [PTAGIS](http://PTAGIS.org) to perform a 'Complete Tag History' query (in the future maybe we can write a function to do this step through R using DART's or PTAGIS's open API).   We only need to export the contents of the TagID field which contains the unique PIT-tag codes and save them to your working directory.
 
 ```{r}
 tag_codes <- valid_tags$TagID
-write.table(tag_codes, file = '../data/Data_Output/tag_codes.txt',quote = FALSE, sep = '\t',
-              row.names = FALSE, col.names = FALSE)
+# write.table(tag_codes, file = '.../tag_codes.txt',quote = FALSE, sep = '\t',
+#               row.names = FALSE, col.names = FALSE)
 ```
 
-After logging into [PTAGIS](http://PTAGIS.org), select the "Data" tab, "Advanced Reporting" and then the "Launch" button. Now, select the "New Query Builder2 Report" icon and the "Complete Tag History" option. The __DABOM__ functions require the following attributes to be selected; *Tag*, *Event Date Time*, *Event Site Code*, *Antenna*, and *Antenna Group Configuration*. Other attributes can be selected and they can appear in any order.  After selecting attributes, upload *tag_codes.txt* in the 'Tag Code - List or Text File' section and then run the report and save the output as an Excel file.  Next read the outputted observation file into R using the package __readxl__.
+After logging into [PTAGIS](http://PTAGIS.org), select the "Data" tab, "Advanced Reporting" and then the "Launch" button. Now, select the "New Query Builder2 Report" icon and the "Complete Tag History" option. The __DABOM__ functions require the following attributes to be selected; *Tag*, *Event Date Time*, *Event Site Code*, *Antenna*, and *Antenna Group Configuration*. Other attributes can be selected and they can appear in any order.  After selecting attributes, upload *tag_codes.txt* in the 'Tag Code - List or Text File' section and then run the report and save the output.  Next read the outputted observation file into R or use the example observation file, "chinook15_obs".
 
 ```{r}
 #------------------------------------------------------------------------------
 # load tag observation file
 #------------------------------------------------------------------------------
-obs <- readxl::read_excel('../data/Data_Input/Complete Tag History.xlsx')
-#obs <- readxl::read_excel('../data/Data_Input/Complete Tag History SY2015 Chinook 9-6-17.xlsx')
+View(chinook15_obs)
+# Examples to read in the observation data
+# chinook15_obs <- readxl::read_excel('filepath')
+# chinook15_obs <- readr::read_csv('filepath')
 ```
 
-Now load the two configuration files to assign model nodes to each record in the observation file and to build a table of of all acceptable fish pathways. (When the config file loads lots of warnings show up, need to fix.)
+Now load the two configuration files to assign model nodes to each record in the observation file and to build a table of of all acceptable fish pathways.  Example datasets are provided for the site-configuration file and the parent-child table.
 
 ```{r}
 #------------------------------------------------------------------------------
-# load configuration files
+# load configuration and parent-child files
 #------------------------------------------------------------------------------
-config <- readxl::read_excel('../data/Config_Files/Data_Site_Config_RO_9-6-17.xlsx')
-parentchild <- readxl::read_excel('../data/Config_Files/Parent-Child Table RO 9-6-17.xlsx')
+View(config)
+View(parentchild)
 ```
 
 Running the function *nodeAssign()* next will complete two tasks.  First, the function assigns model nodes based on the unique combinations of SiteID, AntennaID and ConfigID listed in the configuration file. If a node is not identified in the cofiguration file, the function will not terminate but an 'ERROR' will appear in the "Node" field of the observation table. The second task is completed if *truncate = TRUE* is selected, which will remove all tag observation records that occur prior to the individuals capture at the Lower Granite trap or occuring at invalid nodes. In addition *truncate = TRUE*, will only keep the record with a minimum observation out of a group of observations occuring at a single node during the same observation event (i.e., multiple detections at a single node that are not interupted with a detection at a different node).  Truncating the data to only the essential observation records necessary for the branch model greatly reduces the processing time for validating the travel paths of each individual fish at a later step, however, this function still requires some computing time because of a for loop to identify minimum dates. (Maybe we can change this later.) 
 
 ```{r, message=FALSE, warning=FALSE}
-valid_obs_dat <- nodeAssign(valid_tags = valid_tags, observation = obs,
+valid_obs_dat <- nodeAssign(valid_tags = valid_tags, observation = chinook15_obs,
                            configuration = config, truncate = TRUE)
 ```
 The following function, *validPaths()*, uses the parent-child table and maps all available fish paths from a single parent (i.e., path root) to each node. The function then builds a character string which labels all nodes a fish would past to reach the observed location. The function was created by Greg Kliewer and originally worked from querying a SQLite database which housed the data.
@@ -129,9 +131,9 @@ fish_obs2 <- spawnerPaths(valid_obs_dat, valid_paths)
 #     nrow()
 ```
 
-The results of both cleaning functions can be written to the working directory or desired file path using base R functions.
+Finally, the results of both cleaning functions can be written to the working directory or desired file path using base R functions.
 
 ```{r}
-write.csv(fish_obs, file = '../data/Data_Output/fishPaths_fnc_output.csv')
-write.csv(fish_obs2, file = '../data/Data_Output/spawnerPaths_fnc_output.csv')
+write.csv(fish_obs, file = './data/Data_Output/fishPaths_fnc_output.csv')
+write.csv(fish_obs2, file = './data/Data_Output/spawnerPaths_fnc_output.csv')
 ```
