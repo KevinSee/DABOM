@@ -42,17 +42,26 @@
 nodeAssign <- function(valid_tags, observation, configuration, truncate = FALSE){
   # IMPORT .csv files or load data from an R data frame object
 
-  if(is.character(valid_tags) == TRUE)
-  { validtag <- read_csv(file = valid_tags, header = TRUE, sep =',')}
-  else { validtag <- valid_tags}
+  if(is.character(valid_tags) == TRUE) {
+    validtag <- read_csv(file = valid_tags, header = TRUE, sep =',')
+  }
+  else {
+    validtag <- valid_tags
+  }
 
-  if(is.character(observation) == TRUE)
-  { obs <- read_csv(file = observation, header = TRUE, sep =',')}
-  else { obs <- observation}
+  if(is.character(observation) == TRUE) {
+    obs <- read_csv(file = observation, header = TRUE, sep =',')
+  }
+  else {
+    obs <- observation
+  }
 
-  if(is.character(configuration) == TRUE)
-  { config <- read_csv(file = configuration, header = TRUE, sep =',')}
-  else { config <- configuration}
+  if(is.character(configuration) == TRUE) {
+    config <- read_csv(file = configuration, header = TRUE, sep =',')
+  }
+  else {
+    config <- configuration
+  }
 
   obs_df <- obs %>%
     select(TagID = `Tag Code`,
@@ -101,33 +110,48 @@ obs_dat <- obs_df %>%
   arrange(TagID, ObsDate)
 
 
+# if(truncate == TRUE){
+#
+  # valid_obs <- obs_dat %>%
+  #   filter(ValidDate == TRUE,
+  #          ValidNode == TRUE) %>%
+  #   mutate(min_obs = NA)
+#
+# #   # test
+# # tmp <- valid_obs %>%
+# #   group_by(TagID, Node) %>%
+# #   slice(which.min(ObsDate))
+# #   # end test
+#
+#   iloop <- nrow(valid_obs)
+#
+#   for(i in 2:iloop){
+#    valid_obs$min_obs[1] <- TRUE
+#     if(valid_obs$TagID[i] != valid_obs$TagID[i-1]){ valid_obs$min_obs[i] <- TRUE
+#     } else {
+#       if(valid_obs$Node[i] != valid_obs$Node[i-1]) { valid_obs$min_obs[i] <- TRUE
+#        } else {valid_obs$min_obs[i] == FALSE}
+#     }
+#   } # iloop
+#
+#   obs_dat <- valid_obs %>%
+#     filter(min_obs == TRUE) %>%
+#     select(-min_obs)
+#
+# } # truncate if statement
+
+# another way, without the loop
 if(truncate == TRUE){
 
-  valid_obs <- obs_dat %>%
+  obs_dat = obs_dat %>%
     filter(ValidDate == TRUE,
            ValidNode == TRUE) %>%
-    mutate(min_obs = NA)
+    group_by(TagID) %>%
+    mutate(prev_node = lag(Node)) %>%
+    filter(Node != prev_node | is.na(prev_node)) %>%
+    select(-prev_node) %>%
+    ungroup()
 
-#   # test
-# tmp <- valid_obs %>%
-#   group_by(TagID, Node) %>%
-#   slice(which.min(ObsDate))
-#   # end test
-
-  iloop <- nrow(valid_obs)
-
-  for(i in 2:iloop){
-   valid_obs$min_obs[1] <- TRUE
-    if(valid_obs$TagID[i] != valid_obs$TagID[i-1]){ valid_obs$min_obs[i] <- TRUE
-    } else {
-      if(valid_obs$Node[i] != valid_obs$Node[i-1]) { valid_obs$min_obs[i] <- TRUE
-       } else {valid_obs$min_obs[i] == FALSE}
-    }
-  } # iloop
-
-  obs_dat <- valid_obs %>%
-    filter(min_obs == TRUE) %>%
-    select(-min_obs)
 } # truncate if statement
 
 return(obs_dat)
