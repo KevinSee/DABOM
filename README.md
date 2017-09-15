@@ -13,7 +13,7 @@ library(devtools)
 NOTE: To use `devtools`, you may also have to download and install Rtools (although you shouldn't). The latest version on Rtools can be found at
 https://cran.r-project.org/bin/windows/Rtools/
 
-Once `devtools` is successfully installed, use the following to install SCOBI:
+Once `devtools` is successfully installed, use the following to install DABOM:
 ```
 devtools::install_github("mackerman44/DABOM")
 ```
