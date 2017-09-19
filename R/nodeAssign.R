@@ -106,7 +106,7 @@ obs_dat <- obs_df %>%
                    SiteDescription),
                    by = c('SiteID', 'AntennaID', 'ConfigID')) %>%
   mutate(Node = ifelse(is.na(Node), 'ERROR', Node),
-         ValidNode = ifelse(is.na(Node), FALSE, ValidNode)) %>%
+         ValidNode = ifelse(is.na(Node), F, T)) %>%
   arrange(TagID, ObsDate)
 
 
@@ -141,7 +141,7 @@ obs_dat <- obs_df %>%
 # } # truncate if statement
 
 # another way, without the loop
-if(truncate == TRUE){
+if(truncate){
 
   obs_dat = obs_dat %>%
     filter(ValidDate == TRUE,
