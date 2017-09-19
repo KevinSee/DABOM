@@ -112,7 +112,10 @@ The first function was originally created by Greg Kliewer and worked within a SQ
 #------------------------------------------------------------------------------
 # Greg's original process and logic
 #------------------------------------------------------------------------------
-fish_obs <- fishPaths(valid_obs_dat, valid_paths)
+fish_obs <- fishPaths(valid_obs_dat %>%
+                        filter(Node %in% union(unique(parentchild$ParentNode),
+                                               unique(parentchild$ChildNode))),
+                      valid_paths)
 
 # fish_obs %>%
 #   filter(UserProcStatus == '') %>%
@@ -124,7 +127,10 @@ The second function identifies the direction of travel for each individual fish 
 # figure out if fish movement is upstream or downstream, and in the same path
 # then truncate to only model observations
 # RK and Rick thought process.
-fish_obs2 <- spawnerPaths(valid_obs_dat, valid_paths)
+fish_obs2 <- spawnerPaths(valid_obs_dat %>%
+                        filter(Node %in% union(unique(parentchild$ParentNode),
+                                               unique(parentchild$ChildNode))),
+                        valid_paths)
 
 # fish_obs2 %>%
 #   filter(is.na(Direction)) %>%
