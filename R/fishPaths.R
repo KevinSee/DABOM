@@ -164,7 +164,7 @@ fishPaths <- function(valid_obs, valid_paths){
 
   #for each tag
   for (i in 1:nrow(tags)) { # goes to line 369
-    if( i %% 1000 == 0){ print(paste0(Sys.time(), "  ", i, " of ", nrow(tags), " tags. Current tag: ",tags$TagID[i]))  }
+    if( i %% 500 == 0){ print(paste0(Sys.time(), "  ", i, " of ", nrow(tags), " tags. Current tag: ",tags$TagID[i]))  }
 
     #if( i %% tagCntLimit == 0) break
 
