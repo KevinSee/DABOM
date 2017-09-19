@@ -37,7 +37,7 @@ validPaths <- function(parent_child){
 
   if(is.character(parent_child) == TRUE)
   { parentchild <- read_csv(file = parent_child, header = TRUE, sep =',')}
-  else { validtag <- parent_child}
+  else { parentchild <- parent_child}
 
   df <- parentchild %>%
     distinct(ParentNode) %>%
