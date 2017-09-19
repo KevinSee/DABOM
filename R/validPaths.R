@@ -35,9 +35,12 @@ validPaths <- function(parent_child){
   # From Site_ParentChild)"
   # df <- dbGetQuery(dbConn, qry)
 
-  if(is.character(parent_child) == TRUE)
-  { parentchild <- read_csv(file = parent_child, header = TRUE, sep =',')}
-  else { parentchild <- parent_child}
+  if(is.character(parent_child) == TRUE) {
+    parentchild <- read_csv(file = parent_child, header = TRUE, sep =',')
+    }
+  else {
+    parentchild <- parent_child
+    }
 
   df <- parentchild %>%
     distinct(ParentNode) %>%
