@@ -106,7 +106,8 @@ logOnePath <- function(rootNode, childNode){
     arrange(desc(NodeNum))
 
   # if( printForDebug ) print(qry)
-  pathString = 'GRA'
+  # pathString = 'GRA'
+  pathString = df$NodeSite[1]
 
   for (i in 2:nrow(df)){
     pathString = paste0(pathString,' ',df$NodeSite[i])
