@@ -24,4 +24,3 @@ validTags(trapdata = trap_df)
 \author{
 Ryan N. Kinzer
 }
-

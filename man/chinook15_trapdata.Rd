@@ -15,4 +15,3 @@ Idaho Fish and Game's Lower Granite Trapping Database
 chinook15_trapdata
 }
 \keyword{datasets}
-

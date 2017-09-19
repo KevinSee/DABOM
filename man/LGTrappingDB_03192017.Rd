@@ -17,4 +17,3 @@ contains all records in the LGTrapping database including both adults and juveni
 \keyword{LGR}
 \keyword{LGTrappingDB}
 \keyword{steelhead}
-

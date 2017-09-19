@@ -26,4 +26,3 @@ spawnerPaths()
 \author{
 Ryan N. Kinzer
 }
-

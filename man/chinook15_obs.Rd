@@ -15,4 +15,3 @@ the valid tag ID returned from running the \code{LGTrapData} and \code{validTags
 chinook15_obs
 }
 \keyword{datasets}
-

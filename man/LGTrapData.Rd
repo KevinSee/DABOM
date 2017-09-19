@@ -20,4 +20,3 @@ species = 'Chinook', spawnyear = '2015')
 \author{
 Ryan N. Kinzer
 }
-

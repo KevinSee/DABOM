@@ -29,4 +29,3 @@ validTagList(input = LGTrappingDB_03192017, spawnYear = "SY2016", species = "chn
 \author{
 Mike Ackerman
 }
-

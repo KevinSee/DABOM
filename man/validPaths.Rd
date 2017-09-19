@@ -24,4 +24,3 @@ validPaths()
 \author{
 Greg Kliewer
 }
-

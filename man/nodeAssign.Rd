@@ -45,4 +45,3 @@ nodeAssign()
 \author{
 Ryan Kinzer
 }
-

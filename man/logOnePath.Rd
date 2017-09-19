@@ -28,4 +28,3 @@ logOnePath()
 \author{
 Greg Kliewer
 }
-
