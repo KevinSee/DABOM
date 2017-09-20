@@ -16,19 +16,15 @@
 #' located in an adult ladder or trap entry or the single (MRR) SiteID for fish handled and
 #' scanned at a weir location.
 #'
-#' @param valid_tags is a data frame or comma seperated value (.csv) file containing the
-#' valid tag list which is outputted from the validTagList() function and the LGTrappingDB
+#' @param valid_tags is a data frame or comma seperated value (.csv) file containing the valid tag list which is outputted from the validTagList() function and the LGTrappingDB
 #'
-#' @param observation is the PTAGIS observation file inputted as a data frame or .csv file
-#' containing the complete tag history for each of the tagIDs in valid_tags
+#' @param observation is the PTAGIS observation file inputted as a data frame or .csv file containing the complete tag history for each of the tagIDs in valid_tags
 #'
-#' @param configuration is a data frame or .csv file which assigns node names to unique SiteID,
-#' AntennaID, and site configuration ID combinations.
+#' @param configuration is a data frame or .csv file which assigns node names to unique SiteID, AntennaID, and site configuration ID combinations.
 #'
-#' @param truncate logical, subsets observations to those with valid nodes, observations dates
-#' greater than trapping date at LGD and then to the minimum observation date of each set of
-#' observation events at a node, multiple observation events can occur at one node if the
-#' observations are split by detections at other nodes
+#' @param parent_child is a data frame or comma seperated value (.csv) file containing the parent-child nodes
+#'
+#' @param truncate logical, subsets observations to those with valid nodes, observations dates greater than trapping date at LGD and then to the minimum observation date of each set of observation events at a node, multiple observation events can occur at one node if the observations are split by detections at other nodes
 #'
 #' @author Ryan Kinzer
 #'
@@ -39,28 +35,35 @@
 #' @export
 #' @return NULL
 
-nodeAssign <- function(valid_tags, observation, configuration, truncate = FALSE){
+nodeAssign <- function(valid_tags, observation, configuration, parent_child, truncate = FALSE){
   # IMPORT .csv files or load data from an R data frame object
 
-  if(is.character(valid_tags) == TRUE) {
+  if(is.character(valid_tags)) {
     validtag <- read_csv(file = valid_tags, header = TRUE, sep =',')
   }
-  else {
+  if(!is.character(valid_tags)) {
     validtag <- valid_tags
   }
 
-  if(is.character(observation) == TRUE) {
+  if(is.character(observation)) {
     obs <- read_csv(file = observation, header = TRUE, sep =',')
   }
-  else {
+  if(!is.character(observation)) {
     obs <- observation
   }
 
-  if(is.character(configuration) == TRUE) {
+  if(is.character(configuration)) {
     config <- read_csv(file = configuration, header = TRUE, sep =',')
   }
-  else {
+  if(!is.character(configuration)) {
     config <- configuration
+  }
+
+  if(is.character(parent_child) == TRUE) {
+    parentchild <- read_csv(file = parent_child, header = TRUE, sep =',')
+  }
+  if(is.character(parent_child) == F) {
+    parentchild <- parent_child
   }
 
   obs_df <- obs %>%
@@ -94,19 +97,20 @@ nodeAssign <- function(valid_tags, observation, configuration, truncate = FALSE)
   }
 
 obs_dat <- obs_df %>%
-  left_join(select(config,
-                   SiteID,
-                   AntennaID,
-                   ConfigID,
-                   Node,
-                   ValidNode,
-                   AntennaGroup,
-                   ModelMainBranch,
-                   SiteName,
-                   SiteDescription),
+  left_join(config %>%
+              select(SiteID,
+                     AntennaID,
+                     ConfigID,
+                     Node,
+                     ValidNode,
+                     AntennaGroup,
+                     ModelMainBranch,
+                     SiteName,
+                     SiteDescription) %>%
+              filter(Node %in% union(unique(parentchild$ParentNode), unique(parentchild$ChildNode))),
                    by = c('SiteID', 'AntennaID', 'ConfigID')) %>%
   mutate(Node = ifelse(is.na(Node), 'ERROR', Node),
-         ValidNode = ifelse(is.na(Node), F, T)) %>%
+         ValidNode = ifelse(Node == 'ERROR', F, T)) %>%
   arrange(TagID, ObsDate)
 
 
