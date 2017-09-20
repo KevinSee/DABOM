@@ -9,6 +9,8 @@
 #'
 #' @param childNode
 #'
+#' @param parentchild
+#'
 #' @author Greg Kliewer
 #'
 #' @examples logOnePath()
@@ -18,7 +20,7 @@
 #' @export
 #' @return NULL
 #' #log path from given site to root (mouth of river)
-logOnePath <- function(rootNode, childNode){
+logOnePath <- function(rootNode, childNode, parentchild){
   #Assumes rigid treee structure vs graph, where each child has exactly 1 parent
   #For input node, calculate and log path to root determined by Site_ParentChild table in project DB
 
@@ -107,7 +109,8 @@ logOnePath <- function(rootNode, childNode){
 
   # if( printForDebug ) print(qry)
   # pathString = 'GRA'
-  pathString = df$NodeSite[1]
+  # pathString = df$NodeSite[1]
+  pathString = df$StartNode[1]
 
   for (i in 2:nrow(df)){
     pathString = paste0(pathString,' ',df$NodeSite[i])

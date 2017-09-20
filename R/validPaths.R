@@ -37,10 +37,10 @@ validPaths <- function(parent_child){
 
   if(is.character(parent_child) == TRUE) {
     parentchild <- read_csv(file = parent_child, header = TRUE, sep =',')
-    }
-  else {
+  }
+  if(is.character(parent_child) == F) {
     parentchild <- parent_child
-    }
+  }
 
   df <- parentchild %>%
     distinct(ParentNode) %>%
@@ -82,7 +82,7 @@ validPaths <- function(parent_child){
 
   path_df <- NULL
   for (i in 1:nrow(df)){
-    tmp_df <- logOnePath(childNode = df$ChildNode[i], rootNode)
+    tmp_df <- logOnePath(childNode = df$ChildNode[i], rootNode, parentchild)
     path_df <- bind_rows(path_df, tmp_df)
   }
 
