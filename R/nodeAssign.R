@@ -65,7 +65,8 @@ nodeAssign <- function(valid_tags, observation, configuration, truncate = FALSE)
 
   obs_df <- obs %>%
     select(TagID = `Tag Code`,
-           ObsDate = `Event Date Time Value`,
+           ObsDate = ifelse(is.na(`Event Release Date Time Value`),`Event Date Time Value`,
+                            `Event Release Date Time Value`),
            SiteID = `Event Site Code Value`,
            AntennaID = `Antenna ID`,
            ConfigID = `Antenna Group Configuration Value`) %>%
