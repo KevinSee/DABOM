@@ -46,7 +46,9 @@ spawnerPaths <- function(valid_obs, valid_paths){
       mutate(Up = ifelse(is.na(previous_node), 'Up',
                                     ifelse(grepl(previous_node, pathString),'Up', NA)),
              Down = ifelse(grepl(Node,prev_string),'Down', NA ),
-             Direction = ifelse(!is.na(Up), Up, Down)) %>%
+             Same = ifelse(Node == previous_node, 'Same', NA),
+             Direction = ifelse(!is.na(Up), Up, Down),
+             Direction = ifelse(!is.na(Same), '', Direction)) %>%
       select(names(valid_obs), NodeOrder, Direction) %>%
       ungroup()
 
