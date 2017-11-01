@@ -15,7 +15,7 @@ https://cran.r-project.org/bin/windows/Rtools/
 
 Once `devtools` is successfully installed, use the following to install DABOM:
 ```
-devtools::install_github("mackerman44/DABOM")
+devtools::install_github("KevinSee/DABOM")
 ```
 
 If you are interested in making contributions to DABOM, consider getting a GitHub account, fork this repository, clone to a local directory, modify, and send me a pull request. I can then review any changes and merge.
