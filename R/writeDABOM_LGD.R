@@ -1,6 +1,6 @@
-#' @title Write JAGS model
+#' @title Write Lower Granite Dam JAGS model
 #'
-#' @description This writes the overall JAGS model for DABOM as a text file. It can then be modified depending on the observations for a particular valid tag list.
+#' @description This writes the overall JAGS model for LGR DABOM as a text file. It can then be modified depending on the observations for a particular valid tag list.
 #'
 #' @author Kevin See
 #'
@@ -15,7 +15,7 @@ writeDABOM_LGD = function(file_name = NULL) {
   if(is.null(file_name)) file_name = 'LGD_DABOM.txt'
 
   model_code = '
-  model{
+model{
 
   # This model requires:
   # n.fish - number of valid tags being used in this model
@@ -46,7 +46,6 @@ writeDABOM_LGD = function(file_name = NULL) {
   AFCB0_p ~ dbeta(1,1)
   CCAA0_p ~ dbeta(1,1)
   CCAB0_p ~ dbeta(1,1)
-  CHARLC_p <- 1 # assume perfect detection
 
   LTR_p ~ dbeta(1,1)
   MTR_p ~ dbeta(1,1)
@@ -223,14 +222,14 @@ writeDABOM_LGD = function(file_name = NULL) {
   main_p[1:n.pops.main] ~ ddirch(main_dirch_vec) # Dirichlet for probs for going to n.pops bins
 
   for(i in 1:n.fish) {
-  a[i] ~ dcat( main_p[1:n.pops.main] )
+    a[i] ~ dcat( main_p[1:n.pops.main] )
   }
 
   # expand the dcat variable into a matrix of zeros and ones
   for (i in 1:n.fish) {
-  for (j in 1:n.pops.main) {
-  catexp[i,j] <- equals(a[i],j) #equals(x,y) is a test for equality, returns [1,0]
-  }
+    for (j in 1:n.pops.main) {
+      catexp[i,j] <- equals(a[i],j) #equals(x,y) is a test for equality, returns [1,0]
+    }
   }
 
   ####################################################
@@ -241,34 +240,34 @@ writeDABOM_LGD = function(file_name = NULL) {
   # P(being in bin) = P(migrating from next lowest bin) * present in lower bin (1/0)
 
   # priors for transition probabilities
-  for ( i in 1:3) {
-  phi_tuc[i] ~ dbeta(1,1) #prob of migrating up into sections of Tucanon
-  }
+  phi_mtr ~ dbeta(1,1)  # probability of moving past MTR
+  phi_utr ~ dbeta(1,1)  # probability of moving past UTR
+  phi_tuch ~ dbeta(1,1)  # probability of moving past TUCH_TFH
 
   for ( i in 1:n.fish ) {
-  #----------------------------
-  # TRUE STATE part in Tucannon
-  #----------------------------
-  # did the fish make it past MTR?
-  z_tuc[i,1] ~ dbern(catexp[i,1] * phi_tuc[1])
+    #----------------------------
+    # TRUE STATE part in Tucannon
+    #----------------------------
+    # did the fish make it past MTR?
+    z_mtr[i] ~ dbern(catexp[i,1] * phi_mtr)
 
-  # did the fish make it past UTR?
-  z_tuc[i,2] ~ dbern(z_tuc[i,1] * phi_tuc[2])
+    # did the fish make it past UTR?
+    z_utr[i] ~ dbern(z_mtr[i] * phi_utr)
 
-  # did the fish make it past TUCH & TFH?
-  z_tuc[i,3] ~ dbern(z_tuc[i,2] * phi_tuc[3])
+    # did the fish make it past TUCH & TFH?
+    z_tuch[i] ~ dbern(z_utr[i] * phi_tuch)
 
-  #----------------------------
-  # OBSERVATION part in Tucanon
-  #----------------------------
+    #----------------------------
+    # OBSERVATION part in Tucanon
+    #----------------------------
 
-  Tucannon[i,1] ~ dbern(LTR_p * catexp[i,1]) # did they go past LTR?
+    Tucannon[i,1] ~ dbern(LTR_p * catexp[i,1]) # did they go past LTR?
 
-  Tucannon[i,2] ~ dbern(MTR_p * z_tuc[i,1]) # did they go past MTR?
+    Tucannon[i,2] ~ dbern(MTR_p * z_mtr[i]) # did they go past MTR?
 
-  Tucannon[i,3] ~ dbern(UTR_p * z_tuc[i,2]) # did they go past UTR?
+    Tucannon[i,3] ~ dbern(UTR_p * z_utr[i]) # did they go past UTR?
 
-  Tucannon[i,4] ~ dbern(TUCH_TFH_p * z_tuc[i,3]) # did they go past TUCH & TFH?
+    Tucannon[i,4] ~ dbern(TUCH_TFH_p * z_tuch[i]) # did they go past TUCH & TFH?
 
   }  # ends the ifish loop started at the top of this section
 
@@ -278,9 +277,9 @@ writeDABOM_LGD = function(file_name = NULL) {
   # only have to worry about observation piece
   for ( i in 1:n.fish ) {
 
-  Penawawa[i,1] ~ dbern(PENAWC_p * catexp[i,2])
-  Almota[i,1] ~ dbern(ALMOTC_p * catexp[i,3])
-  Alpowa[i,1] ~ dbern(ALPOWC_p * catexp[i,4])
+    Penawawa[i,1] ~ dbern(PENAWC_p * catexp[i,2])
+    Almota[i,1] ~ dbern(ALMOTC_p * catexp[i,3])
+    Alpowa[i,1] ~ dbern(ALPOWC_p * catexp[i,4])
 
   }
 
@@ -301,34 +300,34 @@ writeDABOM_LGD = function(file_name = NULL) {
   pMat_Asotin[2,(n.pops.Asotin[1]+1)] <- 0 #set the "not there" bin to prob = 0
 
   for (i in 1:n.fish) {
-  #------------------------------------
-  # TRUE STATE part in lower Asotin
-  #------------------------------------
-  # the row number acts as switch between rows 1&2 using stochastic node
-  a_Aso[i] ~ dcat( pMat_Asotin[(catexp[i,5]+1),1:(n.pops.Asotin[1]+1)] ) # the row number acts as on/off switch
-  for (j in 1:(n.pops.Asotin[1]+1))	{ # now expand the dcat into matrix of zeros and ones
-  catexp_Aso[i,j] <- equals(a_Aso[i],j) #equals(x,y) is a test for equality, returns [1,0]
+    #------------------------------------
+    # TRUE STATE part in lower Asotin
+    #------------------------------------
+    # the row number acts as switch between rows 1&2 using stochastic node
+    a_Aso[i] ~ dcat( pMat_Asotin[(catexp[i,5]+1),1:(n.pops.Asotin[1]+1)] ) # the row number acts as on/off switch
+    for (j in 1:(n.pops.Asotin[1]+1))	{ # now expand the dcat into matrix of zeros and ones
+      catexp_Aso[i,j] <- equals(a_Aso[i],j) #equals(x,y) is a test for equality, returns [1,0]
+    }
+
+    #------------------------------------
+    # OBSERVATION part in lower Asotin
+    #------------------------------------
+    #first do main stem (if it is seen anywhere in mainstem OR tribs in Asotin -- thus the max statement)
+    # first array (ACM)
+    Asotin[i,2] ~ dbern(ACMB0_p * max(catexp_Aso[i,1:(n.pops.Asotin[1])]))
+    Asotin[i,3] ~ dbern(ACMA0_p * max(catexp_Aso[i,1:(n.pops.Asotin[1])]))
+
+    # Past adult trap (ASOTIC)
+    Asotin[i,1] ~ dbern(ASOTIC_p * catexp_Aso[i,3])
+
+    # Past ACB
+    z_aso[i] ~ dbern(catexp_Aso[i,3] * phi_aso)
+    Asotin[i,4] ~ dbern(ACB_p * z_aso[i])
+
+    # George Creek (GEORGC)
+    Asotin[i,5] ~ dbern(GEORGC_p * catexp_Aso[i,2])
+
   }
-
-  #------------------------------------
-  # OBSERVATION part in lower Asotin
-  #------------------------------------
-  #first do main stem (if it is seen anywhere in mainstem OR tribs in Asotin -- thus the max statement)
-  # first array (ACM)
-  Asotin[i,2] ~ dbern(ACMB0_p * max(catexp_Aso[i,1:(n.pops.Asotin[1])]))
-  Asotin[i,3] ~ dbern(ACMA0_p * max(catexp_Aso[i,1:(n.pops.Asotin[1])]))
-
-  # Past adult trap (ASOTIC)
-  Asotin[i,1] ~ dbern(ASOTIC_p * catexp_Aso[i,3])
-
-  # Past ACB
-  z_aso[i] ~ dbern(catexp_Aso[i,3] * phi_aso)
-  Asotin[i,4] ~ dbern(ACB_p * z_aso[i])
-  }
-
-  # George Creek (GEORGC)
-  Asotin[i,5] ~ dbern(GEORGC_p * catexp_Aso[i,2])
-
 
   # Upper branch
   # 4 bins: mainstem (1), CCA (2), AFC (3), and not seen (4)
@@ -342,26 +341,26 @@ writeDABOM_LGD = function(file_name = NULL) {
   pMat_AsoUpp[2,(n.pops.Asotin[2]+1)] <- 0 #set the "not there" bin to prob = 0
 
   for (i in 1:n.fish) {
-  #------------------------------------
-  # TRUE STATE part in upper Asotin
-  #------------------------------------
-  # the row number acts as switch between rows 1&2 using stochastic node
-  a_AsoUp[i] ~ dcat( pMat_AsoUpp[(z_aso[i]+1),1:(n.pops.Asotin[2]+1)] ) # the row number acts as on/off switch
-  for (j in 1:(n.pops.Asotin[2]+1))  { # now expand the dcat into matrix of zeros and ones
-  catexp_AsoUp[i,j] <- equals(a_AsoUp[i],j) #equals(x,y) is a test for equality, returns [1,0]
-  }
+    #------------------------------------
+    # TRUE STATE part in upper Asotin
+    #------------------------------------
+    # the row number acts as switch between rows 1&2 using stochastic node
+    a_AsoUp[i] ~ dcat( pMat_AsoUpp[(z_aso[i]+1),1:(n.pops.Asotin[2]+1)] ) # the row number acts as on/off switch
+    for (j in 1:(n.pops.Asotin[2]+1))  { # now expand the dcat into matrix of zeros and ones
+      catexp_AsoUp[i,j] <- equals(a_AsoUp[i],j) #equals(x,y) is a test for equality, returns [1,0]
+    }
 
-  #------------------------------------
-  # OBSERVATION part in upper Asotin
-  #------------------------------------
-  #first do main stem (if it is seen anywhere in mainstem OR tribs in Asotin -- thus the max statement)
-  # CCA
-  Asotin[i,6] ~ dbern(CCAB0_p * catexp_AsoUp[i,3])
-  Asotin[i,7] ~ dbern(CCAA0_p * catexp_AsoUp[i,3])
+    #------------------------------------
+    # OBSERVATION part in upper Asotin
+    #------------------------------------
+    #first do main stem (if it is seen anywhere in mainstem OR tribs in Asotin -- thus the max statement)
+    # CCA
+    Asotin[i,6] ~ dbern(CCAB0_p * catexp_AsoUp[i,3])
+    Asotin[i,7] ~ dbern(CCAA0_p * catexp_AsoUp[i,3])
 
-  # AFC
-  Asotin[i,8] ~ dbern(AFCB0_p * catexp_AsoUp[i,2])
-  Asotin[i,9] ~ dbern(AFCA0_p * catexp_AsoUp[i,2])
+    # AFC
+    Asotin[i,8] ~ dbern(AFCB0_p * catexp_AsoUp[i,2])
+    Asotin[i,9] ~ dbern(AFCA0_p * catexp_AsoUp[i,2])
 
   } # ends the ifish loop started at the top of this section
 
@@ -371,7 +370,7 @@ writeDABOM_LGD = function(file_name = NULL) {
   # only have to worry about observation piece
   for ( i in 1:n.fish ) {
 
-  TenMileCreek[i,1] ~ dbern(TENMC2_p * catexp[i,6])
+    TenMileCreek[i,1] ~ dbern(TENMC2_p * catexp[i,6])
 
   }
 
@@ -391,34 +390,34 @@ writeDABOM_LGD = function(file_name = NULL) {
   phi_web ~ dbeta(1,1)  # probability of moving past WEB
 
   for (i in 1:n.fish) {
-  #------------------------------------
-  # TRUE STATE part in Lapwai
-  #------------------------------------
-  # the row number acts as switch between rows 1&2 using stochastic node
-  a_Lap[i] ~ dcat( pMat_Lapwai[(catexp[i,7]+1),1:(n.pops.Lapwai+1)] ) # the row number acts as on/off switch
-  for (j in 1:(n.pops.Lapwai+1))	{ # now expand the dcat into matrix of zeros and ones
-  catexp_Lap[i,j] <- equals(a_Lap[i],j) #equals(x,y) is a test for equality, returns [1,0]
-  }
+    #------------------------------------
+    # TRUE STATE part in Lapwai
+    #------------------------------------
+    # the row number acts as switch between rows 1&2 using stochastic node
+    a_Lap[i] ~ dcat( pMat_Lapwai[(catexp[i,7]+1),1:(n.pops.Lapwai+1)] ) # the row number acts as on/off switch
+    for (j in 1:(n.pops.Lapwai+1))	{ # now expand the dcat into matrix of zeros and ones
+    catexp_Lap[i,j] <- equals(a_Lap[i],j) #equals(x,y) is a test for equality, returns [1,0]
+    }
 
-  z_web[i] ~ dbern(catexp_Lap[i,2] * phi_web)
-  #------------------------------------
-  # OBSERVATION part in Lapwai
-  #------------------------------------
-  #first do main stem (if it is seen anywhere in mainstem OR tribs in Lapwai -- thus the max statement)
-  #first array (LAP)
-  Lapwai[i,1] ~ dbern(LAPB0_p * max(catexp_Lap[i,1:(n.pops.Lapwai)]))
-  Lapwai[i,2] ~ dbern(LAPA0_p * max(catexp_Lap[i,1:(n.pops.Lapwai)]))
+    z_web[i] ~ dbern(catexp_Lap[i,2] * phi_web)
+    #------------------------------------
+    # OBSERVATION part in Lapwai
+    #------------------------------------
+    #first do main stem (if it is seen anywhere in mainstem OR tribs in Lapwai -- thus the max statement)
+    #first array (LAP)
+    Lapwai[i,1] ~ dbern(LAPB0_p * max(catexp_Lap[i,1:(n.pops.Lapwai)]))
+    Lapwai[i,2] ~ dbern(LAPA0_p * max(catexp_Lap[i,1:(n.pops.Lapwai)]))
 
-  # Sweetwater Creek array (SWT)...
-  Lapwai[i,3] ~ dbern(SWTB0_p * catexp_Lap[i, 2])
-  Lapwai[i,4] ~ dbern(SWTA0_p * catexp_Lap[i, 2])
+    # Sweetwater Creek array (SWT)...
+    Lapwai[i,3] ~ dbern(SWTB0_p * catexp_Lap[i, 2])
+    Lapwai[i,4] ~ dbern(SWTA0_p * catexp_Lap[i, 2])
 
-  Lapwai[i,5] ~ dbern(WEBB0_p * z_web[i])
-  Lapwai[i,6] ~ dbern(WEBA0_p * z_web[i])
+    Lapwai[i,5] ~ dbern(WEBB0_p * z_web[i])
+    Lapwai[i,6] ~ dbern(WEBA0_p * z_web[i])
 
-  # Mission Creek array (MIS)...
-  Lapwai[i,7] ~ dbern(MISB0_p * catexp_Lap[i, 3])
-  Lapwai[i,8] ~ dbern(MISA0_p * catexp_Lap[i, 3])
+    # Mission Creek array (MIS)...
+    Lapwai[i,7] ~ dbern(MISB0_p * catexp_Lap[i, 3])
+    Lapwai[i,8] ~ dbern(MISA0_p * catexp_Lap[i, 3])
 
 
   } # ends the ifish loop started at the top of this section
@@ -457,53 +456,53 @@ writeDABOM_LGD = function(file_name = NULL) {
   pMat_HLM[2,(n.pops.HLM+1)] <- 0 #set the "not there" bin to prob = 0
 
   for (i in 1:n.fish) {
-  #------------------------------------
-  # TRUE STATE part in Potlatch
-  #------------------------------------
-  # the row number acts as switch between rows 1&2 using stochastic node
-  a_Pot[i] ~ dcat( pMat_Potlatch[(catexp[i,8]+1),1:(n.pops.Potlatch+1)] ) # the row number acts as on/off switch
-  for (j in 1:(n.pops.Potlatch+1))	{ # now expand the dcat into matrix of zeros and ones
-  catexp_Pot[i,j] <- equals(a_Pot[i],j) #equals(x,y) is a test for equality, returns [1,0]
-  }
+    #------------------------------------
+    # TRUE STATE part in Potlatch
+    #------------------------------------
+    # the row number acts as switch between rows 1&2 using stochastic node
+    a_Pot[i] ~ dcat( pMat_Potlatch[(catexp[i,8]+1),1:(n.pops.Potlatch+1)] ) # the row number acts as on/off switch
+    for (j in 1:(n.pops.Potlatch+1))	{ # now expand the dcat into matrix of zeros and ones
+      catexp_Pot[i,j] <- equals(a_Pot[i],j) #equals(x,y) is a test for equality, returns [1,0]
+    }
 
-  # for fish that went past HLM, what branch did they take next?
-  a_HLM[i] ~ dcat( pMat_HLM[(catexp_Pot[i,2]+1),1:(n.pops.HLM+1)] ) # the row number acts as on/off switch
-  for (j in 1:(n.pops.HLM+1))  { # now expand the dcat into matrix of zeros and ones
-  catexp_HLM[i,j] <- equals(a_HLM[i],j) #equals(x,y) is a test for equality, returns [1,0]
-  }
+    # for fish that went past HLM, what branch did they take next?
+    a_HLM[i] ~ dcat( pMat_HLM[(catexp_Pot[i,2]+1),1:(n.pops.HLM+1)] ) # the row number acts as on/off switch
+    for (j in 1:(n.pops.HLM+1))  { # now expand the dcat into matrix of zeros and ones
+      catexp_HLM[i,j] <- equals(a_HLM[i],j) #equals(x,y) is a test for equality, returns [1,0]
+    }
 
-  # for fish that went past KHS, what branch did they take next?
-  a_KHS[i] ~ dcat( pMat_KHS[(catexp_Pot[i,3]+1),1:(n.pops.KHS+1)] ) # the row number acts as on/off switch
-  for (j in 1:(n.pops.KHS+1))  { # now expand the dcat into matrix of zeros and ones
-  catexp_KHS[i,j] <- equals(a_KHS[i],j) #equals(x,y) is a test for equality, returns [1,0]
-  }
+    # for fish that went past KHS, what branch did they take next?
+    a_KHS[i] ~ dcat( pMat_KHS[(catexp_Pot[i,3]+1),1:(n.pops.KHS+1)] ) # the row number acts as on/off switch
+    for (j in 1:(n.pops.KHS+1))  { # now expand the dcat into matrix of zeros and ones
+      catexp_KHS[i,j] <- equals(a_KHS[i],j) #equals(x,y) is a test for equality, returns [1,0]
+    }
 
-  #------------------------------------
-  # OBSERVATION part in Potlatch
-  #------------------------------------
-  #first do main stem (if it is seen anywhere in mainstem OR tribs in Potlatch -- thus the max statement)
-  #first array (JUL)
-  Potlatch[i,1] ~ dbern(JUL_p * max(catexp_Pot[i,1:(n.pops.Potlatch)]))
+    #------------------------------------
+    # OBSERVATION part in Potlatch
+    #------------------------------------
+    #first do main stem (if it is seen anywhere in mainstem OR tribs in Potlatch -- thus the max statement)
+    #first array (JUL)
+    Potlatch[i,1] ~ dbern(JUL_p * max(catexp_Pot[i,1:(n.pops.Potlatch)]))
 
-  # Kendrick High School array (KHS)
-  Potlatch[i,3] ~ dbern(KHSB0_p * catexp_Pot[i, 2])
-  Potlatch[i,4] ~ dbern(KHSA0_p * catexp_Pot[i, 2])
+    # Kendrick High School array (KHS)
+    Potlatch[i,3] ~ dbern(KHSB0_p * catexp_Pot[i, 2])
+    Potlatch[i,4] ~ dbern(KHSA0_p * catexp_Pot[i, 2])
 
-  # above KHS
-  Potlatch[i,2] ~ dbern(BIGBEC_p * catexp_KHS[i, 2])
-  Potlatch[i,5] ~ dbern(LBEARC_p * catexp_KHS[i, 3])
+    # above KHS
+    Potlatch[i,2] ~ dbern(BIGBEC_p * catexp_KHS[i, 2])
+    Potlatch[i,5] ~ dbern(LBEARC_p * catexp_KHS[i, 3])
 
-  # PCM
-  Potlatch[i,6] ~ dbern(PCMB0_p * catexp_Pot[i, 3])
-  Potlatch[i,7] ~ dbern(PCMA0_p * catexp_Pot[i, 3])
+    # PCM
+    Potlatch[i,6] ~ dbern(PCMB0_p * catexp_Pot[i, 3])
+    Potlatch[i,7] ~ dbern(PCMA0_p * catexp_Pot[i, 3])
 
-  # Helmer array (HLM)
-  Potlatch[i,9] ~ dbern(HLMB0_p * catexp_Pot[i, 4])
-  Potlatch[i,10] ~ dbern(HLMA0_p * catexp_Pot[i, 4])
+    # Helmer array (HLM)
+    Potlatch[i,9] ~ dbern(HLMB0_p * catexp_Pot[i, 4])
+    Potlatch[i,10] ~ dbern(HLMA0_p * catexp_Pot[i, 4])
 
-  # above HLM
-  Potlatch[i,8] ~ dbern(POTREF_p * catexp_HLM[i, 2])
-  Potlatch[i,11] ~ dbern(POTRWF_p * catexp_HLM[i, 3])
+    # above HLM
+    Potlatch[i,8] ~ dbern(POTREF_p * catexp_HLM[i, 2])
+    Potlatch[i,11] ~ dbern(POTRWF_p * catexp_HLM[i, 3])
 
   } #ends the ifish loop started at the top of this section
 
@@ -513,11 +512,12 @@ writeDABOM_LGD = function(file_name = NULL) {
   # only have to worry about observation piece
   for (i in 1:n.fish) {
 
-  # first array (LC1)
-  Lolo[i,1] ~ dbern( LC1_p * catexp[i,9] )
+    # first array (LC1)
+    Lolo[i,1] ~ dbern( LC1_p * catexp[i,9] )
 
-  # second array (LC2)
-  Lolo[i,2] ~ dbern( LC2_p * catexp[i,9] )
+    # second array (LC2)
+    Lolo[i,2] ~ dbern( LC2_p * catexp[i,9] )
+
   }
 
   ####################################################
@@ -526,14 +526,14 @@ writeDABOM_LGD = function(file_name = NULL) {
   # only have to worry about observation piece
   for (i in 1:n.fish) {
 
-  # first array (SC1)
-  SFClearwater[i,1] ~ dbern( SC1_p * catexp[i,10] )
+    # first array (SC1)
+    SFClearwater[i,1] ~ dbern( SC1_p * catexp[i,10] )
 
-  # second array (SC2)
-  SFClearwater[i,2] ~ dbern( SC2_p * catexp[i,10] )
+    # second array (SC2)
+    SFClearwater[i,2] ~ dbern( SC2_p * catexp[i,10] )
 
-  # other arrays (above_SC2)
-  SFClearwater[i,3] ~ dbern( above_SC2_p * catexp[i,10] )
+    # other arrays (above_SC2)
+    SFClearwater[i,3] ~ dbern( above_SC2_p * catexp[i,10] )
 
   }
 
@@ -543,13 +543,13 @@ writeDABOM_LGD = function(file_name = NULL) {
   # only have to worry about observation piece
   for (i in 1:n.fish) {
 
-  # first array (CLC)
-  ClearCreek[i,1] ~ dbern( CLC_p * catexp[i,11] )
+    # first array (CLC)
+    ClearCreek[i,1] ~ dbern( CLC_p * catexp[i,11] )
 
-  # other observation spot (KOOS)
-  ClearCreek[i,2] ~ dbern( KOOS_p * catexp[i,11] )
+    # other observation spot (KOOS)
+    ClearCreek[i,2] ~ dbern( KOOS_p * catexp[i,11] )
+
   }
-
 
   ####################################################
   #   Now we deal with Lochsa
@@ -557,11 +557,12 @@ writeDABOM_LGD = function(file_name = NULL) {
   # only have to worry about observation piece
   for (i in 1:n.fish) {
 
-  # first array (LRL)
-  Lochsa[i,1] ~ dbern( LRL_p * catexp[i,12] )
+    # first array (LRL)
+    Lochsa[i,1] ~ dbern( LRL_p * catexp[i,12] )
 
-  # other observation spot (FISTRP)
-  Lochsa[i,2] ~ dbern( FISTRP_p * catexp[i,12] )
+    # other observation spot (FISTRP)
+    Lochsa[i,2] ~ dbern( FISTRP_p * catexp[i,12] )
+
   }
 
 
@@ -571,8 +572,9 @@ writeDABOM_LGD = function(file_name = NULL) {
   # only have to worry about observation piece
   for (i in 1:n.fish) {
 
-  # first array (SW1)
-  Selway[i,1] ~ dbern( SW1_p * catexp[i,13] )
+    # first array (SW1)
+    Selway[i,1] ~ dbern( SW1_p * catexp[i,13] )
+
   }
 
   ####################################################
@@ -582,21 +584,22 @@ writeDABOM_LGD = function(file_name = NULL) {
   phi_josepc ~ dbeta(1,1)
 
   for (i in 1:n.fish) {
-  #------------------------------------
-  # TRUE STATE part in Joseph Creek
-  #------------------------------------
-  # did the fish make it to JOSEPC?
-  z_joc[i] ~ dbern(catexp[i,14] * phi_josepc)
+    #------------------------------------
+    # TRUE STATE part in Joseph Creek
+    #------------------------------------
+    # did the fish make it to JOSEPC?
+    z_joc[i] ~ dbern(catexp[i,14] * phi_josepc)
 
-  #------------------------------------
-  # OBSERVATION part in Joseph Creek
-  #------------------------------------
-  # first array (JOC)
-  JosephCreek[i,2] ~ dbern( JOCB0_p * catexp[i,14] )
-  JosephCreek[i,3] ~ dbern( JOCA0_p * catexp[i,14] )
+    #------------------------------------
+    # OBSERVATION part in Joseph Creek
+    #------------------------------------
+    # first array (JOC)
+    JosephCreek[i,2] ~ dbern( JOCB0_p * catexp[i,14] )
+    JosephCreek[i,3] ~ dbern( JOCA0_p * catexp[i,14] )
 
-  # JOSEPC
-  JosephCreek[i,1] ~ dbern( JOSEPC_p * z_joc[i] )
+    # JOSEPC
+    JosephCreek[i,1] ~ dbern( JOSEPC_p * z_joc[i] )
+
   }
 
   ####################################################
@@ -613,30 +616,30 @@ writeDABOM_LGD = function(file_name = NULL) {
   pMat_Wallow[2,(n.pops.Wallowa+1)] <- 0 #set the "not there" bin to prob = 0
 
   for (i in 1:n.fish) {
-  #------------------------------------
-  # TRUE STATE part in Wallowa
-  #------------------------------------
-  # the row number acts as switch between rows 1&2 using stochastic node
-  a_Wal[i] ~ dcat( pMat_Wallow[(catexp[i,15]+1),1:(n.pops.Wallowa+1)] ) # the row number acts as on/off switch
-  for (j in 1:(n.pops.Wallowa+1))	{ # now expand the dcat into matrix of zeros and ones
-  catexp_Wal[i,j] <- equals(a_Wal[i],j) #equals(x,y) is a test for equality, returns [1,0]
-  }
+    #------------------------------------
+    # TRUE STATE part in Wallowa
+    #------------------------------------
+    # the row number acts as switch between rows 1&2 using stochastic node
+    a_Wal[i] ~ dcat( pMat_Wallow[(catexp[i,15]+1),1:(n.pops.Wallowa+1)] ) # the row number acts as on/off switch
+    for (j in 1:(n.pops.Wallowa+1))	{ # now expand the dcat into matrix of zeros and ones
+      catexp_Wal[i,j] <- equals(a_Wal[i],j) #equals(x,y) is a test for equality, returns [1,0]
+    }
 
-  #------------------------------------
-  # OBSERVATION part in Wallowa
-  #------------------------------------
-  #first do main stem (if it is seen anywhere in mainstem OR tribs in Wallowa -- thus the max statement)
-  #first array (WR1)
-  Wallowa[i,1] ~ dbern(WR1_p * max(catexp_Wal[i,1:(n.pops.Wallowa)]))
+    #------------------------------------
+    # OBSERVATION part in Wallowa
+    #------------------------------------
+    #first do main stem (if it is seen anywhere in mainstem OR tribs in Wallowa -- thus the max statement)
+    #first array (WR1)
+    Wallowa[i,1] ~ dbern(WR1_p * max(catexp_Wal[i,1:(n.pops.Wallowa)]))
 
-  # BCANF
-  Wallowa[i,2] ~ dbern(BCANF_p * catexp_Wal[i, 2])
+    # BCANF
+    Wallowa[i,2] ~ dbern(BCANF_p * catexp_Wal[i, 2])
 
-  # LOSTIW
-  Wallowa[i,3] ~ dbern(LOSTIW_p * catexp_Wal[i, 3])
+    # LOSTIW
+    Wallowa[i,3] ~ dbern(LOSTIW_p * catexp_Wal[i, 3])
 
-  # WALH
-  Wallowa[i,4] ~ dbern(WALH_p * catexp_Wal[i, 4])
+    # WALH
+    Wallowa[i,4] ~ dbern(WALH_p * catexp_Wal[i, 4])
 
   }
 
@@ -646,8 +649,9 @@ writeDABOM_LGD = function(file_name = NULL) {
   # only have to worry about observation piece
   for (i in 1:n.fish) {
 
-  # first array (LOOKGC)
-  LookingGlass[i,1] ~ dbern( LOOKGC_p * catexp[i,16] )
+    # first array (LOOKGC)
+    LookingGlass[i,1] ~ dbern( LOOKGC_p * catexp[i,16] )
+
   }
 
   ####################################################
@@ -664,29 +668,29 @@ writeDABOM_LGD = function(file_name = NULL) {
   pMat_UppGR[2,(n.pops.UppGR+1)] <- 0 #set the "not there" bin to prob = 0
 
   for (i in 1:n.fish) {
-  #------------------------------------
-  # TRUE STATE part in Upper Grande Ronde
-  #------------------------------------
-  # the row number acts as switch between rows 1&2 using stochastic node
-  a_UGR[i] ~ dcat( pMat_UppGR[(catexp[i,17]+1),1:(n.pops.UppGR+1)] ) # the row number acts as on/off switch
-  for (j in 1:(n.pops.UppGR+1))  { # now expand the dcat into matrix of zeros and ones
-  catexp_UGR[i,j] <- equals(a_UGR[i],j) #equals(x,y) is a test for equality, returns [1,0]
-  }
+    #------------------------------------
+    # TRUE STATE part in Upper Grande Ronde
+    #------------------------------------
+    # the row number acts as switch between rows 1&2 using stochastic node
+    a_UGR[i] ~ dcat( pMat_UppGR[(catexp[i,17]+1),1:(n.pops.UppGR+1)] ) # the row number acts as on/off switch
+    for (j in 1:(n.pops.UppGR+1))  { # now expand the dcat into matrix of zeros and ones
+      catexp_UGR[i,j] <- equals(a_UGR[i],j) #equals(x,y) is a test for equality, returns [1,0]
+    }
 
-  #------------------------------------
-  # OBSERVATION part in Upper Grande Ronde
-  #------------------------------------
-  #first do main stem (if it is seen anywhere in mainstem OR tribs in Wallowa -- thus the max statement)
-  #first array (UGR)
-  GrandeRonde[i,1] ~ dbern(UGR_p * max(catexp_UGR[i,1:(n.pops.UppGR)]))
+    #------------------------------------
+    # OBSERVATION part in Upper Grande Ronde
+    #------------------------------------
+    #first do main stem (if it is seen anywhere in mainstem OR tribs in Wallowa -- thus the max statement)
+    #first array (UGR)
+    GrandeRonde[i,1] ~ dbern(UGR_p * max(catexp_UGR[i,1:(n.pops.UppGR)]))
 
-  # Catherine Creek
-  GrandeRonde[i,2] ~ dbern(CCWB0_p * catexp_UGR[i, 2])
-  GrandeRonde[i,3] ~ dbern(CCWA0_p * catexp_UGR[i, 2])
-  GrandeRonde[i,4] ~ dbern(CATHEW_p * catexp_UGR[i, 2])
+    # Catherine Creek
+    GrandeRonde[i,2] ~ dbern(CCWB0_p * catexp_UGR[i, 2])
+    GrandeRonde[i,3] ~ dbern(CCWA0_p * catexp_UGR[i, 2])
+    GrandeRonde[i,4] ~ dbern(CATHEW_p * catexp_UGR[i, 2])
 
-  # GRANDW
-  GrandeRonde[i,5] ~ dbern(GRANDW_p * catexp_UGR[i, 3])
+    # GRANDW
+    GrandeRonde[i,5] ~ dbern(GRANDW_p * catexp_UGR[i, 3])
 
   }
 
@@ -695,9 +699,11 @@ writeDABOM_LGD = function(file_name = NULL) {
   ####################################################
   # only have to worry about observation piece
   for (i in 1:n.fish) {
-  # first array (COC)
-  CowCreek[i,1] ~ dbern( COCB0_p * catexp[i,18] )
-  CowCreek[i,2] ~ dbern( COCA0_p * catexp[i,18] )
+
+    # first array (COC)
+    CowCreek[i,1] ~ dbern( COCB0_p * catexp[i,18] )
+    CowCreek[i,2] ~ dbern( COCA0_p * catexp[i,18] )
+
   }
 
   ####################################################
@@ -737,90 +743,89 @@ writeDABOM_LGD = function(file_name = NULL) {
   phi_iml ~ dbeta(1,1)
   phi_ir5 ~ dbeta(1,1)
 
-
   for (i in 1:n.fish) {
-  #------------------------------------
-  # TRUE STATE part in Imnaha
-  #------------------------------------
-  # the row number acts as switch between rows 1&2 using stochastic node
-  a_Imn[i] ~ dcat( pMat_Imnaha[(catexp[i,19]+1),1:(n.pops.Imnaha[1]+1)] ) # the row number acts as on/off switch
-  for (j in 1:(n.pops.Imnaha[1]+1))	{ # now expand the dcat into matrix of zeros and ones
-  catexp_Imn[i,j] <- equals(a_Imn[i],j) #equals(x,y) is a test for equality, returns [1,0]
-  }
+    #------------------------------------
+    # TRUE STATE part in Imnaha
+    #------------------------------------
+    # the row number acts as switch between rows 1&2 using stochastic node
+    a_Imn[i] ~ dcat( pMat_Imnaha[(catexp[i,19]+1),1:(n.pops.Imnaha[1]+1)] ) # the row number acts as on/off switch
+    for (j in 1:(n.pops.Imnaha[1]+1))	{ # now expand the dcat into matrix of zeros and ones
+      catexp_Imn[i,j] <- equals(a_Imn[i],j) #equals(x,y) is a test for equality, returns [1,0]
+    }
 
-  # above IR3
-  a_ImnUp[i] ~ dcat( pMat_UppImn[(catexp_Imn[i,6]+1),1:(n.pops.Imnaha[2]+1)] ) # the row number acts as on/off switch
-  for (j in 1:(n.pops.Imnaha[2]+1))  { # now expand the dcat into matrix of zeros and ones
-  catexp_ImnUp[i,j] <- equals(a_ImnUp[i],j) #equals(x,y) is a test for equality, returns [1,0]
-  }
+    # above IR3
+    a_ImnUp[i] ~ dcat( pMat_UppImn[(catexp_Imn[i,6]+1),1:(n.pops.Imnaha[2]+1)] ) # the row number acts as on/off switch
+    for (j in 1:(n.pops.Imnaha[2]+1))  { # now expand the dcat into matrix of zeros and ones
+      catexp_ImnUp[i,j] <- equals(a_ImnUp[i],j) #equals(x,y) is a test for equality, returns [1,0]
+    }
 
-  # past IML (IR4 -> IML)
-  z_iml[i] ~ dbern(catexp_ImnUp[i,4] * phi_iml)
+    # past IML (IR4 -> IML)
+    z_iml[i] ~ dbern(catexp_ImnUp[i,4] * phi_iml)
 
-  # past IR5 (IML -> IR5)
-  z_ir5[i] ~ dbern(z_iml[i] * phi_ir5)
+    # past IR5 (IML -> IR5)
+    z_ir5[i] ~ dbern(z_iml[i] * phi_ir5)
 
-  # above IR5
-  a_ImnWeir[i] ~ dcat( pMat_ImnWeir[(z_ir5[i]+1),1:(n.pops.Imnaha[3]+1)] ) # the row number acts as on/off switch
-  for (j in 1:(n.pops.Imnaha[3]+1))  { # now expand the dcat into matrix of zeros and ones
-  catexp_ImnWeir[i,j] <- equals(a_ImnWeir[i],j) #equals(x,y) is a test for equality, returns [1,0]
-  }
+    # above IR5
+    a_ImnWeir[i] ~ dcat( pMat_ImnWeir[(z_ir5[i]+1),1:(n.pops.Imnaha[3]+1)] ) # the row number acts as on/off switch
+    for (j in 1:(n.pops.Imnaha[3]+1))  { # now expand the dcat into matrix of zeros and ones
+      catexp_ImnWeir[i,j] <- equals(a_ImnWeir[i],j) #equals(x,y) is a test for equality, returns [1,0]
+    }
 
-  #------------------------------------
-  # OBSERVATION part in Imnaha
-  #------------------------------------
-  # first do main stem (if it is seen anywhere in mainstem OR tribs in Imnaha -- thus the max statement)
-  # first array (IR1)
-  ImnahaRiver[i,1] ~ dbern(IR1_p * max(catexp_Imn[i,1:(n.pops.Imnaha[1])]))
-  # second array (IR2)
-  ImnahaRiver[i,2] ~ dbern(IR2_p * max(catexp_Imn[i,1:(n.pops.Imnaha[1])]))
+    #------------------------------------
+    # OBSERVATION part in Imnaha
+    #------------------------------------
+    # first do main stem (if it is seen anywhere in mainstem OR tribs in Imnaha -- thus the max statement)
+    # first array (IR1)
+    ImnahaRiver[i,1] ~ dbern(IR1_p * max(catexp_Imn[i,1:(n.pops.Imnaha[1])]))
+    # second array (IR2)
+    ImnahaRiver[i,2] ~ dbern(IR2_p * max(catexp_Imn[i,1:(n.pops.Imnaha[1])]))
 
-  # HORS3C
-  ImnahaRiver[i,3] ~ dbern(HORS3C_p * catexp_Imn[i, 2])
+    # HORS3C
+    ImnahaRiver[i,3] ~ dbern(HORS3C_p * catexp_Imn[i, 2])
 
-  # Camp Creek (CMP)
-  ImnahaRiver[i,4] ~ dbern(CMPB0_p * catexp_Imn[i, 3])
-  ImnahaRiver[i,5] ~ dbern(CMPA0_p * catexp_Imn[i, 3])
+    # Camp Creek (CMP)
+    ImnahaRiver[i,4] ~ dbern(CMPB0_p * catexp_Imn[i, 3])
+    ImnahaRiver[i,5] ~ dbern(CMPA0_p * catexp_Imn[i, 3])
 
-  # LSHEEF
-  ImnahaRiver[i,6] ~ dbern(LSHEEF_p * catexp_Imn[i, 4])
+    # LSHEEF
+    ImnahaRiver[i,6] ~ dbern(LSHEEF_p * catexp_Imn[i, 4])
 
-  # Big Sheep Creek (BSC)
-  ImnahaRiver[i,7] ~ dbern(BSCB0_p * catexp_Imn[i, 5])
-  ImnahaRiver[i,8] ~ dbern(BSCA0_p * catexp_Imn[i, 5])
+    # Big Sheep Creek (BSC)
+    ImnahaRiver[i,7] ~ dbern(BSCB0_p * catexp_Imn[i, 5])
+    ImnahaRiver[i,8] ~ dbern(BSCA0_p * catexp_Imn[i, 5])
 
-  # Upper Imnaha (IR3)
-  ImnahaRiver[i,9] ~ dbern(IR3B0_p * catexp_Imn[i, 6])
-  ImnahaRiver[i,10] ~ dbern(IR3A0_p * catexp_Imn[i, 6])
+    # Upper Imnaha (IR3)
+    ImnahaRiver[i,9] ~ dbern(IR3B0_p * catexp_Imn[i, 6])
+    ImnahaRiver[i,10] ~ dbern(IR3A0_p * catexp_Imn[i, 6])
 
-  # Freezeout Creek weir
-  ImnahaRiver[i,11] ~ dbern(FREEZC_p * catexp_ImnUp[i, 2])
+    # Freezeout Creek weir
+    ImnahaRiver[i,11] ~ dbern(FREEZC_p * catexp_ImnUp[i, 2])
 
-  # Crazy Creek (CZY)
-  ImnahaRiver[i,12] ~ dbern(CZYB0_p * catexp_ImnUp[i, 3])
-  ImnahaRiver[i,13] ~ dbern(CZYA0_p * catexp_ImnUp[i, 3])
+    # Crazy Creek (CZY)
+    ImnahaRiver[i,12] ~ dbern(CZYB0_p * catexp_ImnUp[i, 3])
+    ImnahaRiver[i,13] ~ dbern(CZYA0_p * catexp_ImnUp[i, 3])
 
-  # Mahogany Creek weir
-  ImnahaRiver[i,14] ~ dbern(MAHOGC_p * catexp_ImnUp[i, 4])
+    # Mahogany Creek weir
+    ImnahaRiver[i,14] ~ dbern(MAHOGC_p * catexp_ImnUp[i, 4])
 
-  # IR4
-  ImnahaRiver[i,15] ~ dbern(IR4B0_p * catexp_ImnUp[i, 5])
-  ImnahaRiver[i,16] ~ dbern(IR4A0_p * catexp_ImnUp[i, 5])
+    # IR4
+    ImnahaRiver[i,15] ~ dbern(IR4B0_p * catexp_ImnUp[i, 5])
+    ImnahaRiver[i,16] ~ dbern(IR4A0_p * catexp_ImnUp[i, 5])
 
-  # Imnaha weir
-  ImnahaRiver[i,17] ~ dbern(IMLB0_p * z_iml[i])
-  ImnahaRiver[i,18] ~ dbern(IMLA0_p * z_iml[i])
-  ImnahaRiver[i,19] ~ dbern(IMNAHW_p * z_iml[i])
+    # Imnaha weir
+    ImnahaRiver[i,17] ~ dbern(IMLB0_p * z_iml[i])
+    ImnahaRiver[i,18] ~ dbern(IMLA0_p * z_iml[i])
+    ImnahaRiver[i,19] ~ dbern(IMNAHW_p * z_iml[i])
 
-  # IR5
-  ImnahaRiver[i,20] ~ dbern(IR5B0_p * z_ir5[i])
-  ImnahaRiver[i,21] ~ dbern(IR5A0_p * z_ir5[i])
+    # IR5
+    ImnahaRiver[i,20] ~ dbern(IR5B0_p * z_ir5[i])
+    ImnahaRiver[i,21] ~ dbern(IR5A0_p * z_ir5[i])
 
-  # Gumboot Creek weir
-  ImnahaRiver[i,22] ~ dbern(GUMBTC_p * catexp_ImnWeir[i, 2])
+    # Gumboot Creek weir
+    ImnahaRiver[i,22] ~ dbern(GUMBTC_p * catexp_ImnWeir[i, 2])
 
-  # Dry Creek
-  ImnahaRiver[i,23] ~ dbern(DRY2C_p * catexp_ImnWeir[i, 3])
+    # Dry Creek
+    ImnahaRiver[i,23] ~ dbern(DRY2C_p * catexp_ImnWeir[i, 3])
 
 
   } #ends the ifish loop started at the top of this section
@@ -830,8 +835,10 @@ writeDABOM_LGD = function(file_name = NULL) {
   ####################################################
   # only have to worry about observation piece
   for (i in 1:n.fish) {
-  # first array (RAPH)
-  RapidRiver[i,1] ~ dbern( RAPH_p * catexp[i,20] )
+
+    # first array (RAPH)
+    RapidRiver[i,1] ~ dbern( RAPH_p * catexp[i,20] )
+
   }
 
   ####################################################
@@ -854,42 +861,42 @@ writeDABOM_LGD = function(file_name = NULL) {
 
 
   for (i in 1:n.fish) {
-  #------------------------------------
-  # TRUE STATE part in South Fork Salmon
-  #------------------------------------
-  # the row number acts as switch between rows 1&2 using stochastic node
-  a_SFS[i] ~ dcat( pMat_SFS[(catexp[i,21]+1),1:(n.pops.SFS+1)] ) # the row number acts as on/off switch
-  for (j in 1:(n.pops.SFS+1))	{ # now expand the dcat into matrix of zeros and ones
-  catexp_SFS[i,j] <- equals(a_SFS[i],j) #equals(x,y) is a test for equality, returns [1,0]
-  }
+    #------------------------------------
+    # TRUE STATE part in South Fork Salmon
+    #------------------------------------
+    # the row number acts as switch between rows 1&2 using stochastic node
+    a_SFS[i] ~ dcat( pMat_SFS[(catexp[i,21]+1),1:(n.pops.SFS+1)] ) # the row number acts as on/off switch
+    for (j in 1:(n.pops.SFS+1))	{ # now expand the dcat into matrix of zeros and ones
+      catexp_SFS[i,j] <- equals(a_SFS[i],j) #equals(x,y) is a test for equality, returns [1,0]
+    }
 
-  # on/off for whether fish moved to end of each branch
-  z_lakec[i] ~ dbern(catexp_SFS[i,2] * phi_lakec)
-  z_johnsc[i] ~ dbern(catexp_SFS[i,3] * phi_johnsc)
-  z_str[i] ~ dbern(catexp_SFS[i,4] * phi_str)
+    # on/off for whether fish moved to end of each branch
+    z_lakec[i] ~ dbern(catexp_SFS[i,2] * phi_lakec)
+    z_johnsc[i] ~ dbern(catexp_SFS[i,3] * phi_johnsc)
+    z_str[i] ~ dbern(catexp_SFS[i,4] * phi_str)
 
-  #------------------------------------
-  # OBSERVATION part in South Fork Salmon
-  #------------------------------------
-  #first do main stem (if it is seen anywhere in mainstem OR tribs in SFS -- thus the max statement)
-  # first array (SFG)
-  SFSalmon[i,1] ~ dbern(SFG_p * max(catexp_SFS[i,1:(n.pops.SFS)]))
+    #------------------------------------
+    # OBSERVATION part in South Fork Salmon
+    #------------------------------------
+    #first do main stem (if it is seen anywhere in mainstem OR tribs in SFS -- thus the max statement)
+    # first array (SFG)
+    SFSalmon[i,1] ~ dbern(SFG_p * max(catexp_SFS[i,1:(n.pops.SFS)]))
 
-  #  Zena Creek array (ZEN)
-  SFSalmon[i,2] ~ dbern(ZENB0_p * catexp_SFS[i, 2])
-  SFSalmon[i,3] ~ dbern(ZENA0_p * catexp_SFS[i, 2])
-  SFSalmon[i,4] ~ dbern(LAKEC_p * z_lakec[i])
+    #  Zena Creek array (ZEN)
+    SFSalmon[i,2] ~ dbern(ZENB0_p * catexp_SFS[i, 2])
+    SFSalmon[i,3] ~ dbern(ZENA0_p * catexp_SFS[i, 2])
+    SFSalmon[i,4] ~ dbern(LAKEC_p * z_lakec[i])
 
-  # East Fork South Fork array (ESS)
-  SFSalmon[i,2] ~ dbern(ESSB0_p * catexp_SFS[i, 3])
-  SFSalmon[i,3] ~ dbern(ESSA0_p * catexp_SFS[i, 3])
-  # upstream of ESS, at Johnson Creek weir
-  SFSalmon[i,4] ~ dbern( JOHNSC_p * z_johnsc[i])
+    # East Fork South Fork array (ESS)
+    SFSalmon[i,2] ~ dbern(ESSB0_p * catexp_SFS[i, 3])
+    SFSalmon[i,3] ~ dbern(ESSA0_p * catexp_SFS[i, 3])
+    # upstream of ESS, at Johnson Creek weir
+    SFSalmon[i,4] ~ dbern( JOHNSC_p * z_johnsc[i])
 
-  # Krassel Creek array (KRS)
-  SFSalmon[i,5] ~ dbern( KRS_p * catexp_SFS[i, 4] )
-  # upstream of KRS, at McCall hatchery (STR)
-  SFSalmon[i,6] ~ dbern( STR_p * z_str[i] )
+    # Krassel Creek array (KRS)
+    SFSalmon[i,5] ~ dbern( KRS_p * catexp_SFS[i, 4] )
+    # upstream of KRS, at McCall hatchery (STR)
+    SFSalmon[i,6] ~ dbern( STR_p * z_str[i] )
 
   } #ends the ifish loop started at the top of this section
 
@@ -898,9 +905,11 @@ writeDABOM_LGD = function(file_name = NULL) {
   ####################################################
   # only have to worry about observation piece
   for (i in 1:n.fish) {
-  # first array (TAY)
-  BigCreek[i,1] ~ dbern( TAYB0_p * catexp[i,22] )
-  BigCreek[i,2] ~ dbern( TAYA0_p * catexp[i,22] )
+
+    # first array (TAY)
+    BigCreek[i,1] ~ dbern( TAYB0_p * catexp[i,22] )
+    BigCreek[i,2] ~ dbern( TAYA0_p * catexp[i,22] )
+
   }
 
   ####################################################
@@ -908,9 +917,11 @@ writeDABOM_LGD = function(file_name = NULL) {
   ####################################################
   # only have to worry about observation piece
   for (i in 1:n.fish) {
-  # first array (NFS)
-  NFSalmon[i,1] ~ dbern( NFSB0_p * catexp[i,23] )
-  NFSalmon[i,2] ~ dbern( NFSA0_p * catexp[i,23] )
+
+    # first array (NFS)
+    NFSalmon[i,1] ~ dbern( NFSB0_p * catexp[i,23] )
+    NFSalmon[i,2] ~ dbern( NFSA0_p * catexp[i,23] )
+
   }
 
   ####################################################
@@ -918,9 +929,11 @@ writeDABOM_LGD = function(file_name = NULL) {
   ####################################################
   # only have to worry about observation piece
   for (i in 1:n.fish) {
-  # first array (CRC)
-  CarmenCreek[i,1] ~ dbern( CRCB0_p * catexp[i,24] )
-  CarmenCreek[i,2] ~ dbern( CRCA0_p * catexp[i,24] )
+
+    # first array (CRC)
+    CarmenCreek[i,1] ~ dbern( CRCB0_p * catexp[i,24] )
+    CarmenCreek[i,2] ~ dbern( CRCA0_p * catexp[i,24] )
+
   }
 
 
@@ -944,50 +957,50 @@ writeDABOM_LGD = function(file_name = NULL) {
   phi_hbc ~ dbeta(1,1)
 
   for (i in 1:n.fish) {
-  #------------------------------------
-  # TRUE STATE part in Lower Lemhi
-  #------------------------------------
-  # the row number acts as switch between rows 1&2 using stochastic node
-  a_LowLem[i] ~ dcat( pMat_LowLemhi[(catexp[i,25]+1),1:(n.pops.Lemhi[1]+1)] ) # the row number acts as on/off switch
-  for (j in 1:(n.pops.Lemhi[1]+1))	{ # now expand the dcat into matrix of zeros and ones
-  catexp_LowLem[i,j] <- equals(a_LowLem[i],j)
-  }
+    #------------------------------------
+    # TRUE STATE part in Lower Lemhi
+    #------------------------------------
+    # the row number acts as switch between rows 1&2 using stochastic node
+    a_LowLem[i] ~ dcat( pMat_LowLemhi[(catexp[i,25]+1),1:(n.pops.Lemhi[1]+1)] ) # the row number acts as on/off switch
+    for (j in 1:(n.pops.Lemhi[1]+1))	{ # now expand the dcat into matrix of zeros and ones
+      catexp_LowLem[i,j] <- equals(a_LowLem[i],j)
+    }
 
-  z_hbc[i] ~ dbern(catexp_LowLem[i, 6] * phi_hbc)
+    z_hbc[i] ~ dbern(catexp_LowLem[i, 6] * phi_hbc)
 
-  #------------------------------------
-  # OBSERVATION part in Lower Lemhi
-  #------------------------------------
-  #first do main stem
-  #first array (LLR)
-  Lemhi[i,1] ~ dbern(LLRB0_p * max(catexp_LowLem[i,1:(n.pops.Lemhi[1])]))
-  Lemhi[i,2] ~ dbern(LLRA0_p * max(catexp_LowLem[i,1:(n.pops.Lemhi[1])]))
+    #------------------------------------
+    # OBSERVATION part in Lower Lemhi
+    #------------------------------------
+    #first do main stem
+    #first array (LLR)
+    Lemhi[i,1] ~ dbern(LLRB0_p * max(catexp_LowLem[i,1:(n.pops.Lemhi[1])]))
+    Lemhi[i,2] ~ dbern(LLRA0_p * max(catexp_LowLem[i,1:(n.pops.Lemhi[1])]))
 
-  # Bohannon array (BHC)...
-  Lemhi[i,3] ~ dbern(BHCB0_p * catexp_LowLem[i, 2])
-  Lemhi[i,4] ~ dbern(BHCA0_p * catexp_LowLem[i, 2])
+    # Bohannon array (BHC)...
+    Lemhi[i,3] ~ dbern(BHCB0_p * catexp_LowLem[i, 2])
+    Lemhi[i,4] ~ dbern(BHCA0_p * catexp_LowLem[i, 2])
 
-  # Wimpy array (WPC)...
-  Lemhi[i,5] ~ dbern(WPCB0_p * catexp_LowLem[i, 3])
-  Lemhi[i,6] ~ dbern(WPCA0_p * catexp_LowLem[i, 3])
+    # Wimpy array (WPC)...
+    Lemhi[i,5] ~ dbern(WPCB0_p * catexp_LowLem[i, 3])
+    Lemhi[i,6] ~ dbern(WPCA0_p * catexp_LowLem[i, 3])
 
-  # Kenney array (KEN)...
-  Lemhi[i,7] ~ dbern(KENB0_p * catexp_LowLem[i, 4])
-  Lemhi[i,8] ~ dbern(KENA0_p * catexp_LowLem[i, 4])
+    # Kenney array (KEN)...
+    Lemhi[i,7] ~ dbern(KENB0_p * catexp_LowLem[i, 4])
+    Lemhi[i,8] ~ dbern(KENA0_p * catexp_LowLem[i, 4])
 
-  # Agency array (AGC)...
-  Lemhi[i,9] ~ dbern(AGCB0_p * catexp_LowLem[i, 5])
-  Lemhi[i,10] ~ dbern(AGCA0_p * catexp_LowLem[i, 5])
+    # Agency array (AGC)...
+    Lemhi[i,9] ~ dbern(AGCB0_p * catexp_LowLem[i, 5])
+    Lemhi[i,10] ~ dbern(AGCA0_p * catexp_LowLem[i, 5])
 
-  # Hayden array (HYC)...
-  Lemhi[i,11] ~ dbern(HYCB0_p * catexp_LowLem[i, 6])
-  Lemhi[i,12] ~ dbern(HYCA0_p * catexp_LowLem[i, 6])
-  # past HBC
-  Lemhi[i,13] ~ dbern(HBC_p * z_hbc[i])
+    # Hayden array (HYC)...
+    Lemhi[i,11] ~ dbern(HYCB0_p * catexp_LowLem[i, 6])
+    Lemhi[i,12] ~ dbern(HYCA0_p * catexp_LowLem[i, 6])
+    # past HBC
+    Lemhi[i,13] ~ dbern(HBC_p * z_hbc[i])
 
-  # Upper Lemhi (LRW)
-  Lemhi[i,14] ~ dbern(LRWB0_p * catexp_LowLem[i, 7])
-  Lemhi[i,15] ~ dbern(LRWA0_p * catexp_LowLem[i, 7])
+    # Upper Lemhi (LRW)
+    Lemhi[i,14] ~ dbern(LRWB0_p * catexp_LowLem[i, 7])
+    Lemhi[i,15] ~ dbern(LRWA0_p * catexp_LowLem[i, 7])
 
   } # ends the ifish loop started at the top of this section
 
@@ -1012,54 +1025,54 @@ writeDABOM_LGD = function(file_name = NULL) {
 
 
   for (i in 1:n.fish) {
-  #------------------------------------
-  # TRUE STATE part in Upper Lemhi
-  #------------------------------------
-  # the row number acts as switch between rows 1&2 using stochastic node
-  a_UpLem[i] ~ dcat( pMat_UpLemhi[(catexp_LowLem[i,7]+1),1:(n.pops.Lemhi[2]+1)] ) # the row number acts as on/off switch
+    #------------------------------------
+    # TRUE STATE part in Upper Lemhi
+    #------------------------------------
+    # the row number acts as switch between rows 1&2 using stochastic node
+    a_UpLem[i] ~ dcat( pMat_UpLemhi[(catexp_LowLem[i,7]+1),1:(n.pops.Lemhi[2]+1)] ) # the row number acts as on/off switch
 
-  for (j in 1:(n.pops.Lemhi[2]+1))	{ # now expand the dcat into matrix of zeros and ones
-  catexp_UpLem[i,j] <- equals(a_UpLem[i],j)
-  }
+    for (j in 1:(n.pops.Lemhi[2]+1))	{ # now expand the dcat into matrix of zeros and ones
+      catexp_UpLem[i,j] <- equals(a_UpLem[i],j)
+    }
 
-  # movement up Big Timber Creek
-  z_btm[i] ~ dbern(catexp_UpLem[i, 6] * phi_btm)  # past BTM
-  z_btu[i] ~ dbern(z_btm[i] * phi_btu)  # past BTU
+    # movement up Big Timber Creek
+    z_btm[i] ~ dbern(catexp_UpLem[i, 6] * phi_btm)  # past BTM
+    z_btu[i] ~ dbern(z_btm[i] * phi_btu)  # past BTU
 
-  #------------------------------------
-  # OBSERVATION part in Upper Lemhi
-  #------------------------------------
-  #first do main stem (if it is seen anywhere in mainstem OR tribs in Upper Lemhi -- thus the max statement)
+    #------------------------------------
+    # OBSERVATION part in Upper Lemhi
+    #------------------------------------
+    #first do main stem (if it is seen anywhere in mainstem OR tribs in Upper Lemhi -- thus the max statement)
 
-  # Little Springs array (LLS)...
-  Lemhi[i,16] ~ dbern(LLSB0_p * catexp_UpLem[i, 2])
-  Lemhi[i,17] ~ dbern(LLSA0_p * catexp_UpLem[i, 2])
+    # Little Springs array (LLS)...
+    Lemhi[i,16] ~ dbern(LLSB0_p * catexp_UpLem[i, 2])
+    Lemhi[i,17] ~ dbern(LLSA0_p * catexp_UpLem[i, 2])
 
-  # Big Eightmile (LB8)
-  Lemhi[i,18] ~ dbern(LB8B0_p * catexp_UpLem[i, 3])
-  Lemhi[i,19] ~ dbern(LB8A0_p * catexp_UpLem[i, 3])
+    # Big Eightmile (LB8)
+    Lemhi[i,18] ~ dbern(LB8B0_p * catexp_UpLem[i, 3])
+    Lemhi[i,19] ~ dbern(LB8A0_p * catexp_UpLem[i, 3])
 
-  # Big Springs (LBS)
-  Lemhi[i,20] ~ dbern(LBSB0_p * catexp_UpLem[i, 4])
-  Lemhi[i,21] ~ dbern(LBSA0_p * catexp_UpLem[i, 4])
+    # Big Springs (LBS)
+    Lemhi[i,20] ~ dbern(LBSB0_p * catexp_UpLem[i, 4])
+    Lemhi[i,21] ~ dbern(LBSA0_p * catexp_UpLem[i, 4])
 
-  # Lee Creek (LCL)
-  Lemhi[i,22] ~ dbern(LCLB0_p * catexp_UpLem[i, 5])
-  Lemhi[i,23] ~ dbern(LCLA0_p * catexp_UpLem[i, 5])
+    # Lee Creek (LCL)
+    Lemhi[i,22] ~ dbern(LCLB0_p * catexp_UpLem[i, 5])
+    Lemhi[i,23] ~ dbern(LCLA0_p * catexp_UpLem[i, 5])
 
-  # Big Timber array (BTC)...
-  Lemhi[i,24] ~ dbern(BTLB0_p * catexp_UpLem[i, 6])
-  Lemhi[i,25] ~ dbern(BTLA0_p * catexp_UpLem[i, 6])
+    # Big Timber array (BTC)...
+    Lemhi[i,24] ~ dbern(BTLB0_p * catexp_UpLem[i, 6])
+    Lemhi[i,25] ~ dbern(BTLA0_p * catexp_UpLem[i, 6])
 
-  Lemhi[i,26] ~ dbern(BTMB0_p * z_btm[i])
-  Lemhi[i,27] ~ dbern(BTMA0_p * z_btm[i])
+    Lemhi[i,26] ~ dbern(BTMB0_p * z_btm[i])
+    Lemhi[i,27] ~ dbern(BTMA0_p * z_btm[i])
 
-  Lemhi[i,28] ~ dbern(BTUB0_p * z_btu[i])
-  Lemhi[i,29] ~ dbern(BTUA0_p * z_btu[i])
+    Lemhi[i,28] ~ dbern(BTUB0_p * z_btu[i])
+    Lemhi[i,29] ~ dbern(BTUA0_p * z_btu[i])
 
-  # Canyon array (CAC)...
-  Lemhi[i,30] ~ dbern(CACB0_p * catexp_UpLem[i, 7])
-  Lemhi[i,31] ~ dbern(CACA0_p * catexp_UpLem[i, 7])
+    # Canyon array (CAC)...
+    Lemhi[i,30] ~ dbern(CACB0_p * catexp_UpLem[i, 7])
+    Lemhi[i,31] ~ dbern(CACA0_p * catexp_UpLem[i, 7])
 
   } # ends the ifish loop started at the top of this section
 
@@ -1085,45 +1098,45 @@ writeDABOM_LGD = function(file_name = NULL) {
   pMat_UpSalm[2,(n.pops.UpSalm+1)] <- 0 #set the "not there" bin to prob = 0
 
   for (i in 1:n.fish) {
-  #-----------------------------------------------------
-  # TRUE STATE part in first section of Upper Salmon
-  #-----------------------------------------------------
-  # migration up the Upper Salmon
-  z_usi[i] ~ dbern(catexp[i,26] * phi_usi ) # did fish make it past USI?
+    #-----------------------------------------------------
+    # TRUE STATE part in first section of Upper Salmon
+    #-----------------------------------------------------
+    # migration up the Upper Salmon
+    z_usi[i] ~ dbern(catexp[i,26] * phi_usi ) # did fish make it past USI?
 
-  #-----------------------------------------------------
-  # TRUE STATE part in second section of Upper Salmon
-  #-----------------------------------------------------
-  # the row number acts as switch between rows 1&2 using stochastic node
-  a_UpSalm[i] ~ dcat( pMat_UpSalm[(z_usi[i]+1),1:(n.pops.UpSalm+1)] ) # the row number acts as on/off switch
-  for (j in 1:(n.pops.UpSalm+1))  { # now expand the dcat into matrix of zeros and ones
-  catexp_UpSalm[i,j] <- equals(a_UpSalm[i],j)
-  }
+    #-----------------------------------------------------
+    # TRUE STATE part in second section of Upper Salmon
+    #-----------------------------------------------------
+    # the row number acts as switch between rows 1&2 using stochastic node
+    a_UpSalm[i] ~ dcat( pMat_UpSalm[(z_usi[i]+1),1:(n.pops.UpSalm+1)] ) # the row number acts as on/off switch
+    for (j in 1:(n.pops.UpSalm+1))  { # now expand the dcat into matrix of zeros and ones
+      catexp_UpSalm[i,j] <- equals(a_UpSalm[i],j)
+    }
 
-  #-----------------------------------------------------
-  # OBSERVATION part in Upper Salmon
-  #-----------------------------------------------------
-  # first array (USE)
-  UpperSalmon[i,1] ~ dbern( USE_p * catexp[i,26])
-  # second array (USI)
-  UpperSalmon[i,2] ~ dbern( USI_p * z_usi[i])
+    #-----------------------------------------------------
+    # OBSERVATION part in Upper Salmon
+    #-----------------------------------------------------
+    # first array (USE)
+    UpperSalmon[i,1] ~ dbern( USE_p * catexp[i,26])
+    # second array (USI)
+    UpperSalmon[i,2] ~ dbern( USI_p * z_usi[i])
 
-  # Pahsimeroi array (PAHH)...
-  UpperSalmon[i,3] ~ dbern(PAHH_p * catexp_UpSalm[i, 2])
+    # Pahsimeroi array (PAHH)...
+    UpperSalmon[i,3] ~ dbern(PAHH_p * catexp_UpSalm[i, 2])
 
-  # East Fork Salmon River trap array (SALEFT)...
-  UpperSalmon[i,4] ~ dbern(SALEFT_p * catexp_UpSalm[i, 3])
+    # East Fork Salmon River trap array (SALEFT)...
+    UpperSalmon[i,4] ~ dbern(SALEFT_p * catexp_UpSalm[i, 3])
 
-  # Yankee Fork array (YKF)...
-  UpperSalmon[i,5] ~ dbern(YFKB0_p * catexp_UpSalm[i, 4])
-  UpperSalmon[i,6] ~ dbern(YFKA0_p * catexp_UpSalm[i, 4])
+    # Yankee Fork array (YKF)...
+    UpperSalmon[i,5] ~ dbern(YFKB0_p * catexp_UpSalm[i, 4])
+    UpperSalmon[i,6] ~ dbern(YFKA0_p * catexp_UpSalm[i, 4])
 
-  # Valley Creek arrays (VC2 & VC1)...
-  UpperSalmon[i,7] ~ dbern(VC2_p * catexp_UpSalm[i, 5])
-  UpperSalmon[i,8] ~ dbern(VC1_p * catexp_UpSalm[i, 5])
+    # Valley Creek arrays (VC2 & VC1)...
+    UpperSalmon[i,7] ~ dbern(VC2_p * catexp_UpSalm[i, 5])
+    UpperSalmon[i,8] ~ dbern(VC1_p * catexp_UpSalm[i, 5])
 
-  # Sawtooth trap (STL or SAWT)...
-  UpperSalmon[i,9] ~ dbern(STL_p * catexp_UpSalm[i, 6])
+    # Sawtooth trap (STL or SAWT)...
+    UpperSalmon[i,9] ~ dbern(STL_p * catexp_UpSalm[i, 6])
 
   } # ends the ifish loop started at the top of this section
 
