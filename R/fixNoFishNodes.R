@@ -8,8 +8,8 @@
 #' @param file_name name (with file path) to save the model as.
 #' @param proc_ch capture history as returned by one of the \code{processCapHist} family of functions in \code{PITcleanr} package, which has then been verified by a user and all blank UserProcStatus entries have been completed.
 #' @param node_order output of function \code{createNodeOrder}
-#' @param root_site initial tagging site
 #'
+#' @import dplyr stringr
 #' @export
 #' @return NULL
 #' @examples fixNoFishNodes()
@@ -21,7 +21,8 @@ fixNoFishNodes = function(init_file = NULL,
 
   stopifnot(!is.null(init_file) |
               !is.null(file_name) |
-              !is.null(proc_ch))
+              !is.null(proc_ch) |
+              !is.null(node_order))
 
   # which nodes had observations?
   seenNodes = proc_ch %>%
@@ -33,6 +34,15 @@ fixNoFishNodes = function(init_file = NULL,
 
   # which nodes did not?
   unseenNodes = unique(node_order$Node)[!unique(node_order$Node) %in% seenNodes]
+
+  # convert to site codes
+  seenSites = str_replace(seenNodes, 'B0$', '') %>%
+    str_replace('A0$', '') %>%
+    unique()
+
+  unseenSites = str_replace(unseenNodes, 'B0$', '') %>%
+    str_replace('A0$', '') %>%
+    unique()
 
 
   # read in basic model file
@@ -53,6 +63,11 @@ fixNoFishNodes = function(init_file = NULL,
   if(length(unseenNodes) > 0) {
     cat(paste('Fixed', paste(unseenNodes, collapse = ', '), 'at 0% detection probability, because no tags were observed there.\n'))
   }
+
+  # for(site in unseenSites) {
+  #   if(sum(grepl(paste0('phi_', tolower(site)), mode_file)) > 0)
+  #     mode_file[grep(paste0('phi_', tolower(site), ' ~'))] = paste0('phi_', tolower(site), '_p <- 0 # no detections here or upstream')
+  # }
 
   # check if some sites only saw fish at single array (i.e. double array not installed that year)
   # if that site is the furtherest upstream, fix the detection probability at 100%
@@ -79,7 +94,7 @@ fixNoFishNodes = function(init_file = NULL,
               grepl(site, Node)) %>%
        nrow() > 0) {
 
-      mod_file[grep(paste0(seenNodes[grepl(site, seenNodes)], '_p'), mod_file)[1]] = paste0(seenNodes[grepl(site, seenNodes)], '_p <- 1 # Single array, no upstream detections')
+      mod_file[grep(paste0(seenNodes[grepl(site, seenNodes)], '_p'), mod_file)[1]] = paste0('  ', seenNodes[grepl(site, seenNodes)], '_p <- 1 # Single array, no upstream detections')
 
       cat(paste('\nFixed', site, 'at 100% detection probability, because it is a single array with no upstream detections.\n'))
 

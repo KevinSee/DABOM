@@ -15,8 +15,6 @@ fixNoFishNodes(init_file = NULL, file_name = NULL, proc_ch = NULL,
 \item{proc_ch}{capture history as returned by one of the \code{processCapHist} family of functions in \code{PITcleanr} package, which has then been verified by a user and all blank UserProcStatus entries have been completed.}
 
 \item{node_order}{output of function \code{createNodeOrder}}
-
-\item{root_site}{initial tagging site}
 }
 \description{
 Takes the basic JAGS model and modifies it based on particular observations. Specifically, it fixes the detection probability of all nodes that had no observations to 0.
