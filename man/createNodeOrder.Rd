@@ -5,7 +5,7 @@
 \title{Node Order}
 \usage{
 createNodeOrder(valid_paths = NULL, configuration = NULL,
-  parent_child = NULL, site_df = NULL)
+  parent_child = NULL, site_df = NULL, step_num = 1)
 }
 \arguments{
 \item{valid_paths}{a dataframe created by the \code{getValidPaths} function in the \code{PITcleanr} package.}
@@ -13,6 +13,10 @@ createNodeOrder(valid_paths = NULL, configuration = NULL,
 \item{configuration}{a configuration file built by \code{buildConfig} in the \code{PITcleanr} package.}
 
 \item{parent_child}{is a data frame created by \code{createParentChildDf} in the \code{PITcleanr} package.}
+
+\item{site_df}{a data frame created by one of the \code{write___NodeNetwork} functions in the \code{PITcleanr} package.}
+
+\item{step_num}{in the \code{site_df} data frame, which step should be used to group various nodes? Default value is 1.}
 }
 \description{
 Based on valid paths, returns a dataframe with a row for each node, showing the path to get to that node, and how many nodes a tag must pass to get there.
