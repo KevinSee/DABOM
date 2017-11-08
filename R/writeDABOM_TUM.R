@@ -8,7 +8,7 @@
 #'
 #' @export
 #' @return NULL
-#' @examples writeJAGSmodel()
+#' @examples writeJAGSmodel_TUM()
 
 writeDABOM_TUM = function(file_name = NULL) {
 

@@ -13,7 +13,7 @@ writeDABOM_TUM(file_name = NULL)
 This writes the overall JAGS model for Tumwater DABOM as a text file. It can then be modified depending on the observations for a particular valid tag list.
 }
 \examples{
-writeJAGSmodel()
+writeJAGSmodel_TUM()
 }
 \author{
 Kevin See
