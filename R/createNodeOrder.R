@@ -47,7 +47,10 @@ createNodeOrder = function(valid_paths = NULL,
               by = c('Node')) %>%
     filter(!is.na(Path)) %>%
     left_join(configuration %>%
-                select(Node, RKM, RKMTotal) %>%
+                select(SiteID, Node, matches('RKM')) %>%
+                rowwise() %>%
+                filter(grepl(SiteID, Node)) %>%
+                ungroup() %>%
                 distinct())
 
   init_brch = node_order %>%
