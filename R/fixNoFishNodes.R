@@ -64,21 +64,6 @@ fixNoFishNodes = function(init_file = NULL,
     cat(paste('Fixed', paste(unseenNodes, collapse = ', '), 'at 0% detection probability, because no tags were observed there.\n'))
   }
 
-  # for(site in unseenSites) {
-  #   if(sum(grepl(paste0('phi_', tolower(site)), mode_file)) > 0)
-  #     mode_file[grep(paste0('phi_', tolower(site), ' ~'))] = paste0('phi_', tolower(site), '_p <- 0 # no detections here or upstream')
-  # }
-
-  # check if some sites only saw fish at single array (i.e. double array not installed that year)
-  # if that site is the furtherest upstream, fix the detection probability at 100%
-  seenSites = str_replace(seenNodes, 'B0$', '') %>%
-    str_replace('A0$', '') %>%
-    unique()
-
-  unseenSites = str_replace(unseenNodes, 'B0$', '') %>%
-    str_replace('A0$', '') %>%
-    unique()
-
   singleSites = intersect(seenSites, unseenSites)
 
   for(site in singleSites) {
@@ -101,6 +86,12 @@ fixNoFishNodes = function(init_file = NULL,
     }
 
   }
+
+  # if no observations at some terminal nodes, fix the movement probability past those nodes to 0
+  for(site in intersect(c('tuch', 'web', 'josephc', 'lakec', 'johnsc', 'str', 'hbc', 'btu'), tolower(unseenSites))) {
+    mod_file[grep(paste0('phi_', site, ' ~'), mod_file)] = paste0('  phi_', site, ' <- 0 # no upstream detections')
+  }
+
 
   writeLines(mod_file, mod_conn_new)
   close(mod_conn_new)
