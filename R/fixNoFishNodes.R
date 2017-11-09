@@ -95,6 +95,10 @@ fixNoFishNodes = function(init_file = NULL,
 
   }
 
+  if('STR' %in% unseenSites & 'KRS' %in% seenSites) {
+    mod_file[grep('KRS_p ~')] = 'KRS_p <- 1 # Single array, no upstream detections'
+  }
+
 
   writeLines(mod_file, mod_conn_new)
   close(mod_conn_new)
