@@ -869,23 +869,23 @@ model{
     #------------------------------------
     #first do main stem (if it is seen anywhere in mainstem OR tribs in SFS -- thus the max statement)
     # first array (SFG)
-    SFSalmon[i,2] ~ dbern(SFG_p * max(catexp_SFS[i,1:(n.pops.SFS)]))
+    SFSalmon[i,1] ~ dbern(SFG_p * max(catexp_SFS[i,1:(n.pops.SFS)]))
 
     #  Zena Creek array (ZEN)
-    SFSalmon[i,3] ~ dbern(ZENB0_p * catexp_SFS[i, 2])
-    SFSalmon[i,4] ~ dbern(ZENA0_p * catexp_SFS[i, 2])
-    SFSalmon[i,5] ~ dbern(LAKEC_p * z_lakec[i])
+    SFSalmon[i,2] ~ dbern(ZENB0_p * catexp_SFS[i, 2])
+    SFSalmon[i,3] ~ dbern(ZENA0_p * catexp_SFS[i, 2])
+    SFSalmon[i,4] ~ dbern(LAKEC_p * z_lakec[i])
 
     # East Fork South Fork array (ESS)
-    SFSalmon[i,6] ~ dbern(ESSB0_p * catexp_SFS[i, 3])
-    SFSalmon[i,7] ~ dbern(ESSA0_p * catexp_SFS[i, 3])
+    SFSalmon[i,5] ~ dbern(ESSB0_p * catexp_SFS[i, 3])
+    SFSalmon[i,6] ~ dbern(ESSA0_p * catexp_SFS[i, 3])
     # upstream of ESS, at Johnson Creek weir
-    SFSalmon[i,8] ~ dbern( JOHNSC_p * z_johnsc[i])
+    SFSalmon[i,7] ~ dbern( JOHNSC_p * z_johnsc[i])
 
     # Krassel Creek array (KRS)
-    SFSalmon[i,9] ~ dbern( KRS_p * catexp_SFS[i, 4] )
+    SFSalmon[i,8] ~ dbern( KRS_p * catexp_SFS[i, 4] )
     # upstream of KRS, at McCall hatchery (STR)
-    SFSalmon[i,1] ~ dbern( STR_p * z_str[i] )
+    SFSalmon[i,9] ~ dbern( STR_p * z_str[i] )
 
   } #ends the ifish loop started at the top of this section
 
