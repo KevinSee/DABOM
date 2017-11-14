@@ -91,12 +91,12 @@ fixNoFishNodes = function(init_file = NULL,
   for(site in intersect(c('tuch', 'web', 'josephc', 'lakec', 'johnsc', 'str', 'hbc', 'btu'), tolower(unseenSites))) {
     mod_file[grep(paste0('phi_', site, ' ~'), mod_file)] = paste0('  phi_', site, ' <- 0 # no upstream detections')
 
-    cat(paste('\nFixed upstream movement past site', site, 'to 0 because no detections there.\n'))
+    cat(paste('\nFixed upstream movement past site', toupper(site), 'to 0 because no detections there.\n'))
 
   }
 
   if('STR' %in% unseenSites & 'KRS' %in% seenSites) {
-    mod_file[grep('KRS_p ~')] = 'KRS_p <- 1 # Single array, no upstream detections'
+    mod_file[grep('KRS_p ~', mod_file)] = 'KRS_p <- 1 # Single array, no upstream detections'
   }
 
 
