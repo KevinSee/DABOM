@@ -6,7 +6,7 @@
 #'
 #' @param dabom_list output of \code{createDABOMcapHist} with parameter split_matrics set to \code{TRUE}.
 #'
-#' @import dplyr purrr
+#' @import dplyr
 #' @export
 #' @return NULL
 #' @examples createJAGSinputs_LGD()
