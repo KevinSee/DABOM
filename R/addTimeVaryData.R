@@ -13,7 +13,7 @@
 #' @param last_strata_min minimum length (in days) for the final strata. Default value is 3.
 
 #'
-#' @import STADEM
+#' @importFrom STADEM weeklyStrata
 #' @export
 #' @return NULL
 #' @examples addTimeVaryData()
