@@ -5,7 +5,7 @@
 \title{Create Dirichlet vector}
 \usage{
 createDirichletVector(n_branches = NULL, init_vals = NULL,
-  initial_one = F, final_one = F)
+  initial_one = T, final_one = F)
 }
 \arguments{
 \item{n_branches}{How many paths could a tag travel from this branching node?}
