@@ -4,7 +4,10 @@
 \alias{setSavedParams_LGD}
 \title{Set Saved Parameters - LGD}
 \usage{
-setSavedParams_LGD()
+setSavedParams_LGD(time_varying = F)
+}
+\arguments{
+\item{time_varying}{Should the initial movement probabilities be time-varying? Default value is \code{FALSE}}
 }
 \description{
 Returns a character vector of parameters to be saved by JAGS in the Lower Granite version of DABOM
