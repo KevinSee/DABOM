@@ -11,7 +11,7 @@
 
 setBranchNums_LGD = function() {
 
-  n_branch_list = list(n.pops.main = 26,           # number of main branches
+  n_branch_list = list(n.pops.main = 27,           # number of main branches
                        n.pops.Asotin = c(3,3),     # number of branches after ACM, then number of branches after ACB
                        n.pops.Lapwai = 3,				   # number of bins in Lapwai branch
                        n.pops.Potlatch = c(4,3,3), # number of bins in Potlatch branch, then above KHS, then above HLM

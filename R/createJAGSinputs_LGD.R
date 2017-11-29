@@ -22,7 +22,7 @@ createJAGSinputs_LGD = function(dabom_list = NULL) {
   init_val_func = setInitialValues_LGD(dabom_list)
   init_mats = init_val_func()
 
-  dirich_vecs = list(main_dirch_vec = createDirichletVector(n_branch_list$n.pops.main + 1,
+  dirich_vecs = list(main_dirch_vec = createDirichletVector(n_branch_list$n.pops.main,
                                                             table(init_mats$a),
                                                             initial_one = F,
                                                             final_one = T),
