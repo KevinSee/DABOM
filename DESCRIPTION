@@ -4,10 +4,11 @@ Version: 0.1.0
 Authors@R: person("Kevin", "See", email = "Kevin@qcinc.org", role = c("aut", "cre"))
 Maintainer: Kevin See <Kevin@qcinc.org>
 Description: Takes verified output from PITcleanr package and runs DABOM, a hierarchical patch-occupancy model to estimate adult salmonid escapement above a tagging location.
-Depends: R (>= 3.4.1)
+Depends: 
+  R (>= 3.4.1),
+  dplyr(>= 0.7.0)
 License: GPL-2
 Imports:
-  dplyr(>= 0.7.0),
   lubridate(>= 1.6.0),
   stringr(>= 1.2.0),
   forcats(>= 0.2.0),
