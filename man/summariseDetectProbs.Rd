@@ -4,12 +4,15 @@
 \alias{summariseDetectProbs}
 \title{Summarise Detection Probabilities}
 \usage{
-summariseDetectProbs(dabom_mod = NULL, cred_int_prob = 0.95)
+summariseDetectProbs(dabom_mod = NULL, capHist_proc = NULL,
+  cred_int_prob = 0.95)
 }
 \arguments{
 \item{dabom_mod}{An MCMC.list, where the detection parameter names all end with "\code{_p}".}
 
-\item{cred_int_prob}{A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95%.}
+\item{capHist_proc}{Dataframe with the same format as that returned by \code{processCapHist_LGD}, under the name \code{ProcCapHist}. This is the data fed into DABOM as observations.}
+
+\item{cred_int_prob}{A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95\\%.}
 }
 \description{
 Extracts the MCMC posteriors of detection probabilities for a DABOM model, and summarises the results.
