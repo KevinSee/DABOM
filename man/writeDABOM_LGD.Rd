@@ -4,12 +4,12 @@
 \alias{writeDABOM_LGD}
 \title{Write Lower Granite Dam JAGS model}
 \usage{
-writeDABOM_LGD(file_name = NULL, time_varying = F)
+writeDABOM_LGD(file_name = NULL, time_varying = TRUE)
 }
 \arguments{
 \item{file_name}{name (with file path) to save the model as}
 
-\item{time_varying}{Should the initial movement probabilities be time-varying? Default value is \code{FALSE}}
+\item{time_varying}{Should the initial movement probabilities be time-varying? Default value is \code{TRUE}}
 }
 \description{
 This writes the overall JAGS model for LGR DABOM as a text file. It can then be modified depending on the observations for a particular valid tag list.

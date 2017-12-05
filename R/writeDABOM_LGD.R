@@ -5,14 +5,14 @@
 #' @author Kevin See
 #'
 #' @param file_name name (with file path) to save the model as
-#' @param time_varying Should the initial movement probabilities be time-varying? Default value is \code{FALSE}
+#' @param time_varying Should the initial movement probabilities be time-varying? Default value is \code{TRUE}
 #'
 #' @export
 #' @return NULL
 #' @examples writeJAGSmodel_LGD()
 
 writeDABOM_LGD = function(file_name = NULL,
-                          time_varying = F) {
+                          time_varying = TRUE) {
 
   if(is.null(file_name)) file_name = 'LGD_DABOM.txt'
 
