@@ -4,10 +4,12 @@
 \alias{compileTransProbs_LGD}
 \title{Compile Transition Probabilities - LGD}
 \usage{
-compileTransProbs_LGD(dabom_mod = NULL)
+compileTransProbs_LGD(dabom_mod = NULL, time_varying = TRUE)
 }
 \arguments{
 \item{dabom_mod}{An MCMC.list}
+
+\item{time_varying}{Should the initial movement probabilities be time-varying? Default value is \code{TRUE}}
 }
 \description{
 Extracts the MCMC posteriors of transition probabilities for a DABOM model, and multiplies them appropriately. This function is specific to the Lower Granite version of DABOM.

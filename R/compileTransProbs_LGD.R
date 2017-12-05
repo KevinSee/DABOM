@@ -5,13 +5,15 @@
 #' @author Kevin See
 #'
 #' @param dabom_mod An MCMC.list
+#' @param time_varying Should the initial movement probabilities be time-varying? Default value is \code{TRUE}
 #'
 #' @import dplyr tidyr
 #' @export
 #' @return NULL
 #' @examples compileTransProbs_LGD()
 
-compileTransProbs_LGD = function(dabom_mod = NULL) {
+compileTransProbs_LGD = function(dabom_mod = NULL,
+                                 time_varying = TRUE) {
 
   stopifnot(!is.null(dabom_mod))
 
@@ -23,6 +25,19 @@ compileTransProbs_LGD = function(dabom_mod = NULL) {
     # remove detection parameters
     select(-matches('_p$'))
 
+  # drop first branch tranistions if time-varying
+  if(time_varying) {
+    first_week_pos = grep('p_pop_main\\[1,', names(trans_mat))
+
+    # force initial transitions to all be 1, for multiplication purposes
+    trans_mat = trans_mat %>%
+      mutate_at(vars(first_week_pos),
+                funs(if_else(. == 0, 0, 1)))
+
+    trans_mat = trans_mat %>%
+      dplyr::select(-matches('p_pop_main'), first_week_pos)
+  }
+
   # change names of paramters
   names(trans_mat) = renameTransParams_LGD(names(trans_mat))
 
@@ -32,6 +47,7 @@ compileTransProbs_LGD = function(dabom_mod = NULL) {
     dplyr::mutate(past_MTR = Tucannon * past_MTR,
                   past_UTR = past_MTR * past_UTR,
                   past_TUCH = past_UTR * past_TUCH) %>%
+    dplyr::rename(past_TUCH_TFH = past_TUCH) %>%
     dplyr::mutate_at(vars(Asotin_bb, GEORGC, past_ASOTIC),
                      funs(. * Asotin)) %>%
     dplyr::mutate(past_ACB = past_ASOTIC * past_ACB) %>%
@@ -77,6 +93,7 @@ compileTransProbs_LGD = function(dabom_mod = NULL) {
     tidyr::gather(param, value, -CHAIN, -ITER) %>%
     dplyr::group_by(CHAIN, param) %>%
     dplyr::mutate(iter = 1:n()) %>%
+    dplyr::ungroup() %>%
     dplyr::select(chain = CHAIN,
                   iter,
                   param,
