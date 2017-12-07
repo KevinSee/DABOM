@@ -942,9 +942,6 @@ model{
   pMat_LowLemhi[2,1:n.pops.Lemhi[1]] <- p_pop_LowLemhi # when in trib, >0 probs of being in sub areas
   pMat_LowLemhi[2,(n.pops.Lemhi[1]+1)] <- 0 #set the "not there" bin to prob = 0
 
-  # probability of moving past HBC
-  phi_hbc ~ dbeta(1,1)
-
   for (i in 1:n.fish) {
     #------------------------------------
     # TRUE STATE part in Lower Lemhi
@@ -954,8 +951,6 @@ model{
     for (j in 1:(n.pops.Lemhi[1]+1))	{ # now expand the dcat into matrix of zeros and ones
       catexp_LowLem[i,j] <- equals(a_LowLem[i],j)
     }
-
-    z_hbc[i] ~ dbern(catexp_LowLem[i, 6] * phi_hbc)
 
     #------------------------------------
     # OBSERVATION part in Lower Lemhi
@@ -984,12 +979,10 @@ model{
     # Hayden array (HYC)...
     Lemhi[i,11] ~ dbern(HYCB0_p * catexp_LowLem[i, 6])
     Lemhi[i,12] ~ dbern(HYCA0_p * catexp_LowLem[i, 6])
-    # past HBC
-    Lemhi[i,13] ~ dbern(HBC_p * z_hbc[i])
 
     # Upper Lemhi (LRW)
-    Lemhi[i,14] ~ dbern(LRWB0_p * catexp_LowLem[i, 7])
-    Lemhi[i,15] ~ dbern(LRWA0_p * catexp_LowLem[i, 7])
+    Lemhi[i,13] ~ dbern(LRWB0_p * catexp_LowLem[i, 7])
+    Lemhi[i,14] ~ dbern(LRWA0_p * catexp_LowLem[i, 7])
 
   } # ends the ifish loop started at the top of this section
 
@@ -1034,40 +1027,40 @@ model{
     #first do main stem (if it is seen anywhere in mainstem OR tribs in Upper Lemhi -- thus the max statement)
 
     # Little Springs array (LLS)...
-    Lemhi[i,16] ~ dbern(LLSB0_p * catexp_UpLem[i, 2])
-    Lemhi[i,17] ~ dbern(LLSA0_p * catexp_UpLem[i, 2])
+    Lemhi[i,15] ~ dbern(LLSB0_p * catexp_UpLem[i, 2])
+    Lemhi[i,16] ~ dbern(LLSA0_p * catexp_UpLem[i, 2])
 
     # Big Eightmile (LB8)
-    Lemhi[i,18] ~ dbern(LB8B0_p * catexp_UpLem[i, 3])
-    Lemhi[i,19] ~ dbern(LB8A0_p * catexp_UpLem[i, 3])
+    Lemhi[i,17] ~ dbern(LB8B0_p * catexp_UpLem[i, 3])
+    Lemhi[i,18] ~ dbern(LB8A0_p * catexp_UpLem[i, 3])
 
     # Big Springs (LBS)
-    Lemhi[i,20] ~ dbern(LBSB0_p * catexp_UpLem[i, 4])
-    Lemhi[i,21] ~ dbern(LBSA0_p * catexp_UpLem[i, 4])
+    Lemhi[i,19] ~ dbern(LBSB0_p * catexp_UpLem[i, 4])
+    Lemhi[i,20] ~ dbern(LBSA0_p * catexp_UpLem[i, 4])
 
     # Lee Creek (LCL)
-    Lemhi[i,22] ~ dbern(LCLB0_p * catexp_UpLem[i, 5])
-    Lemhi[i,23] ~ dbern(LCLA0_p * catexp_UpLem[i, 5])
+    Lemhi[i,21] ~ dbern(LCLB0_p * catexp_UpLem[i, 5])
+    Lemhi[i,22] ~ dbern(LCLA0_p * catexp_UpLem[i, 5])
 
     # Big Timber array (BTC)...
-    Lemhi[i,24] ~ dbern(BTLB0_p * catexp_UpLem[i, 6])
-    Lemhi[i,25] ~ dbern(BTLA0_p * catexp_UpLem[i, 6])
+    Lemhi[i,23] ~ dbern(BTLB0_p * catexp_UpLem[i, 6])
+    Lemhi[i,24] ~ dbern(BTLA0_p * catexp_UpLem[i, 6])
 
-    Lemhi[i,26] ~ dbern(BTMB0_p * z_btm[i])
-    Lemhi[i,27] ~ dbern(BTMA0_p * z_btm[i])
+    Lemhi[i,25] ~ dbern(BTMB0_p * z_btm[i])
+    Lemhi[i,26] ~ dbern(BTMA0_p * z_btm[i])
 
-    Lemhi[i,28] ~ dbern(BTUB0_p * z_btu[i])
-    Lemhi[i,29] ~ dbern(BTUA0_p * z_btu[i])
+    Lemhi[i,27] ~ dbern(BTUB0_p * z_btu[i])
+    Lemhi[i,28] ~ dbern(BTUA0_p * z_btu[i])
 
     # Canyon array (CAC)...
-    Lemhi[i,30] ~ dbern(CACB0_p * catexp_UpLem[i, 7])
-    Lemhi[i,31] ~ dbern(CACA0_p * catexp_UpLem[i, 7])
+    Lemhi[i,29] ~ dbern(CACB0_p * catexp_UpLem[i, 7])
+    Lemhi[i,30] ~ dbern(CACA0_p * catexp_UpLem[i, 7])
 
     # Eighteen Mile / Hawley (18M, HEC)
-    Lemhi[i,32] ~ dbern(X18MB0_p * catexp_UpLem[i, 8])
-    Lemhi[i,33] ~ dbern(X18MA0_p * catexp_UpLem[i, 8])
-    Lemhi[i,34] ~ dbern(HECB0_p * catexp_UpLem[i, 8])
-    Lemhi[i,35] ~ dbern(HECA0_p * catexp_UpLem[i, 8])
+    Lemhi[i,31] ~ dbern(X18MB0_p * catexp_UpLem[i, 8])
+    Lemhi[i,32] ~ dbern(X18MA0_p * catexp_UpLem[i, 8])
+    Lemhi[i,33] ~ dbern(HECB0_p * catexp_UpLem[i, 8])
+    Lemhi[i,34] ~ dbern(HECA0_p * catexp_UpLem[i, 8])
 
   } # ends the ifish loop started at the top of this section
 
