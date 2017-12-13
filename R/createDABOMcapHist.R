@@ -53,12 +53,12 @@ createDABOMcapHist = function(proc_ch = NULL,
     full_join(proc_ch %>%
                 select(TagID, TrapDate) %>%
                 distinct()) %>%
-    select(TagID, TrapDate, one_of(node_order$Node), everything())
+    select(TagID, TrapDate, one_of(node_order$Node[!(node_order$Node %in% root_site)]), everything())
 
-  if(sum(!node_order$Node %in% names(dabom_df)) > 0) {
+  if(sum(!node_order$Node[!(node_order$Node %in% root_site)] %in% names(dabom_df)) > 0) {
     dabom_df[,node_order$Node[!node_order$Node %in% names(dabom_df)]] = NA
     dabom_df = dabom_df %>%
-      select(TagID, TrapDate, one_of(node_order$Node), everything())
+      select(TagID, TrapDate, one_of(node_order$Node[!(node_order$Node %in% root_site)]), everything())
   }
 
   # replace all NAs with 0s
