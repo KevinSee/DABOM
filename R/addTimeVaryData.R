@@ -14,6 +14,7 @@
 
 #'
 #' @importFrom STADEM weeklyStrata
+#' @import lubridate
 #' @export
 #' @return NULL
 #' @examples addTimeVaryData()
