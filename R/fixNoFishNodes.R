@@ -88,7 +88,7 @@ fixNoFishNodes = function(init_file = NULL,
   }
 
   # if no observations at some terminal nodes, fix the movement probability past those nodes to 0
-  for(site in intersect(c('tuch', 'web', 'josephc', 'lakec', 'johnsc', 'str', 'hbc', 'btu'), tolower(unseenSites))) {
+  for(site in intersect(c('tuch', 'web', 'josephc', 'lakec', 'johnsc', 'str', 'btu'), tolower(unseenSites))) {
     mod_file[grep(paste0('phi_', site, ' ~'), mod_file)] = paste0('  phi_', site, ' <- 0 # no upstream detections')
 
     cat(paste('\nFixed upstream movement past site', toupper(site), 'to 0 because no detections there.\n'))

@@ -301,7 +301,7 @@ setInitialValues_LGD = function(dabom_list = NULL) {
     apply(1, max)
   # Hayden
   a_LowLem_init[,6] = dabom_list$Lemhi %>%
-    dplyr::select(matches('HYC'), HBC) %>%
+    dplyr::select(matches('HYC')) %>%
     apply(1, max)
   # LRW
   a_LowLem_init[,7] = dabom_list$Lemhi %>%
