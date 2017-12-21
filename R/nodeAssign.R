@@ -64,12 +64,17 @@ nodeAssign <- function(valid_tags, observation, configuration, truncate = FALSE)
   }
 
   obs_df <- obs %>%
+    mutate(ObsDate = ifelse(is.na(`Event Release Date Time Value`),`Event Date Time Value`,
+                                       `Event Release Date Time Value`),
+           `Event Date Time Value` = as.POSIXct(`Event Date Time Value`, format = '%m/%d/%Y %H:%M'),
+           `Event Release Date Time Value` = as.POSIXct(`Event Release Date Time Value`, format = '%m/%d/%Y %H:%M'),
+          ObsDate = as.POSIXct(ObsDate, format = '%m/%d/%Y %H:%M')) %>%
     select(TagID = `Tag Code`,
-           ObsDate = ifelse(is.na(`Event Release Date Time Value`),`Event Date Time Value`,
-                            `Event Release Date Time Value`),
+           ObsDate,
            SiteID = `Event Site Code Value`,
            AntennaID = `Antenna ID`,
-           ConfigID = `Antenna Group Configuration Value`) %>%
+           ConfigID = `Antenna Group Configuration Value`,
+           everything()) %>%
     left_join(select(validtag, TagID, TrapDate),
               by = c('TagID')) %>%
     mutate(ValidDate = ifelse(ObsDate > TrapDate, TRUE, FALSE)) #%>%
