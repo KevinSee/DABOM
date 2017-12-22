@@ -1,14 +1,24 @@
 Package: DABOM
-Type: Package
-Title: What the Package Does (Title Case)
+Title: Runs DABOM model
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Authors@R: person("Kevin", "See", email = "Kevin@qcinc.org", role = c("aut", "cre"))
+Maintainer: Kevin See <Kevin@qcinc.org>
+Description: Takes verified output from PITcleanr package and runs DABOM, a hierarchical patch-occupancy model to estimate adult salmonid escapement above a tagging location.
+Depends: 
+  R (>= 3.4.1),
+  dplyr(>= 0.7.0)
+License: GPL-2
+Imports:
+  lubridate(>= 1.6.0),
+  stringr(>= 1.2.0),
+  forcats(>= 0.2.0),
+  tidyr(>= 0.7.2),
+  jagsUI(>= 1.4.4),
+  MCMCglmm(>= 2.24),
+  coda(>= 0.19-1),
+  STADEM(>= 0.1.0)
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
