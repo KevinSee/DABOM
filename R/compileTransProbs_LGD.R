@@ -82,8 +82,7 @@ compileTransProbs_LGD = function(dabom_mod = NULL,
                   past_STR = past_KRS * past_STR) %>%
     dplyr::mutate_at(vars(Lemhi_bb:past_LRW),
                      funs(. * Lemhi)) %>%
-    dplyr::mutate(past_HBC = past_HYC * past_HBC) %>%
-    dplyr::mutate_at(vars(LRW_bb:past_18M),
+    dplyr::mutate_at(vars(LRW_bb:past_HEC),
                      funs(. * past_LRW)) %>%
     dplyr::mutate(past_BTM = past_BTC * past_BTM,
                   past_BTU = past_BTM * past_BTU) %>%

@@ -48,13 +48,13 @@ setInitialValues_LGD = function(dabom_list = NULL) {
 
   # Tucannon
   z_mtr_init = dabom_list$Tucannon %>%
-    dplyr::select(MTR:TUCH_TFH) %>%
+    dplyr::select(MTR:TUCH) %>%
     apply(1, max)
   z_utr_init = dabom_list$Tucannon %>%
-    dplyr::select(UTR:TUCH_TFH) %>%
+    dplyr::select(UTR:TUCH) %>%
     apply(1, max)
   z_tuch_init = dabom_list$Tucannon %>%
-    dplyr::select(TUCH_TFH) %>%
+    dplyr::select(TUCH) %>%
     apply(1, max)
 
   # Asotin
@@ -339,7 +339,7 @@ setInitialValues_LGD = function(dabom_list = NULL) {
     apply(1, max)
   # 18 mile / Hawley
   a_UpLem_init[,8] = dabom_list$Lemhi %>%
-    dplyr::select(X18MB0:HECA0) %>%
+    dplyr::select(matches('HEC')) %>%
     apply(1, max)
   # Upper Lemhi bb
   a_UpLem_init[,1] = ifelse(apply(a_UpLem_init[,-1], 1, max) == 0,
