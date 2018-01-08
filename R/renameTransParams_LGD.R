@@ -30,7 +30,7 @@ renameTransParams_LGD = function(param_vec = NULL) {
   param_vec[grep('p_pop_UppGR', param_vec)] = c('GrandeRonde_bb', 'CATHEW', 'GRANDW')
   param_vec[grep('p_pop_SFS', param_vec)] = c('SFSalmon_bb', 'past_ZEN', 'past_ESS', 'past_KRS')
   param_vec[grep('p_pop_LowLemhi', param_vec)] = c('Lemhi_bb', 'past_BHC', 'past_WPC', 'past_KEN', 'past_AGC', 'past_HYC', 'past_LRW')
-  param_vec[grep('p_pop_UpLemhi', param_vec)] = c('LRW_bb', 'past_LLS', 'past_LB8', 'past_LBS', 'past_LCL', 'past_BTC', 'past_CAC', 'past_18M')
+  param_vec[grep('p_pop_UpLemhi', param_vec)] = c('LRW_bb', 'past_LLS', 'past_LB8', 'past_LBS', 'past_LCL', 'past_BTC', 'past_CAC', 'past_HEC')
   param_vec[grep('p_pop_UpSalm', param_vec)] = c('USI_bb', 'PAHH', 'SALEFT', 'past_YFK', 'past_VC2', 'past_STL')
 
   return(param_vec)

@@ -32,7 +32,7 @@ calcRepGrpEscape_LGD(dabom_mod = NULL, stadem_mod = NULL,
 Combines estimates of total escapement from STADEM with transition probabilities from DABOM to generate estimates of escapement within pre-defined reporting groups. Currently only works for wild fish.
 }
 \examples{
-calcRepGrpEscape_LGD()
+#calcRepGrpEscape_LGD()
 }
 \author{
 Kevin See

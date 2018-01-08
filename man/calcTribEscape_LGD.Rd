@@ -30,7 +30,7 @@ calcTribEscape_LGD(dabom_mod = NULL, stadem_mod = NULL,
 Combines estimates of total escapement from STADEM with transition probabilities from DABOM to generate estimates of escapement above various detection sites. Currently only works for wild fish.
 }
 \examples{
-calcTribEscape_LGD()
+#calcTribEscape_LGD()
 }
 \author{
 Kevin See

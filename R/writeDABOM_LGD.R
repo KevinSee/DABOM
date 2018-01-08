@@ -37,7 +37,7 @@ model{
   LTR_p ~ dbeta(1,1)
   MTR_p ~ dbeta(1,1)
   UTR_p ~ dbeta(1,1)
-  TUCH_TFH_p <- 1 # assume perfect detection
+  TUCH_p <- 1 # assume perfect detection
 
   ALMOTC_p <- 1 # assume perfect detection
   ALPOWC_p <- 1 # assume perfect detection
@@ -72,8 +72,8 @@ model{
   LC2_p ~ dbeta(1,1)
 
   SC1_p ~ dbeta(1,1)
-  SC2_p ~ dbeta(1,1)
-  above_SC2_p ~ dbeta(1,1)
+  SC2B0_p ~ dbeta(1,1)
+  SC2A0_p ~ dbeta(1,1)
 
   CLC_p ~ dbeta(1,1)
   KOOS_p ~ dbeta(1,1)
@@ -162,7 +162,6 @@ model{
   KENB0_p ~ dbeta(1,1)
   HYCA0_p ~ dbeta(1,1)
   HYCB0_p ~ dbeta(1,1)
-  HBC_p <- 1 # assume perfect detection
   LRWA0_p ~ dbeta(1,1)
   LRWB0_p ~ dbeta(1,1)
   WPCA0_p ~ dbeta(1,1)
@@ -185,8 +184,6 @@ model{
   LBSB0_p ~ dbeta(1,1)
   CACA0_p ~ dbeta(1,1)
   CACB0_p ~ dbeta(1,1)
-  X18MA0_p ~ dbeta(1,1)
-  X18MB0_p ~ dbeta(1,1)
   HECA0_p ~ dbeta(1,1)
   HECB0_p ~ dbeta(1,1)
 
@@ -230,7 +227,7 @@ model{
   # priors for transition probabilities
   phi_mtr ~ dbeta(1,1)  # probability of moving past MTR
   phi_utr ~ dbeta(1,1)  # probability of moving past UTR
-  phi_tuch ~ dbeta(1,1)  # probability of moving past TUCH_TFH
+  phi_tuch ~ dbeta(1,1)  # probability of moving past TUCH
 
   for ( i in 1:n.fish ) {
     #----------------------------
@@ -255,7 +252,7 @@ model{
 
     Tucannon[i,3] ~ dbern(UTR_p * z_utr[i]) # did they go past UTR?
 
-    Tucannon[i,4] ~ dbern(TUCH_TFH_p * z_tuch[i]) # did they go past TUCH & TFH?
+    Tucannon[i,4] ~ dbern(TUCH_p * z_tuch[i]) # did they go past TUCH & TFH?
 
   }  # ends the ifish loop started at the top of this section
 
@@ -680,10 +677,10 @@ model{
     SFClearwater[i,1] ~ dbern( SC1_p * catexp[i,13] )
 
     # second array (SC2)
-    SFClearwater[i,2] ~ dbern( SC2_p * catexp[i,13] )
+    SFClearwater[i,2] ~ dbern( SC2B0_p * catexp[i,13] )
 
-    # other arrays (above_SC2)
-    SFClearwater[i,3] ~ dbern( above_SC2_p * catexp[i,13] )
+    # other arrays (above SC2)
+    SFClearwater[i,3] ~ dbern( SC2A0_p * catexp[i,13] )
 
   }
 
@@ -1056,11 +1053,9 @@ model{
     Lemhi[i,29] ~ dbern(CACB0_p * catexp_UpLem[i, 7])
     Lemhi[i,30] ~ dbern(CACA0_p * catexp_UpLem[i, 7])
 
-    # Eighteen Mile / Hawley (18M, HEC)
-    Lemhi[i,31] ~ dbern(X18MB0_p * catexp_UpLem[i, 8])
-    Lemhi[i,32] ~ dbern(X18MA0_p * catexp_UpLem[i, 8])
-    Lemhi[i,33] ~ dbern(HECB0_p * catexp_UpLem[i, 8])
-    Lemhi[i,34] ~ dbern(HECA0_p * catexp_UpLem[i, 8])
+    # Hawley (HEC)
+    Lemhi[i,31] ~ dbern(HECB0_p * catexp_UpLem[i, 8])
+    Lemhi[i,32] ~ dbern(HECA0_p * catexp_UpLem[i, 8])
 
   } # ends the ifish loop started at the top of this section
 

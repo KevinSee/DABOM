@@ -13,7 +13,7 @@
 #' @importFrom MCMCglmm posterior.mode
 #' @export
 #' @return NULL
-#' @examples calcRepGrpEscape_LGD()
+#' @examples #calcRepGrpEscape_LGD()
 
 calcRepGrpEscape_LGD = function(dabom_mod = NULL,
                                 stadem_mod = NULL,
@@ -35,9 +35,9 @@ calcRepGrpEscape_LGD = function(dabom_mod = NULL,
                             node_order) %>%
     mutate(area = ifelse(NodeOrder == 2,
                          as.character(Group),
-                         ifelse(nchar(SiteID) > 3,
+                         ifelse(nchar(NodeSite) > 3,
                                 lowNode,
-                                paste0('past_', SiteID)))) %>%
+                                paste0('past_', NodeSite)))) %>%
     select(ReportGrp, lowNode, area)
 
   escape_post = calcTribEscape_LGD(dabom_mod,

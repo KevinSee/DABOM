@@ -16,7 +16,7 @@
 #' @import dplyr tidyr stringr
 #' @export
 #' @return NULL
-#' @examples calcTribEscape_LGD()
+#' @examples #calcTribEscape_LGD()
 
 calcTribEscape_LGD = function(dabom_mod = NULL,
                               stadem_mod = NULL,
