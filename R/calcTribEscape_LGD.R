@@ -39,37 +39,37 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
                         iters = T,
                         chains = T) %>%
     as.data.frame() %>%
-    dplyr::tbl_df() %>%
-    dplyr::select(CHAIN, ITER, matches(stadem_param_nm)) %>%
-    dplyr::group_by(CHAIN) %>%
-    dplyr::mutate(ITER = 1:n()) %>%
-    dplyr::ungroup() %>%
+    tbl_df() %>%
+    select(CHAIN, ITER, matches(stadem_param_nm)) %>%
+    group_by(CHAIN) %>%
+    mutate(ITER = 1:n()) %>%
+    ungroup() %>%
     tidyr::gather(param, value, -CHAIN, -ITER) %>%
-    dplyr::mutate(week = stringr::str_extract(param, '[:digit:]+'),
+    mutate(week = stringr::str_extract(param, '[:digit:]+'),
                   week = as.integer(week)) %>%
-    dplyr::group_by(param) %>%
-    dplyr::mutate(iter = 1:n()) %>%
-    dplyr::ungroup() %>%
-    dplyr::select(iter, week, tot_escape = value)
+    group_by(param) %>%
+    mutate(iter = 1:n()) %>%
+    ungroup() %>%
+    select(iter, week, tot_escape = value)
 
   stadem_summ = stadem_df %>%
-    dplyr::group_by(week) %>%
-    dplyr::summarise(mean = mean(tot_escape),
+    group_by(week) %>%
+    summarise(mean = mean(tot_escape),
                      median = median(tot_escape),
-                     mode = MCMCglmm::posterior.mode(tot_escape),
+                     mode = estMode(tot_escape),
                      sd = sd(tot_escape)) %>%
-    dplyr::mutate_at(vars(mean, median, mode, sd),
+    mutate_at(vars(mean, median, mode, sd),
                      funs(ifelse(. < 0, 0, .))) %>%
-    dplyr::mutate(var = sd^2)
+    mutate(var = sd^2)
 
 
   init_trans = compileWeekTransProbs(dabom_mod,
                                      'p_pop_main')
 
   tmp = init_trans %>%
-    dplyr::mutate(param = paste(param, branch, sep = '_')) %>%
-    dplyr::mutate(param = forcats::fct_reorder(param, branch)) %>%
-    dplyr::select(-branch) %>%
+    mutate(param = paste(param, branch, sep = '_')) %>%
+    mutate(param = forcats::fct_reorder(param, branch)) %>%
+    select(-branch) %>%
     tidyr::spread(param, prob)
   names(tmp) = renameTransParams_LGD(names(tmp))
   init_trans = tmp %>%
@@ -78,39 +78,39 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
 
   # get total escapement posteriors to each initial branch
   branch_escape_list = stadem_df %>%
-    dplyr::group_by(week) %>%
-    dplyr::sample_n(size = bootstrap_samp,
+    group_by(week) %>%
+    sample_n(size = bootstrap_samp,
                     replace = T) %>%
-    dplyr::mutate(iter = 1:n()) %>%
-    dplyr::ungroup() %>%
-    dplyr::left_join(init_trans %>%
-                       dplyr::select(week, branch, prob) %>%
-                       dplyr::group_by(week, branch) %>%
-                       dplyr::sample_n(size = bootstrap_samp,
+    mutate(iter = 1:n()) %>%
+    ungroup() %>%
+    left_join(init_trans %>%
+                       select(week, branch, prob) %>%
+                       group_by(week, branch) %>%
+                       sample_n(size = bootstrap_samp,
                                        replace = T) %>%
-                       dplyr::mutate(iter = 1:n()) %>%
-                       dplyr::ungroup(),
+                       mutate(iter = 1:n()) %>%
+                       ungroup(),
                      by = c('iter', 'week')) %>%
-    dplyr::mutate(branch_escape = tot_escape * prob) %>%
-    dplyr::group_by(iter, branch) %>%
-    dplyr::summarise_at(vars(branch_escape),
+    mutate(branch_escape = tot_escape * prob) %>%
+    group_by(iter, branch) %>%
+    summarise_at(vars(branch_escape),
                         funs(sum)) %>%
-    dplyr::ungroup() %>%
+    ungroup() %>%
     split(list(.$branch))
 
   # get rest of transition probabilities
   trans_df = compileTransProbs_LGD(dabom_mod,
                                    time_varying = T) %>%
-    dplyr::select(-chain) %>%
-    dplyr::group_by(param) %>%
-    dplyr::mutate(iter = 1:n()) %>%
-    dplyr::ungroup() %>%
-    dplyr::arrange(param, iter) %>%
+    select(-chain) %>%
+    group_by(param) %>%
+    mutate(iter = 1:n()) %>%
+    ungroup() %>%
+    arrange(param, iter) %>%
     tidyr::spread(param, value) %>%
-    dplyr::sample_n(size = bootstrap_samp,
+    sample_n(size = bootstrap_samp,
                     replace = T) %>%
-    dplyr::mutate(iter = 1:n()) %>%
-    dplyr::ungroup()
+    mutate(iter = 1:n()) %>%
+    ungroup()
 
   site_list = createNodeList(node_order) %>%
     purrr::map(.f = function(x) {
@@ -129,7 +129,7 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
   trib_list = site_list %>%
     purrr::map(.f = function(x) {
       y = trans_df %>%
-        dplyr::select(iter,
+        select(iter,
                       one_of(x),
                       one_of(paste0('past_', x)),
                       one_of(paste0(x, '_bb')))
@@ -139,8 +139,8 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
   # add total escapement to transition probabilities within each main branch
   for(brch in names(trib_list)) {
     trib_list[[brch]] = trib_list[[brch]] %>%
-      dplyr::left_join(branch_escape_list[[brch]] %>%
-                         dplyr::select(-branch),
+      left_join(branch_escape_list[[brch]] %>%
+                         select(-branch),
                        by = 'iter')
   }
 
@@ -150,9 +150,9 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
     purrr::map_df(.id = 'branch',
                   .f = function(x) {
                     x %>%
-                      dplyr::mutate_at(vars(-iter, -branch_escape),
+                      mutate_at(vars(-iter, -branch_escape),
                                        funs(. * branch_escape)) %>%
-                      dplyr::select(-branch_escape) %>%
+                      select(-branch_escape) %>%
                       tidyr::gather(area, escape, -iter)
                   })
 
@@ -169,29 +169,29 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
       coda::as.mcmc() %>%
       coda::HPDinterval(prob = cred_int_prob) %>%
       as.data.frame() %>%
-      dplyr::mutate(area = rownames(.)) %>%
-      dplyr::rename(lowerCI = lower,
+      mutate(area = rownames(.)) %>%
+      rename(lowerCI = lower,
                     upperCI = upper) %>%
-      dplyr::tbl_df() %>%
-      dplyr::select(area, dplyr::everything())
+      tbl_df() %>%
+      select(area, everything())
 
     escape_summ = escape_post %>%
-      dplyr::group_by(area) %>%
-      dplyr::summarise(mean = mean(escape),
+      group_by(area) %>%
+      summarise(mean = mean(escape),
                        median = median(escape),
-                       mode = MCMCglmm::posterior.mode(escape),
+                       mode = estMode(escape),
                        sd = sd(escape),
                        cv = sd / mean) %>%
-      dplyr::mutate_at(vars(mean, median, mode, sd),
+      mutate_at(vars(mean, median, mode, sd),
                        funs(ifelse(. < 0, 0, .))) %>%
-      dplyr::left_join(credInt,
+      left_join(credInt,
                        by = 'area') %>%
-      dplyr::mutate_at(vars(mean, median, mode),
+      mutate_at(vars(mean, median, mode),
                        funs(round)) %>%
-      dplyr::mutate_at(vars(sd, lowerCI, upperCI),
+      mutate_at(vars(sd, lowerCI, upperCI),
                        funs(round),
                        digits = 1) %>%
-      dplyr::mutate_at(vars(cv),
+      mutate_at(vars(cv),
                        funs(round),
                        digits = 3)
 

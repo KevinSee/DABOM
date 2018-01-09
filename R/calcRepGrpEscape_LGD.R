@@ -10,7 +10,6 @@
 #' @import dplyr tidyr
 #' @importFrom coda as.mcmc
 #' @importFrom coda HPDinterval
-#' @importFrom MCMCglmm posterior.mode
 #' @export
 #' @return NULL
 #' @examples #calcRepGrpEscape_LGD()
@@ -47,46 +46,46 @@ calcRepGrpEscape_LGD = function(dabom_mod = NULL,
 
   # estimate the credible interval for each reporting group
   credInt = report_df %>%
-    dplyr::left_join(escape_post) %>%
-    dplyr::group_by(ReportGrp, iter) %>%
-    dplyr::summarise_at(vars(escape),
+    left_join(escape_post) %>%
+    group_by(ReportGrp, iter) %>%
+    summarise_at(vars(escape),
                         funs(sum),
                         na.rm = T) %>%
-    dplyr::ungroup() %>%
-    dplyr::group_by(ReportGrp) %>%
-    dplyr::filter(n_distinct(iter) > 1) %>%
-    dplyr::ungroup() %>%
+    ungroup() %>%
+    group_by(ReportGrp) %>%
+    filter(n_distinct(iter) > 1) %>%
+    ungroup() %>%
     tidyr::spread(ReportGrp, escape) %>%
-    dplyr::select(-iter) %>%
+    select(-iter) %>%
     coda::as.mcmc() %>%
     coda::HPDinterval(prob = cred_int_prob) %>%
     as.data.frame() %>%
-    dplyr::mutate(ReportGrp = rownames(.)) %>%
-    dplyr::rename(lowerCI = lower,
+    mutate(ReportGrp = rownames(.)) %>%
+    rename(lowerCI = lower,
                   upperCI = upper) %>%
-    dplyr::tbl_df() %>%
-    dplyr::select(ReportGrp, dplyr::everything())
+    tbl_df() %>%
+    select(ReportGrp, everything())
 
 
 
   report_summ = report_df %>%
-    dplyr::left_join(escape_post) %>%
-    dplyr::group_by(ReportGrp, iter) %>%
-    dplyr::summarise_at(vars(escape),
+    left_join(escape_post) %>%
+    group_by(ReportGrp, iter) %>%
+    summarise_at(vars(escape),
                         funs(sum),
                         na.rm = T) %>%
-    dplyr::ungroup() %>%
-    dplyr::group_by(ReportGrp) %>%
-    dplyr::filter(n_distinct(iter) > 1) %>%
-    dplyr::summarise(mean = mean(escape),
+    ungroup() %>%
+    group_by(ReportGrp) %>%
+    filter(n_distinct(iter) > 1) %>%
+    summarise(mean = mean(escape),
                      median = median(escape),
-                     mode = MCMCglmm::posterior.mode(escape),
+                     mode = estMode(escape),
                      sd = sd(escape)) %>%
-    dplyr::mutate_at(vars(mean, median, mode, sd),
+    mutate_at(vars(mean, median, mode, sd),
                      funs(ifelse(. < 0, 0, .))) %>%
-    dplyr::full_join(credInt) %>%
-    dplyr::full_join(report_df %>%
-                       dplyr::select(ReportGrp) %>%
+    full_join(credInt) %>%
+    full_join(report_df %>%
+                       select(ReportGrp) %>%
                        distinct()) %>%
     ungroup()
 

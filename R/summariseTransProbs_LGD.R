@@ -7,7 +7,7 @@
 #' @param dabom_mod An MCMC.list, where the detection parameter names all end with "\code{_p}".
 #' @param cred_int_prob A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95%.
 #'
-#' @import dplyr tidyr MCMCglmm coda stringr
+#' @import dplyr tidyr coda stringr
 #' @export
 #' @return NULL
 #' @examples summariseTransProbs_LGD()
@@ -20,22 +20,22 @@ summariseTransProbs_LGD = function(dabom_mod = NULL,
   # estimate the credible interval for each parameter
   credInt = coda::HPDinterval(dabom_mod, prob = cred_int_prob) %>%
     as.data.frame() %>%
-    dplyr::mutate(param = rownames(.)) %>%
-    dplyr::rename(lowerCI = lower,
+    mutate(param = rownames(.)) %>%
+    rename(lowerCI = lower,
                   upperCI = upper) %>%
-    dplyr::tbl_df() %>%
-    dplyr::select(param, dplyr::everything()) %>%
+    tbl_df() %>%
+    select(param, everything()) %>%
     mutate(param = renameTransParams_LGD(param))
 
   trans_df = compileTransProbs_LGD(dabom_mod) %>%
-    dplyr::group_by(param) %>%
-    dplyr::summarise(mean = mean(value),
+    group_by(param) %>%
+    summarise(mean = mean(value),
                      median = median(value),
-                     mode = MCMCglmm::posterior.mode(value),
+                     mode = estMode(value),
                      sd = sd(value)) %>%
-    dplyr::mutate_at(vars(mean, median, mode, sd),
+    mutate_at(vars(mean, median, mode, sd),
                      funs(ifelse(. < 0, 0, .))) %>%
-    dplyr::left_join(credInt)
+    left_join(credInt)
 
   return(trans_df)
 
