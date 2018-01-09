@@ -22,7 +22,7 @@ compileTransProbs_PRA = function(dabom_mod = NULL) {
                         iters = T,
                         chains = T) %>%
     as.data.frame() %>%
-    dplyr::tbl_df() %>%
+    tbl_df() %>%
     # remove detection parameters
     select(-matches('_p$'))
 

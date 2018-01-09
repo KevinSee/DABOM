@@ -17,7 +17,7 @@ createNodeList = function(node_order = NULL) {
 
   node_order %>%
     split(list(.$Group)) %>%
-    map(.f = function(x) {
+    purrr::map(.f = function(x) {
       x %>%
         arrange(RKM) %>%
         select(Node) %>%

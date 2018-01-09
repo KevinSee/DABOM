@@ -48,24 +48,24 @@ setInitialValues_LGD = function(dabom_list = NULL) {
 
   # Tucannon
   z_mtr_init = dabom_list$Tucannon %>%
-    dplyr::select(MTR:TUCH) %>%
+    select(MTR:TUCH) %>%
     apply(1, max)
   z_utr_init = dabom_list$Tucannon %>%
-    dplyr::select(UTR:TUCH) %>%
+    select(UTR:TUCH) %>%
     apply(1, max)
   z_tuch_init = dabom_list$Tucannon %>%
-    dplyr::select(TUCH) %>%
+    select(TUCH) %>%
     apply(1, max)
 
   # Asotin
   a_Aso_init[,ncol(a_Aso_init)] = 1 - apply(dabom_list$Asotin, 1, max, na.rm = T) # not in Asotin
   # GEORGC
   a_Aso_init[,2] = dabom_list$Asotin %>%
-    dplyr::select(GEORGC) %>%
+    select(GEORGC) %>%
     apply(1, max)
   # past ASOTIC
   a_Aso_init[,3] = dabom_list$Asotin %>%
-    dplyr::select(ASOTIC, ACB, CCAB0:AFCA0) %>%
+    select(ASOTIC, ACB, CCAB0:AFCA0) %>%
     apply(1, max)
   # Asotin bb
   a_Aso_init[,1] = ifelse(apply(a_Aso_init[,-1], 1, max) == 0,
@@ -77,11 +77,11 @@ setInitialValues_LGD = function(dabom_list = NULL) {
   a_AsoUp_init[,ncol(a_AsoUp_init)] = abs(z_acb_init-1) # not in upper Asotin
   # CCA
   a_AsoUp_init[,2] = dabom_list$Asotin %>%
-    dplyr::select(matches('CCA')) %>%
+    select(matches('CCA')) %>%
     apply(1, max)
   # AFC
   a_AsoUp_init[,3] = dabom_list$Asotin %>%
-    dplyr::select(matches('AFC')) %>%
+    select(matches('AFC')) %>%
     apply(1, max)
   # upper Asotin bb
   a_AsoUp_init[,1] = ifelse(apply(a_AsoUp_init[,-1], 1, max) == 0,
@@ -91,33 +91,33 @@ setInitialValues_LGD = function(dabom_list = NULL) {
   a_Lap_init[,ncol(a_Lap_init)] = 1 - apply(dabom_list$Lapwai, 1, max, na.rm = T) # not in Lapwai
   # SWT
   a_Lap_init[,2] = dabom_list$Lapwai %>%
-    dplyr::select(SWTB0:WEBA0) %>%
+    select(SWTB0:WEBA0) %>%
     apply(1,max)
   # MIS
   a_Lap_init[,3] = dabom_list$Lapwai %>%
-    dplyr::select(matches('MIS')) %>%
+    select(matches('MIS')) %>%
     apply(1,max)
   # Lapwai bb
   a_Lap_init[,1] = ifelse(apply(a_Lap_init[,-1], 1, max) == 0,
                           1, 0)
   # WEB
   z_web_init = dabom_list$Lapwai %>%
-    dplyr::select(matches('WEB')) %>%
+    select(matches('WEB')) %>%
     apply(1, max)
 
   # Potlatch
   a_Pot_init[,ncol(a_Pot_init)] = 1 - apply(dabom_list$Potlatch, 1, max, na.rm = T) # not in Potlatch
   # KHS
   a_Pot_init[,2] = dabom_list$Potlatch %>%
-    dplyr::select(BIGBEC:LBEARC) %>%
+    select(BIGBEC:LBEARC) %>%
     apply(1, max)
   # PCM
   a_Pot_init[,3] = dabom_list$Potlatch %>%
-    dplyr::select(matches('PCM')) %>%
+    select(matches('PCM')) %>%
     apply(1, max)
   # HLM
   a_Pot_init[,4] = dabom_list$Potlatch %>%
-    dplyr::select(POTREF:POTRWF) %>%
+    select(POTREF:POTRWF) %>%
     apply(1, max)
   # Potlatch bb
   a_Pot_init[,1] = ifelse(apply(a_Pot_init[,-1], 1, max) == 0,
@@ -126,11 +126,11 @@ setInitialValues_LGD = function(dabom_list = NULL) {
   a_KHS_init[,ncol(a_KHS_init)] = abs(a_Pot_init[,2]-1) # not above KHS
   # BIGBEC
   a_KHS_init[,2] = dabom_list$Potlatch %>%
-    dplyr::select(BIGBEC) %>%
+    select(BIGBEC) %>%
     apply(1, max)
   # LBEARC
   a_KHS_init[,3] = dabom_list$Potlatch %>%
-    dplyr::select(LBEARC) %>%
+    select(LBEARC) %>%
     apply(1, max)
   # KHS bb
   a_KHS_init[,1] = ifelse(apply(a_KHS_init[,-1], 1, max) == 0,
@@ -139,11 +139,11 @@ setInitialValues_LGD = function(dabom_list = NULL) {
   a_HLM_init[,ncol(a_HLM_init)] = abs(a_Pot_init[,4]-1) # not above HLM
   # POTREF
   a_HLM_init[,2] = dabom_list$Potlatch %>%
-    dplyr::select(POTREF) %>%
+    select(POTREF) %>%
     apply(1, max)
   # POTRWF
   a_HLM_init[,3] = dabom_list$Potlatch %>%
-    dplyr::select(POTRWF) %>%
+    select(POTRWF) %>%
     apply(1, max)
   # HLM bb
   a_HLM_init[,1] = ifelse(apply(a_HLM_init[,-1], 1, max) == 0,
@@ -151,22 +151,22 @@ setInitialValues_LGD = function(dabom_list = NULL) {
 
   # Joseph Creek
   z_josepc_init = dabom_list$JosephCreek %>%
-    dplyr::select(JOSEPC) %>%
+    select(JOSEPC) %>%
     apply(1, max)
 
   # Wallowa
   a_Wal_init[,ncol(a_Wal_init)] = 1 - apply(dabom_list$Wallowa, 1, max, na.rm = T) # not in Wallowa
   # BCANF
   a_Wal_init[,2] = dabom_list$Wallowa %>%
-    dplyr::select(BCANF) %>%
+    select(BCANF) %>%
     apply(1, max)
   # LOSTIW
   a_Wal_init[,3] = dabom_list$Wallowa %>%
-    dplyr::select(LOSTIW) %>%
+    select(LOSTIW) %>%
     apply(1, max)
   # WALH
   a_Wal_init[,4] = dabom_list$Wallowa %>%
-    dplyr::select(WALH) %>%
+    select(WALH) %>%
     apply(1, max)
   # Wallowa bb
   a_Wal_init[,1] = ifelse(apply(a_Wal_init[,-1], 1, max) == 0,
@@ -176,11 +176,11 @@ setInitialValues_LGD = function(dabom_list = NULL) {
   a_UGR_init[,ncol(a_UGR_init)] = 1 - apply(dabom_list$GrandeRonde, 1, max, na.rm = T) # not in Grande Ronde
   # Catherine Creek
   a_UGR_init[,2] = dabom_list$GrandeRonde %>%
-    dplyr::select(CCWB0:CATHEW) %>%
+    select(CCWB0:CATHEW) %>%
     apply(1, max)
   # Grande Ronde weir
   a_UGR_init[,3] = dabom_list$GrandeRonde %>%
-    dplyr::select(GRANDW) %>%
+    select(GRANDW) %>%
     apply(1, max)
   # Grande Ronde bb
   a_UGR_init[,1] = ifelse(apply(a_UGR_init[,-1], 1, max) == 0,
@@ -190,23 +190,23 @@ setInitialValues_LGD = function(dabom_list = NULL) {
   a_Imn_init[,ncol(a_Imn_init)] = 1 - apply(dabom_list$ImnahaRiver, 1, max, na.rm = T) # not in Imnaha
   # HORS3C
   a_Imn_init[,2] = dabom_list$ImnahaRiver %>%
-    dplyr::select(HORS3C) %>%
+    select(HORS3C) %>%
     apply(1, max)
   # CMP
   a_Imn_init[,3] = dabom_list$ImnahaRiver %>%
-    dplyr::select(matches('CMP')) %>%
+    select(matches('CMP')) %>%
     apply(1, max)
   # LSHEEF
   a_Imn_init[,4] = dabom_list$ImnahaRiver %>%
-    dplyr::select(LSHEEF) %>%
+    select(LSHEEF) %>%
     apply(1, max)
   # BSC
   a_Imn_init[,5] = dabom_list$ImnahaRiver %>%
-    dplyr::select(matches('BSC')) %>%
+    select(matches('BSC')) %>%
     apply(1, max)
   # IR3
   a_Imn_init[,6] = dabom_list$ImnahaRiver %>%
-    dplyr::select(IR3B0:DRY2C) %>%
+    select(IR3B0:DRY2C) %>%
     apply(1, max)
   # Imnaha bb
   a_Imn_init[,1] = ifelse(apply(a_Imn_init[,-1], 1, max) == 0,
@@ -215,39 +215,39 @@ setInitialValues_LGD = function(dabom_list = NULL) {
   a_ImnUp_init[,ncol(a_ImnUp_init)] = abs(a_Imn_init[,6]-1) # not in upper Imnaha
   # FREEZC
   a_ImnUp_init[,2] = dabom_list$ImnahaRiver %>%
-    dplyr::select(FREEZC) %>%
+    select(FREEZC) %>%
     apply(1, max)
   # CZY
   a_ImnUp_init[,3] = dabom_list$ImnahaRiver %>%
-    dplyr::select(matches('CZY')) %>%
+    select(matches('CZY')) %>%
     apply(1, max)
   # MAHOGC
   a_ImnUp_init[,4] = dabom_list$ImnahaRiver %>%
-    dplyr::select(MAHOGC) %>%
+    select(MAHOGC) %>%
     apply(1, max)
   # IR4
   a_ImnUp_init[,5] = dabom_list$ImnahaRiver %>%
-    dplyr::select(IR4B0:DRY2C) %>%
+    select(IR4B0:DRY2C) %>%
     apply(1, max)
   # upper Imnaha bb
   a_ImnUp_init[,1] = ifelse(apply(a_ImnUp_init[,-1], 1, max) == 0,
                             1, 0)
 
   z_iml_init = dabom_list$ImnahaRiver %>%
-    dplyr::select(IMLB0:DRY2C) %>%
+    select(IMLB0:DRY2C) %>%
     apply(1, max)
   z_ir5_init = dabom_list$ImnahaRiver %>%
-    dplyr::select(IR5B0:DRY2C) %>%
+    select(IR5B0:DRY2C) %>%
     apply(1, max)
 
   a_ImnWeir_init[,ncol(a_ImnWeir_init)] = abs(z_ir5_init - 1) # not above Imnaha weir
   # GUMBTC
   a_ImnWeir_init[,2] = dabom_list$ImnahaRiver %>%
-    dplyr::select(GUMBTC) %>%
+    select(GUMBTC) %>%
     apply(1, max)
   # DRY2C
   a_ImnWeir_init[,3] = dabom_list$ImnahaRiver %>%
-    dplyr::select(DRY2C) %>%
+    select(DRY2C) %>%
     apply(1, max)
   # Imnaha weir bb
   a_ImnWeir_init[,1] = ifelse(apply(a_ImnWeir_init[,-1], 1, max) == 0,
@@ -257,55 +257,55 @@ setInitialValues_LGD = function(dabom_list = NULL) {
   a_SFS_init[,ncol(a_SFS_init)] = 1 - apply(dabom_list$SFSalmon, 1, max, na.rm = T) # not in South Fork Salmon
   # ZEN
   a_SFS_init[,2] = dabom_list$SFSalmon %>%
-    dplyr::select(ZENB0:LAKEC) %>%
+    select(ZENB0:LAKEC) %>%
     apply(1, max)
   # ESS
   a_SFS_init[,3] = dabom_list$SFSalmon %>%
-    dplyr::select(ESSB0:JOHNSC) %>%
+    select(ESSB0:JOHNSC) %>%
     apply(1, max)
   # KRS
   a_SFS_init[,4] = dabom_list$SFSalmon %>%
-    dplyr::select(KRS, STR) %>%
+    select(KRS, STR) %>%
     apply(1, max)
   # SF Salmon bb
   a_SFS_init[,1] = ifelse(apply(a_SFS_init[,-1], 1, max) == 0,
                           1, 0)
 
   z_lakec_init = dabom_list$SFSalmon %>%
-    dplyr::select(LAKEC) %>%
+    select(LAKEC) %>%
     apply(1, max)
   z_johnsc_init = dabom_list$SFSalmon %>%
-    dplyr::select(JOHNSC) %>%
+    select(JOHNSC) %>%
     apply(1, max)
   z_str_init = dabom_list$SFSalmon %>%
-    dplyr::select(STR) %>%
+    select(STR) %>%
     apply(1, max)
 
   # Lower Lemhi
   a_LowLem_init[,ncol(a_LowLem_init)] = 1 - apply(dabom_list$Lemhi, 1, max, na.rm = T) # not in Lemhi
   # BHC
   a_LowLem_init[,2] = dabom_list$Lemhi %>%
-    dplyr::select(matches('BHC')) %>%
+    select(matches('BHC')) %>%
     apply(1, max)
   # WPC
   a_LowLem_init[,3] = dabom_list$Lemhi %>%
-    dplyr::select(matches('WPC')) %>%
+    select(matches('WPC')) %>%
     apply(1, max)
   # KEN
   a_LowLem_init[,4] = dabom_list$Lemhi %>%
-    dplyr::select(matches('KEN')) %>%
+    select(matches('KEN')) %>%
     apply(1, max)
   # AGC
   a_LowLem_init[,5] = dabom_list$Lemhi %>%
-    dplyr::select(matches('AGC')) %>%
+    select(matches('AGC')) %>%
     apply(1, max)
   # Hayden
   a_LowLem_init[,6] = dabom_list$Lemhi %>%
-    dplyr::select(matches('HYC')) %>%
+    select(matches('HYC')) %>%
     apply(1, max)
   # LRW
   a_LowLem_init[,7] = dabom_list$Lemhi %>%
-    dplyr::select(LRWB0:ncol(dabom_list$Lemhi)) %>%
+    select(LRWB0:ncol(dabom_list$Lemhi)) %>%
     apply(1, max)
   # Lower Lemhi bb
   a_LowLem_init[,1] = ifelse(apply(a_LowLem_init[,-1], 1, max) == 0,
@@ -315,31 +315,31 @@ setInitialValues_LGD = function(dabom_list = NULL) {
   a_UpLem_init[,ncol(a_UpLem_init)] = abs(a_LowLem_init[,7]-1) # not in upper Lemhi
   # Little Springs
   a_UpLem_init[,2] = dabom_list$Lemhi %>%
-    dplyr::select(matches('LLS')) %>%
+    select(matches('LLS')) %>%
     apply(1, max)
   # Big Eightmile
   a_UpLem_init[,3] = dabom_list$Lemhi %>%
-    dplyr::select(matches('LB8')) %>%
+    select(matches('LB8')) %>%
     apply(1, max)
   # Big Springs
   a_UpLem_init[,4] = dabom_list$Lemhi %>%
-    dplyr::select(matches('LBS')) %>%
+    select(matches('LBS')) %>%
     apply(1, max)
   # Lee
   a_UpLem_init[,5] = dabom_list$Lemhi %>%
-    dplyr::select(matches('LCL')) %>%
+    select(matches('LCL')) %>%
     apply(1, max)
   # Big Timber
   a_UpLem_init[,6] = dabom_list$Lemhi %>%
-    dplyr::select(BTLB0:BTUA0) %>%
+    select(BTLB0:BTUA0) %>%
     apply(1, max)
   # Canyon
   a_UpLem_init[,7] = dabom_list$Lemhi %>%
-    dplyr::select(matches('CAC')) %>%
+    select(matches('CAC')) %>%
     apply(1, max)
   # 18 mile / Hawley
   a_UpLem_init[,8] = dabom_list$Lemhi %>%
-    dplyr::select(matches('HEC')) %>%
+    select(matches('HEC')) %>%
     apply(1, max)
   # Upper Lemhi bb
   a_UpLem_init[,1] = ifelse(apply(a_UpLem_init[,-1], 1, max) == 0,
@@ -349,30 +349,30 @@ setInitialValues_LGD = function(dabom_list = NULL) {
   a_UpSalm_init[,ncol(a_UpSalm_init)] = 1 - apply(dabom_list$UpperSalmon, 1, max, na.rm = T) # not in Upper Salmon
   # Pahsimeroi
   a_UpSalm_init[,2] = dabom_list$UpperSalmon %>%
-    dplyr::select(PAHH) %>%
+    select(PAHH) %>%
     apply(1, max)
   # East Fork Salmon
   a_UpSalm_init[,3] = dabom_list$UpperSalmon %>%
-    dplyr::select(SALEFT) %>%
+    select(SALEFT) %>%
     apply(1, max)
   # Yankee Fork
   a_UpSalm_init[,4] = dabom_list$UpperSalmon %>%
-    dplyr::select(matches('YFK')) %>%
+    select(matches('YFK')) %>%
     apply(1, max)
   # Valley Creek
   a_UpSalm_init[,5] = dabom_list$UpperSalmon %>%
-    dplyr::select(VC2:VC1) %>%
+    select(VC2:VC1) %>%
     apply(1, max)
   # Sawtooth
   a_UpSalm_init[,6] = dabom_list$UpperSalmon %>%
-    dplyr::select(STL) %>%
+    select(STL) %>%
     apply(1, max)
   # Upper Salmon bb
   a_UpSalm_init[,1] = ifelse(apply(a_UpSalm_init[,-1], 1, max) == 0,
                              1, 0)
 
   z_usi_init = dabom_list$UpperSalmon %>%
-    dplyr::select(-USE) %>%
+    select(-USE) %>%
     apply(1, max)
 
 

@@ -27,34 +27,34 @@ summariseDetectProbs = function(dabom_mod = NULL,
                        iters = T,
                        chains = T) %>%
     as.data.frame() %>%
-    dplyr::tbl_df() %>%
+    tbl_df() %>%
     tidyr::gather(param, value, -CHAIN, -ITER) %>%
-    dplyr::group_by(CHAIN, param) %>%
-    dplyr::mutate(iter = 1:n()) %>%
-    dplyr::select(chain = CHAIN,
+    group_by(CHAIN, param) %>%
+    mutate(iter = 1:n()) %>%
+    select(chain = CHAIN,
                   iter,
                   param,
                   value)
 
   # summarise detection parameters
   detect_df = dabom_df %>%
-    dplyr::filter(grepl('_p$', param)) %>%
-    dplyr::group_by(param) %>%
-    dplyr::summarise(mean = mean(value),
+    filter(grepl('_p$', param)) %>%
+    group_by(param) %>%
+    summarise(mean = mean(value),
                      median = median(value),
                      mode = estMode(value),
                      sd = sd(value),
                      lowerCI = coda::HPDinterval(coda::as.mcmc(value), prob = cred_int_prob)[,1],
                      upperCI = coda::HPDinterval(coda::as.mcmc(value), prob = cred_int_prob)[,2]) %>%
-    dplyr::mutate_at(vars(mean, median, mode, sd),
+    mutate_at(vars(mean, median, mode, sd),
                      funs(ifelse(. < 0, 0, .))) %>%
-    dplyr::rename(Node = param) %>%
-    dplyr::mutate(Node = stringr::str_replace(Node, '_p$', ''))
+    rename(Node = param) %>%
+    mutate(Node = stringr::str_replace(Node, '_p$', ''))
 
   # add number of unique tags sighted at each node
   detect_summ = capHist_proc %>%
-    dplyr::group_by(Node) %>%
-    dplyr::summarise(n_tags = n_distinct(TagID)) %>%
+    group_by(Node) %>%
+    summarise(n_tags = n_distinct(TagID)) %>%
     full_join(detect_df) %>%
     mutate(n_tags = ifelse(is.na(n_tags), 0, n_tags)) %>%
     mutate(mode = ifelse(mean == 1 & median == 1, 1, mode))
