@@ -1179,7 +1179,7 @@ model{
 
   # Which main branch does each fish follow?
   for(i in 1:n.fish) {
-    a[i] ~ dcat( p_pop_main[lgr_week[i], 1:n.pops.main] )
+    a[i] ~ dcat( p_pop_main[dam_week[i], 1:n.pops.main] )
   }"
   }
 
