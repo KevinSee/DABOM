@@ -87,7 +87,15 @@ calcRepGrpEscape_LGD = function(dabom_mod = NULL,
     full_join(report_df %>%
                        select(ReportGrp) %>%
                        distinct()) %>%
-    ungroup()
+    ungroup() %>%
+    mutate_at(vars(mean, median, mode),
+              funs(round)) %>%
+    mutate_at(vars(sd, lowerCI, upperCI),
+              funs(round),
+              digits = 1) %>%
+    mutate_at(vars(cv),
+              funs(round),
+              digits = 3)
 
   if(!is.null(pt_est_nm) & pt_est_nm %in% c('mean', 'median', 'mode')) {
     names(report_summ)[match(pt_est_nm, names(report_summ))] = 'estimate'
