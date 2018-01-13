@@ -36,12 +36,12 @@ fixNoFishNodes = function(init_file = NULL,
   unseenNodes = unique(node_order$Node)[!unique(node_order$Node) %in% seenNodes]
 
   # convert to site codes
-  seenSites = str_replace(seenNodes, 'B0$', '') %>%
-    str_replace('A0$', '') %>%
+  seenSites = stringr::str_replace(seenNodes, 'B0$', '') %>%
+    stringr::str_replace('A0$', '') %>%
     unique()
 
-  unseenSites = str_replace(unseenNodes, 'B0$', '') %>%
-    str_replace('A0$', '') %>%
+  unseenSites = stringr::str_replace(unseenNodes, 'B0$', '') %>%
+    stringr::str_replace('A0$', '') %>%
     unique()
 
 

@@ -14,6 +14,9 @@ summariseDetectProbs(dabom_mod = NULL, capHist_proc = NULL,
 
 \item{cred_int_prob}{A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95\\%.}
 }
+\value{
+a dataframe with number of tags detected, mean, median, mode, se, cv and credible intervals
+}
 \description{
 Extracts the MCMC posteriors of detection probabilities for a DABOM model, and summarises the results.
 }

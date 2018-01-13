@@ -21,9 +21,9 @@ compileWeekTransProbs = function(dabom_mod = NULL,
                         iters = T,
                         chains = T) %>%
     as.data.frame() %>%
-    dplyr::tbl_df() %>%
+    tbl_df() %>%
     select(CHAIN, ITER, matches(param_name)) %>%
-    gather(param, prob, -CHAIN, -ITER) %>%
+    tidyr::gather(param, prob, -CHAIN, -ITER) %>%
     mutate(param_name = stringr::str_split(param, '\\[', simplify = T)[,1]) %>%
     mutate(week = stringr::str_split(param, '\\,', simplify = T)[,1],
            branch = stringr::str_split(param, '\\,', simplify = T)[,2]) %>%

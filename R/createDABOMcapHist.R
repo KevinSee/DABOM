@@ -6,7 +6,6 @@
 #'
 #' @param proc_ch capture history as returned by one of the \code{processCapHist} family of functions in \code{PITcleanr} package, which has then been verified by a user and all blank UserProcStatus entries have been completed.
 #' @param node_order output of function \code{createNodeOrder}
-#' @param root_site Code of the node where fish were initially tagged.
 #' @param split_matrices Should the wide capture history be split into separate matrices, one for each group in \code{node_order}? Default value is \code{FALSE}.
 #'
 #' @import dplyr stringr
@@ -16,11 +15,17 @@
 
 createDABOMcapHist = function(proc_ch = NULL,
                               node_order = NULL,
-                              root_site = 'GRA',
                               split_matrices = F) {
 
   stopifnot(!is.null(proc_ch) |
               !is.null(node_order))
+
+  root_site = node_order %>%
+    filter(nchar(Path) == min(nchar(Path))) %>%
+    select(Node) %>%
+    distinct() %>%
+    as.matrix() %>%
+    as.character()
 
   obsNodes = proc_ch %>%
     select(TagID, Node) %>%

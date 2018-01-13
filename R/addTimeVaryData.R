@@ -38,13 +38,21 @@ addTimeVaryData = function(proc_ch = NULL,
                                      strata_beg = strata_beg,
                                      last_strata_min = last_strata_min)
 
-  lgr_week = vector('integer', nrow(proc_ch))
+  proc_trap_date = proc_ch %>%
+    select(TagID, TrapDate) %>%
+    distinct()
+
+  if(nrow(proc_trap_date) != n_distinct(proc_ch$TagID)) {
+    stop('Multiple trap dates for some tags')
+  }
+
+  dam_week = vector('integer', nrow(proc_trap_date))
   for(i in 1:length(week_strata)) {
-    lgr_week[which(proc_ch$TrapDate %within% week_strata[[i]])] = i
+    dam_week[which(proc_trap_date$TrapDate %within% week_strata[[i]])] = i
   }
 
   tv_list = list(n.weeks = length(week_strata),
-                 lgr_week = lgr_week)
+                 dam_week = dam_week)
 
   return(tv_list)
 
