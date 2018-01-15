@@ -12,8 +12,8 @@
 #'
 #' @import dplyr tidyr coda stringr
 #' @export
-#' @return a dataframe with number of tags detected, mean, median, mode, se, cv and credible intervals
-#' @examples summariseDetectProbs()
+#' @return a dataframe with number of tags detected, mean, median, mode, se, cv and credible intervals of detection probability posteriors.
+#' @examples \dontrun{summariseDetectProbs()}
 
 summariseDetectProbs = function(dabom_mod = NULL,
                                 capHist_proc = NULL,
