@@ -4,7 +4,7 @@
 #'
 #' @author Kevin See
 #'
-#' @param proc_ch capture history as returned by one of the \code{processCapHist} family of functions in \code{PITcleanr} package, which has then been verified by a user and all blank UserProcStatus entries have been completed.
+#' @inheritParams createDABOMcapHist
 #' @param spawn_yr spawn year to divide into weekly strata
 #' @param spp choices are either \code{Chinook} or \code{Steelhead}
 #' @param start_day date (\code{month / day}) when strata should start
@@ -20,6 +20,7 @@
 #' @examples addTimeVaryData()
 
 addTimeVaryData = function(proc_ch = NULL,
+                           node_order = NULL,
                            spawn_yr,
                            spp = c('Chinook', 'Steelhead'),
                            start_day = NULL,
@@ -38,7 +39,9 @@ addTimeVaryData = function(proc_ch = NULL,
                                      strata_beg = strata_beg,
                                      last_strata_min = last_strata_min)
 
-  proc_trap_date = proc_ch %>%
+  proc_trap_date = createDABOMcapHist(proc_ch,
+                                      node_order,
+                                      split_matrices = F) %>%
     select(TagID, TrapDate) %>%
     distinct()
 
