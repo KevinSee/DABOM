@@ -49,8 +49,8 @@ calcRepGrpEscape_LGD = function(dabom_mod = NULL,
     left_join(escape_post) %>%
     group_by(ReportGrp, iter) %>%
     summarise_at(vars(escape),
-                        funs(sum),
-                        na.rm = T) %>%
+                 funs(sum),
+                 na.rm = T) %>%
     ungroup() %>%
     group_by(ReportGrp) %>%
     filter(n_distinct(iter) > 1) %>%
@@ -62,7 +62,7 @@ calcRepGrpEscape_LGD = function(dabom_mod = NULL,
     as.data.frame() %>%
     mutate(ReportGrp = rownames(.)) %>%
     rename(lowerCI = lower,
-                  upperCI = upper) %>%
+           upperCI = upper) %>%
     tbl_df() %>%
     select(ReportGrp, everything())
 
@@ -72,21 +72,22 @@ calcRepGrpEscape_LGD = function(dabom_mod = NULL,
     left_join(escape_post) %>%
     group_by(ReportGrp, iter) %>%
     summarise_at(vars(escape),
-                        funs(sum),
-                        na.rm = T) %>%
+                 funs(sum),
+                 na.rm = T) %>%
     ungroup() %>%
     group_by(ReportGrp) %>%
     filter(n_distinct(iter) > 1) %>%
     summarise(mean = mean(escape),
-                     median = median(escape),
-                     mode = estMode(escape),
-                     sd = sd(escape)) %>%
+              median = median(escape),
+              mode = estMode(escape),
+              sd = sd(escape),
+              cv = sd / mean) %>%
     mutate_at(vars(mean, median, mode, sd),
-                     funs(ifelse(. < 0, 0, .))) %>%
+              funs(ifelse(. < 0, 0, .))) %>%
     full_join(credInt) %>%
     full_join(report_df %>%
-                       select(ReportGrp) %>%
-                       distinct()) %>%
+                select(ReportGrp) %>%
+                distinct()) %>%
     ungroup() %>%
     mutate_at(vars(mean, median, mode),
               funs(round)) %>%
