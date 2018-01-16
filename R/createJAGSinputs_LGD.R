@@ -64,7 +64,7 @@ createJAGSinputs_LGD = function(dabom_list = NULL) {
                                         .f = length) %>%
                        max() %>%
                        rep(0, .) %>%
-                       c(.,0),
+                       c(.,0)),
                 n_branch_list,
                 dirich_vecs,
                 dabom_list)
