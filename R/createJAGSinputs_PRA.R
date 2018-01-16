@@ -45,7 +45,7 @@ createJAGSinputs_PRA = function(dabom_list = NULL) {
 
   jags_list = c(list(n_fish = nrow(dabom_list[[1]]),
                      # vector of zeros, large enough to match any element of dabom_list
-                     zero_vec = rep(0, max(map_int(dabom_list, .f = length)) + 1)),
+                     zero_vec = rep(0, max(sapply(dabom_list, length)) + 1)),
                 n_branch_list,
                 dirich_vecs,
                 dabom_list)
