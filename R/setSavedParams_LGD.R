@@ -34,6 +34,7 @@ setSavedParams_LGD = function(time_varying = F) {
                 'phi_tuch',
                 'phi_acb',
                 'phi_web',
+                'phi_fistrp',
                 'phi_josepc',
                 'phi_iml',
                 'phi_ir5',
