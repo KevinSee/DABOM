@@ -113,6 +113,10 @@ fixNoFishNodes = function(init_file = NULL,
     mod_file[grep('phi_fistrp ~', mod_file)] = 'phi_fistrp <- 1 # no detections at LRL'
   }
 
+  if('SC2A0' %in% unseenNodes & ('SC1' %in% seenNodes & 'SC2B0' %in% seenNodes)) {
+    mod_file[grep('SC2B0 ~', mod_file)] = 'SC2B0 ~ dbeta(1, 1)'
+  }
+
 
   writeLines(mod_file, mod_conn_new)
   close(mod_conn_new)
