@@ -701,14 +701,18 @@ model{
   ####################################################
   #   Now we deal with Lochsa
   ####################################################
-  # only have to worry about observation piece
+  # probability of moving past FISTRP
+  phi_fistrp ~ dbeta(1,1)
+
   for (i in 1:n.fish) {
 
     # first array (LRL)
     Lochsa[i,1] ~ dbern( LRL_p * catexp[i,15] )
 
+    z_fistrp[i] ~ dbern(phi_fistrp * catexp[i,15] )
+
     # other observation spot (FISTRP)
-    Lochsa[i,2] ~ dbern( FISTRP_p * catexp[i,15] )
+    Lochsa[i,2] ~ dbern( FISTRP_p * z_fistrp[i])
 
   }
 

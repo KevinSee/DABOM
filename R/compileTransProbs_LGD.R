@@ -62,6 +62,7 @@ compileTransProbs_LGD = function(dabom_mod = NULL,
                      funs(. * past_KHS)) %>%
     mutate_at(vars(POTREF, POTRWF),
                      funs(. * past_HLM)) %>%
+    mutate(past_FISTRP = Lochsa * past_FISTRP) %>%
     mutate(past_JOSEPC = JosephCreek * past_JOSEPC) %>%
     mutate_at(vars(Imnaha_bb, HORS3C, past_CMP, LSHEEF, past_BSC, past_IR3),
                      funs(. * ImnahaRiver)) %>%

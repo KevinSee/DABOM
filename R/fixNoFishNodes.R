@@ -66,6 +66,16 @@ fixNoFishNodes = function(init_file = NULL,
 
   singleSites = intersect(seenSites, unseenSites)
 
+  # # add all the single array or weir sites
+  # singleSites = c(singleSites,
+  #                 node_order %>%
+  #                   filter(!(grepl('A0$', Node) | grepl('B0$', Node))) %>%
+  #                   select(NodeSite) %>%
+  #                   distinct() %>%
+  #                   as.matrix() %>%
+  #                   as.character()) %>%
+  #   unique()
+
   for(site in singleSites) {
     tmp = node_order %>%
       filter(grepl(site, Path),
@@ -88,7 +98,7 @@ fixNoFishNodes = function(init_file = NULL,
   }
 
   # if no observations at some terminal nodes, fix the movement probability past those nodes to 0
-  for(site in intersect(c('tuch', 'web', 'josephc', 'lakec', 'johnsc', 'str', 'btu'), tolower(unseenSites))) {
+  for(site in intersect(c('tuch', 'web', 'josephc', 'lakec', 'johnsc', 'str', 'btu', 'fistrp'), tolower(unseenSites))) {
     mod_file[grep(paste0('phi_', site, ' ~'), mod_file)] = paste0('  phi_', site, ' <- 0 # no upstream detections')
 
     cat(paste('\nFixed upstream movement past site', toupper(site), 'to 0 because no detections there.\n'))
@@ -97,6 +107,10 @@ fixNoFishNodes = function(init_file = NULL,
 
   if('STR' %in% unseenSites & 'KRS' %in% seenSites) {
     mod_file[grep('KRS_p ~', mod_file)] = 'KRS_p <- 1 # Single array, no upstream detections'
+  }
+
+  if('LRL' %in% unseenSites & 'FISTRP' %in% seenSites) {
+    mod_file[grep('phi_fistrp ~', mod_file)] = 'phi_fistrp <- 1 # no detections at LRL'
   }
 
 
