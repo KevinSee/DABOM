@@ -15,7 +15,7 @@
 
 createDirichletVector = function(n_branches = NULL,
                                  init_vals = NULL,
-                                 initial_one = F,
+                                 initial_one = T,
                                  final_one = F) {
 
   stopifnot(!is.null(n_branches) |
