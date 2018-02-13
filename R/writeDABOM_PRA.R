@@ -92,19 +92,23 @@ model
   GLCA0_p ~ dbeta(1,1)
   LBCB0_p ~ dbeta(1,1)
   LBCA0_p ~ dbeta(1,1)
-  MRC_p ~ dbeta(1,1)
+  MRCB0_p ~ dbeta(1,1)
+  MRCA0_p ~ dbeta(1,1)
   BVCB0_p ~ dbeta(1,1)
   BVCA0_p ~ dbeta(1,1)
   TWRB0_p ~ dbeta(1,1)
   TWRA0_p ~ dbeta(1,1)
+  TWISPW_p <- 1 # assume perfect detection (i.e. worst case)
   CRWB0_p ~ dbeta(1,1)
   CRWA0_p ~ dbeta(1,1)
   CRUB0_p ~ dbeta(1,1)
   CRUA0_p ~ dbeta(1,1)
   SCPB0_p ~ dbeta(1,1)
   SCPA0_p ~ dbeta(1,1)
-  MSH_p ~ dbeta(1,1)
-  METH_p ~ dbeta(1,1)
+  MSHB0_p ~ dbeta(1,1)
+  MSHA0_p ~ dbeta(1,1)
+  METHB0_p ~ dbeta(1,1)
+  METHA0_p ~ dbeta(1,1)
   MRWB0_p ~ dbeta(1,1)
   MRWA0_p ~ dbeta(1,1)
   WFC_p <- 1 # assume perfect detection (i.e. worst case)
@@ -638,7 +642,8 @@ model
   Methow[i,7] ~ dbern(LBCA0_p * catexp_LMR[i,3])
 
   # observation part for MRC
-  Methow[i,8] ~ dbern(MRC_p * catexp_LMR[i,4])
+  Methow[i,8] ~ dbern(MRCB0_p * catexp_LMR[i,4])
+  Methow[i,9] ~ dbern(MRCA0_p * catexp_LMR[i,4])
 
   } #ends n_fish loop in this section
 
@@ -646,6 +651,8 @@ model
   # Now we deal with upper Methow - past MRC
   ################################################################################
   for(j in 1:2) {
+  phi_meth[j] ~ dbeta(1,1) # probability of moving past METH
+  phi_twispw[j] ~ dbeta(1,1) # probability of moving past TWISPW
   phi_cru[j] ~ dbeta(1,1) # probability of moving past CRU
   phi_wfc[j] ~ dbeta(1,1) # probability of moving past WFC
   }
@@ -669,42 +676,49 @@ model
   for (i in 1:n_fish) {
   a_MRC[i] ~ dcat( pMatMRC[(catexp_LMR[i,4] * fishOrigin[i] + 1), 1:(n_pops_MRC+1)] )
 
-  for (j in 1:(n_pops_MRC+1))  {
-  catexp_MRC[i,j] <- equals(a_MRC[i],j)
-  }
+    for (j in 1:(n_pops_MRC+1))  {
+      catexp_MRC[i,j] <- equals(a_MRC[i],j)
+    }
 
   # observation part for BVC
-  Methow[i,9] ~ dbern(BVCB0_p * catexp_MRC[i,2])
-  Methow[i,10] ~ dbern(BVCA0_p * catexp_MRC[i,2])
+  Methow[i,10] ~ dbern(BVCB0_p * catexp_MRC[i,2])
+  Methow[i,11] ~ dbern(BVCA0_p * catexp_MRC[i,2])
 
   # observation part for TWR
-  Methow[i,11] ~ dbern(TWRB0_p * catexp_MRC[i,3])
-  Methow[i,12] ~ dbern(TWRA0_p * catexp_MRC[i,3])
+  Methow[i,12] ~ dbern(TWRB0_p * catexp_MRC[i,3])
+  Methow[i,13] ~ dbern(TWRA0_p * catexp_MRC[i,3])
+
+  z_twispw[i] ~ dbern(catexp_MRC[i,3] * phi_twispw[fishOrigin[i]] ) # did fish move past TWISPW?
+  Method[i,14] ~ dbern(TWISPW_p * z_twispw[i])
 
   # observation part for CRW
-  Methow[i,13] ~ dbern(CRWB0_p * catexp_MRC[i,4])
-  Methow[i,14] ~ dbern(CRWA0_p * catexp_MRC[i,4])
+  Methow[i,15] ~ dbern(CRWB0_p * catexp_MRC[i,4])
+  Methow[i,16] ~ dbern(CRWA0_p * catexp_MRC[i,4])
 
   # upper array (CRU, above CRW)
   z_cru[i] ~ dbern(catexp_MRC[i,4] * phi_cru[fishOrigin[i]] ) # did fish move past CRU?
-  Methow[i,15] ~ dbern(CRUB0_p * z_cru[i])
-  Methow[i,16] ~ dbern(CRUA0_p * z_cru[i])
+  Methow[i,17] ~ dbern(CRUB0_p * z_cru[i])
+  Methow[i,18] ~ dbern(CRUA0_p * z_cru[i])
 
   # observation part for SCP
-  Methow[i,17] ~ dbern(SCPB0_p * catexp_MRC[i,5])
-  Methow[i,18] ~ dbern(SCPA0_p * catexp_MRC[i,5])
+  Methow[i,19] ~ dbern(SCPB0_p * catexp_MRC[i,5])
+  Methow[i,20] ~ dbern(SCPA0_p * catexp_MRC[i,5])
 
   # observation part for MSH
-  Methow[i,19] ~ dbern(MSH_p * catexp_MRC[i,6])
-  Methow[i,20] ~ dbern(METH_p * catexp_MRC[i,6])
+  Methow[i,21] ~ dbern(MSHB0_p * catexp_MRC[i,6])
+  Methow[i,22] ~ dbern(MSHA0_p * catexp_MRC[i,6])
+
+  z_meth[i] ~ dbern(catexp_MRC[i,6] * phi_meth[fishOrigin[i]] ) # did fish move past METH?
+  Methow[i,23] ~ dbern(METHB0_p * z_meth[i])
+  Methow[i,24] ~ dbern(METHA0_p * z_meth[i])
 
   # observation part for MRW
-  Methow[i,21] ~ dbern(MRWB0_p * catexp_MRC[i,7])
-  Methow[i,22] ~ dbern(MRWA0_p * catexp_MRC[i,7])
+  Methow[i,25] ~ dbern(MRWB0_p * catexp_MRC[i,7])
+  Methow[i,26] ~ dbern(MRWA0_p * catexp_MRC[i,7])
 
   # upper array (WFC, above MRW)
   z_wfc[i] ~ dbern(catexp_MRC[i,7] * phi_wfc[fishOrigin[i]] ) # did fish move past WFC?
-  Methow[i,23] ~ dbern(WFC_p * z_wfc[i])
+  Methow[i,27] ~ dbern(WFC_p * z_wfc[i])
 
   } #ends n_fish loop in this section
 

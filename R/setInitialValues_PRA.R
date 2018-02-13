@@ -239,7 +239,7 @@ setInitialValues_PRA = function(dabom_list = NULL) {
     apply(1, max)
   # MRC
   a_list[['LMR']][,4] = dabom_list$Methow %>%
-    select(MRC:WFC) %>%
+    select(MRCB0:WFC) %>%
     apply(1, max)
   # LMR bb
   a_list[['LMR']][,1] = ifelse(apply(a_list[['LMR']][,-1], 1, max) == 0,
@@ -257,6 +257,9 @@ setInitialValues_PRA = function(dabom_list = NULL) {
   a_list[['MRC']][,3] = dabom_list$Methow %>%
     select(matches('TWR')) %>%
     apply(1, max)
+  z_twispw_init = dabom_list$Methow %>%
+    select(matches('TWISPW')) %>%
+    apply(1, max)
   # CRW
   a_list[['MRC']][,4] = dabom_list$Methow %>%
     select(matches('CRW'), matches('CRU')) %>%
@@ -270,7 +273,10 @@ setInitialValues_PRA = function(dabom_list = NULL) {
     apply(1, max)
   # MSH
   a_list[['MRC']][,6] = dabom_list$Methow %>%
-    select(matches('MSH'), METH) %>%
+    select(matches('MSH'), matches('METH')) %>%
+    apply(1, max)
+  z_meth_init = dabom_list$Methow %>%
+    select(matches('METH')) %>%
     apply(1, max)
   # MRW
   a_list[['MRC']][,7] = dabom_list$Methow %>%
@@ -441,6 +447,8 @@ setInitialValues_PRA = function(dabom_list = NULL) {
                       z_ens = z_ens_init,
                       z_enf = z_enf_init,
                       z_cru = z_cru_init,
+                      z_meth = z_meth_init,
+                      z_twispw = z_twispw_init,
                       z_wfc = z_wfc_init,
                       z_sa0 = z_sa0_init,
                       z_obf = z_obf_init),
