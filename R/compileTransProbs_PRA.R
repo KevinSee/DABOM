@@ -69,7 +69,9 @@ compileTransProbs_PRA = function(dabom_mod = NULL) {
         mutate_at(vars(MRC_bb, past_TWR, past_BVC, past_SCP, past_MSH, past_MRW, past_CRW),
                   funs(. * past_MRC)) %>%
         mutate(past_WFC = past_WFC * past_MRW,
-               past_CRU = past_CRU * past_CRW) %>%
+               past_CRU = past_CRU * past_CRW,
+               past_METH = past_MSH * past_METH,
+               past_TWISPW = past_TWR * past_TWISPW) %>%
         mutate_at(vars(OKL_bb, past_LLC, past_SA1, past_JOH, past_AEN, past_OMK, past_WAN, past_TNK, past_BPC, past_ANT, past_WHS, past_ZSL),
                   funs(. * past_OKL)) %>%
         mutate(past_OBF = past_OBF * past_OMK,
