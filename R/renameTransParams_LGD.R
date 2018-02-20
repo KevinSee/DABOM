@@ -23,7 +23,7 @@ renameTransParams_LGD = function(param_vec = NULL) {
   param_vec[grep('p_pop_Potlatch', param_vec)] = c('Potlatch_bb', 'past_KHS', 'past_PCM', 'past_HLM')
   param_vec[grep('p_pop_KHS', param_vec)] = c('KHS_bb', 'BIGBEC', 'LBEARC')
   param_vec[grep('p_pop_HLM', param_vec)] = c('HLM_bb', 'POTREF', 'POTRWF')
-  param_vec[grep('p_pop_Imnaha', param_vec)] = c('Imnaha_bb', 'HORS3C', 'past_CMP', 'LSHEEF', 'past_BSC', 'past_IR3')
+  param_vec[grep('p_pop_Imnaha', param_vec)] = c('ImnahaRiver_bb', 'HORS3C', 'past_CMP', 'LSHEEF', 'past_BSC', 'past_IR3')
   param_vec[grep('p_pop_UppImn', param_vec)] = c('IR3_bb', 'FREEZC', 'past_CZY', 'MAHOGC', 'past_IR4')
   param_vec[grep('p_pop_ImnWeir', param_vec)] = c('IR5_bb', 'GUMBTC', 'DRY2C')
   param_vec[grep('p_pop_Wallowa', param_vec)] = c('Wallowa_bb', 'BCANF', 'LOSTIW', 'WALH')

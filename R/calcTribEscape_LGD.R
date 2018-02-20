@@ -130,9 +130,9 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
     purrr::map(.f = function(x) {
       y = trans_df %>%
         select(iter,
-                      one_of(x),
-                      one_of(paste0('past_', x)),
-                      one_of(paste0(x, '_bb')))
+               one_of(x),
+               one_of(paste0('past_', x)),
+               one_of(paste0(x, '_bb')))
     })
 
 
