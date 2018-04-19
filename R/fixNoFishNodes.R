@@ -98,10 +98,50 @@ fixNoFishNodes = function(init_file = NULL,
   }
 
   # if no observations at some terminal nodes, fix the movement probability past those nodes to 0
-  for(site in intersect(c('tuch', 'web', 'josephc', 'lakec', 'johnsc', 'str', 'btu', 'fistrp'), tolower(unseenSites))) {
-    mod_file[grep(paste0('phi_', site, ' ~'), mod_file)] = paste0('  phi_', site, ' <- 0 # no upstream detections')
+  phiNodes = tibble(modLines = str_trim(mod_file[grep('phi_', mod_file)])) %>%
+    mutate(site = str_split(modLines, '\\~', simplify = T)[,1]) %>%
+    select(site) %>%
+    mutate(site = str_trim(site)) %>%
+    filter(grepl('phi', site)) %>%
+    distinct() %>%
+    mutate(site = str_replace(site, '^phi_', '')) %>%
+    as.matrix() %>%
+    as.character()
 
-    cat(paste('\nFixed upstream movement past site', toupper(site), 'to 0 because no detections there.\n'))
+  unseenPhiSites = intersect(str_to_upper(phiNodes), unseenSites)
+  unseenNodePaths = unseenPhiSites %>%
+    as.list() %>%
+    map_df(.f = function(x) {
+      node_order %>%
+        filter(grepl(x, Path))
+    })
+  if(sum(!unseenNodePaths$NodeSite %in% unseenPhiSites) > 0) {
+    upstrmSites = unseenNodePaths %>%
+      filter(!NodeSite %in% unseenPhiSites) %>%
+      select(NodeSite) %>%
+      distinct() %>%
+      as.matrix() %>%
+      as.character()
+
+    pathDf = upstrmSites %>%
+      as.list() %>%
+      map_df(.f = function(x) {
+        node_order %>%
+          filter(grepl(x, Path))
+      })
+
+    for(site in unseenPhiSites) {
+      if(sum(grepl(site, pathDf$Path)) > 0 ) {
+        unseenPhiSites = unseenPhiSites[-match(site, unseenPhiSites)]
+      }
+    }
+  }
+
+
+  for(site in intersect(unseenPhiSites, unseenSites)) {
+    mod_file[grep(paste0('phi_', tolower(site), ' ~'), mod_file)] = paste0('  phi_', tolower(site), ' <- 0 # no upstream detections')
+
+    cat(paste('\nFixed upstream movement past site', site, 'to 0 because no detections there or upstream.\n'))
 
   }
 
