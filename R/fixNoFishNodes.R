@@ -116,14 +116,12 @@ fixNoFishNodes = function(init_file = NULL,
         filter(grepl(x, Path))
     })
   if(sum(!unseenNodePaths$NodeSite %in% unseenPhiSites) > 0) {
-    upstrmSites = unseenNodePaths %>%
+    pathDf = unseenNodePaths %>%
       filter(!NodeSite %in% unseenPhiSites) %>%
       select(NodeSite) %>%
       distinct() %>%
       as.matrix() %>%
-      as.character()
-
-    pathDf = upstrmSites %>%
+      as.character() %>%
       as.list() %>%
       map_df(.f = function(x) {
         node_order %>%
