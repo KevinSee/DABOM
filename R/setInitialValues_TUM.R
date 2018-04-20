@@ -29,12 +29,12 @@ setInitialValues_TUM = function(dabom_list = NULL,
 
 
   # initial branching detects
-  for(i in 2:ncol(a_list[['TUM']])) {
-    a_list[['TUM']][,i] = dabom_list[[i-1]] %>%
+  for(i in 1:(ncol(a_list[['TUM']]) - 1)) {
+    a_list[['TUM']][,i] = dabom_list[[i]] %>%
       apply(1, max)
   }
   # initial black box
-  a_list[['TUM']][,1] = abs(apply(a_list[['TUM']], 1, max, na.rm=T) - 1) #not seen anywhere
+  a_list[['TUM']][,8] = abs(apply(a_list[['TUM']], 1, max, na.rm=T) - 1) #not seen anywhere
 
 
   # ICL
