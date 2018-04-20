@@ -21,8 +21,8 @@ model{
   # Icicle
   ICLB0_p ~ dbeta(1,1)
   ICLA0_p ~ dbeta(1,1)
-  LEAV_p <- 1 # assume perfect detection
-  LNF_p <- 1 # assume perfect detection
+  LNFB0_p ~ dbeta(1,1)
+  LNFA0_p ~ dbeta(1,1)
   ICMB0_p ~ dbeta(1,1)
   ICMA0_p ~ dbeta(1,1)
   ICUB0_p ~ dbeta(1,1)
@@ -31,7 +31,8 @@ model{
   # Peshastin
   PESB0_p ~ dbeta(1,1)
   PESA0_p ~ dbeta(1,1)
-
+  PEUB0_p ~ dbeta(1,1)
+  PEUA0_p ~ dbeta(1,1)
 
   # Chiwaukum
   CHWB0_p ~ dbeta(1,1)
@@ -63,18 +64,18 @@ model{
   #---------------------------------------------
   # Main branches after Tumwater
   # first row is wild fish, second row is hatchery fish
-  p_pop_TUM[1, 1:n_pop_TUM] ~ ddirch(main_dirch_vec[1,]); # uninformed Dirichlet for probs for going to TUM bins
-  p_pop_TUM[2, 1:n_pop_TUM] ~ ddirch(main_dirch_vec[2,]); # uninformed Dirichlet for probs for going to TUM bins
+  p_pop_TUM[1, 1:n_pops_TUM] ~ ddirch(TUM_dirch_vec[1,]); # uninformed Dirichlet for probs for going to TUM bins
+  p_pop_TUM[2, 1:n_pops_TUM] ~ ddirch(TUM_dirch_vec[2,]); # uninformed Dirichlet for probs for going to TUM bins
 
   # possible values for each branch
   # 1 = Peshastin, 2 = Icicle, 3 = Chiwaukum, 4 = Chiwawa, 5 = Nason, 6 = Little Wenatchee, 7 = White River, 8 = Black box
 
   for (i in 1:(n_fish)) {
-   a_TUM[i] ~ dcat( p_pop_TUM[fishOrigin[i], 1:n_pop_TUM] )
+   a_TUM[i] ~ dcat( p_pop_TUM[fishOrigin[i], 1:n_pops_TUM] )
   }
   # expand the dcat variable into a matrix of zeros and ones
   for (i in 1:(n_fish)) {
-   for (j in 1:n_pop_TUM)	{
+   for (j in 1:n_pops_TUM)	{
     catexp_TUM[i,j] <- equals(a_TUM[i],j) #equals(x,y) is a test for equality, returns [1,0]
    }
   }
@@ -87,13 +88,13 @@ model{
   }
 
   for (i in 1:n_fish) {
-   # PES site
-   Peshastin[i,1] ~ dbern( PESB0_p * catexp_TUM[i,1] )
-   Peshastin[i,2] ~ dbern( PESA0_p * catexp_TUM[i,1] )
+    # PES site
+    Peshastin[i,1] ~ dbern( PESB0_p * catexp_TUM[i,1] )
+    Peshastin[i,2] ~ dbern( PESA0_p * catexp_TUM[i,1] )
 
     z_peu[i] ~ dbern(catexp_TUM[i,1] * phi_peu[fishOrigin[i]] ) # did fish go past PEU?
-    Peshastin[i,3] ~ dbern(PEUB0_p * z_peu[i])
-    Peshastin[i,4] ~ dbern(PEUA0_p  * z_peu[i])
+    Peshastin[i,3] ~ dbern( PEUB0_p * z_peu[i] )
+    Peshastin[i,4] ~ dbern( PEUA0_p * z_peu[i] )
 
   }
 
@@ -105,8 +106,20 @@ model{
   }
 
   # first row is wild fish, second row is hatchery fish
-  p_pop_ICL[1, 1:n_pop_ICL] ~ ddirch(icl_dirch_vec[1,]); # uninformed Dirichlet for probs for going to ICL bins
-  p_pop_ICL[2, 1:n_pop_ICL] ~ ddirch(icl_dirch_vec[2,]); # uninformed Dirichlet for probs for going to ICL bins
+  p_pop_ICL[1, 1:n_pops_ICL] ~ ddirch(ICL_dirch_vec[1,]); # uninformed Dirichlet for probs for going to ICL bins
+  p_pop_ICL[2, 1:n_pops_ICL] ~ ddirch(ICL_dirch_vec[2,]); # uninformed Dirichlet for probs for going to ICL bins
+
+  # set up a matrix that deals with yes/no in the tributary or not
+  pMatICL[1,1:n_pops_ICL] <- zero_vec[1:(n_pops_ICL)] # when not in trib, 0 prob of being in sub areas
+  pMatICL[1,(n_pops_ICL+1)] <- 1 #set the 'not there' bin to prob = 1
+
+  # 2nd row is wild fish, 3rd row is hatchery
+  pMatICL[2,1:n_pops_ICL] <- p_pop_ICL[1,] # when in trib, >0 probs of being in sub areas
+  pMatICL[2,(n_pops_ICL+1)] <- 0 #set the 'not there' bin to prob = 0
+  pMatICL[3,1:n_pops_ICL] <- p_pop_ICL[2,] # when in trib, >0 probs of being in sub areas
+  pMatICL[3,(n_pops_ICL+1)] <- 0 #set the 'not there' bin to prob = 0
+
+
 
   # possible values for each branch
   # 1 = LEAV/LNF, 2 = ICM, 3 = Black box
@@ -117,7 +130,7 @@ model{
    Icicle[i,1] ~ dbern( ICLB0_p * catexp_TUM[i,2] )
    Icicle[i,2] ~ dbern( ICLA0_p * catexp_TUM[i,2] )
 
-   a_ICL[i] ~ dcat( p_pop_ICL[fishOrigin[i], ] )
+   a_ICL[i] ~ dcat( pMatICL[(catexp_TUM[i,2] * fishOrigin[i] + 1), 1:(n_pops_ICL+1)] )
    for (j in 1:3)	{
     catexp_ICL[i,j] <- equals(a_ICL[i],j) # equals(x,y) is a test for equality, returns [1,0]
    }
@@ -194,24 +207,24 @@ model{
   }
 
   #---------------------------------------------
+  # White River
+  #---------------------------------------------
+  # only have to worry about observation piece
+  for (i in 1:n_fish) {
+    # WTL
+    WhiteRiver[i,1] ~ dbern( WTLB0_p * catexp_TUM[i,6] )
+    WhiteRiver[i,2] ~ dbern( WTLA0_p * catexp_TUM[i,6] )
+
+  }
+
+  #---------------------------------------------
   # Little Wenatchee
   #---------------------------------------------
   # only have to worry about observation piece
   for (i in 1:n_fish) {
    # LWN
-   LittleWenatchee[i,1] ~ dbern( LWNB0_p * catexp_TUM[i,6] )
-   LittleWenatchee[i,2] ~ dbern( LWNA0_p * catexp_TUM[i,6] )
-
-  }
-
-  #---------------------------------------------
-  # White River
-  #---------------------------------------------
-  # only have to worry about observation piece
-  for (i in 1:n_fish) {
-   # WTL
-    WhiteRiver[i,1] ~ dbern( WTLB0_p * catexp_TUM[i,7] )
-    WhiteRiver[i,2] ~ dbern( WTLA0_p * catexp_TUM[i,7] )
+   LittleWenatchee[i,1] ~ dbern( LWNB0_p * catexp_TUM[i,7] )
+   LittleWenatchee[i,2] ~ dbern( LWNA0_p * catexp_TUM[i,7] )
 
   }
 
