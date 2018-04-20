@@ -19,7 +19,8 @@ createJAGSinputs_TUM = function(dabom_list = NULL,
               !is.null(n_branch_list))
 
   # set dirichlet vectors
-  init_val_func = setInitialValues_TUM(dabom_list)
+  init_val_func = setInitialValues_TUM(dabom_list,
+                                       n_branch_list)
   init_mats = init_val_func()
 
   dirich_input = vector('list', length(n_branch_list))
