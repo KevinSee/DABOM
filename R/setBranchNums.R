@@ -27,7 +27,8 @@ setBranchNums = function(parent_child = NULL) {
   branchNodes = branchNodes %>%
     filter(ParentNode == rootNode) %>%
     bind_rows(branchNodes %>%
-                filter(ParentNode != rootNode))
+                filter(ParentNode != rootNode) %>%
+                mutate(nChild = nChild + 1))
 
   branchNums_list = branchNodes %>%
     select(nChild) %>%
