@@ -111,19 +111,16 @@ model{
 
   # set up a matrix that deals with yes/no in the tributary or not
   pMatICL[1,1:n_pops_ICL] <- zero_vec[1:(n_pops_ICL)] # when not in trib, 0 prob of being in sub areas
-  pMatICL[1,(n_pops_ICL+1)] <- 1 #set the 'not there' bin to prob = 1
+  pMatICL[1,(n_pops_ICL+1)] <- 1 #set the "not there" bin to prob = 1
 
   # 2nd row is wild fish, 3rd row is hatchery
   pMatICL[2,1:n_pops_ICL] <- p_pop_ICL[1,] # when in trib, >0 probs of being in sub areas
-  pMatICL[2,(n_pops_ICL+1)] <- 0 #set the 'not there' bin to prob = 0
+  pMatICL[2,(n_pops_ICL+1)] <- 0 #set the "not there" bin to prob = 0
   pMatICL[3,1:n_pops_ICL] <- p_pop_ICL[2,] # when in trib, >0 probs of being in sub areas
-  pMatICL[3,(n_pops_ICL+1)] <- 0 #set the 'not there' bin to prob = 0
-
-
+  pMatICL[3,(n_pops_ICL+1)] <- 0 #set the "not there" bin to prob = 0
 
   # possible values for each branch
   # 1 = LEAV/LNF, 2 = ICM, 3 = Black box
-
 
   for (i in 1:n_fish) {
    # ICL
@@ -136,8 +133,8 @@ model{
    }
 
    # LEAV/LNF
-   Icicle[i,3] ~ dbern( LEAV_p * catexp_ICL[i,1])
-   Icicle[i,4] ~ dbern( LNF_p * catexp_ICL[i,1])
+   Icicle[i,3] ~ dbern( LNFB0_p * catexp_ICL[i,1])
+   Icicle[i,4] ~ dbern( LNFA0_p * catexp_ICL[i,1])
 
    # ICM
    Icicle[i,5] ~ dbern( ICMB0_p * catexp_ICL[i,2] )
