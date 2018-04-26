@@ -2,7 +2,7 @@
 % Please edit documentation in R/compileTransProbs_PRA.R
 \name{compileTransProbs_PRA}
 \alias{compileTransProbs_PRA}
-\title{Compile Transition Probabilities - LGD}
+\title{Compile Transition Probabilities - PRA}
 \usage{
 compileTransProbs_PRA(dabom_mod = NULL)
 }
