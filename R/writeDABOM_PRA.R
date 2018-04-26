@@ -844,8 +844,8 @@ model
   Okanogan[i,25] ~ dbern(NMCA0_p * catexp_ZSL[i,3])
 
   # next do OKI
-  Okanogan[i,26] ~ dbern(OKCB0_p * catexp_ZSL[i,4])
-  Okanogan[i,27] ~ dbern(OKCA0_p * catexp_ZSL[i,4])
+  Okanogan[i,26] ~ dbern(OKIB0_p * catexp_ZSL[i,4])
+  Okanogan[i,27] ~ dbern(OKIA0_p * catexp_ZSL[i,4])
 
   # next do OKC
   Okanogan[i,28] ~ dbern(OKCB0_p * catexp_ZSL[i,5])
