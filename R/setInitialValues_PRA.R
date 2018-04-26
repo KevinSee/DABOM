@@ -1,6 +1,6 @@
-#' @title LGD DABOM Initial Values
+#' @title PRA DABOM Initial Values
 #'
-#' @description Construct appropriate initial values for Lower Granite version of DABOM
+#' @description Construct appropriate initial values for Priest Rapids version of DABOM
 #'
 #' @author Kevin See
 #'
