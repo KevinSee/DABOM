@@ -108,6 +108,10 @@ fixNoFishNodes = function(init_file = NULL,
     as.matrix() %>%
     as.character()
 
+  if(sum(grepl('\\[', phiNodes)) > 0) {
+    phiNodes = str_split(phiNodes, '\\[', simplify = T)[,1]
+  }
+
   unseenPhiSites = intersect(str_to_upper(phiNodes), unseenSites)
   unseenNodePaths = unseenPhiSites %>%
     as.list() %>%
