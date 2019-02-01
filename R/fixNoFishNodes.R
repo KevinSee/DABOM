@@ -24,26 +24,50 @@ fixNoFishNodes = function(init_file = NULL,
               !is.null(proc_ch) |
               !is.null(node_order))
 
-  # which nodes had observations?
-  seenNodes = proc_ch %>%
-    filter(UserProcStatus) %>%
-    select(Node) %>%
-    distinct() %>%
-    as.matrix %>%
-    as.character()
+  # dataframe of sites and nodes, and which nodes had at least one detection
+  node_detects = node_order %>%
+    select(NodeSite, Node) %>%
+    full_join(proc_ch %>%
+                filter(UserProcStatus) %>%
+                select(Node) %>%
+                distinct() %>%
+                mutate(seen = T),
+              by = 'Node') %>%
+    mutate_at(vars(seen),
+              funs(if_else(is.na(.), F, .)))
 
-  # which nodes did not?
-  unseenNodes = unique(node_order$Node)[!unique(node_order$Node) %in% seenNodes]
+  # which nodes had observations?
+  seenNodes = node_detects %>%
+    filter(seen) %>%
+    select(Node) %>%
+    as.matrix %>%
+    as.character
+
+  # which nodes had no observations?
+  unseenNodes = node_detects %>%
+    filter(!seen) %>%
+    select(Node) %>%
+    as.matrix %>%
+    as.character
 
   # convert to site codes
-  seenSites = stringr::str_replace(seenNodes, 'B0$', '') %>%
-    stringr::str_replace('A0$', '') %>%
-    unique()
+  unseenSites = node_detects %>%
+    group_by(NodeSite) %>%
+    summarise(nNodes = n_distinct(Node),
+              nSeen = sum(seen)) %>%
+    filter(nSeen == 0) %>%
+    select(NodeSite) %>%
+    as.matrix %>%
+    as.character
 
-  unseenSites = stringr::str_replace(unseenNodes, 'B0$', '') %>%
-    stringr::str_replace('A0$', '') %>%
-    unique()
-
+  seenSites = node_detects %>%
+    group_by(NodeSite) %>%
+    summarise(nNodes = n_distinct(Node),
+              nSeen = sum(seen)) %>%
+    filter(nSeen > 0) %>%
+    select(NodeSite) %>%
+    as.matrix %>%
+    as.character
 
   # read in basic model file
   # open a connection
@@ -64,17 +88,16 @@ fixNoFishNodes = function(init_file = NULL,
     cat(paste('Fixed', paste(unseenNodes, collapse = ', '), 'at 0% detection probability, because no tags were observed there.\n'))
   }
 
-  singleSites = intersect(seenSites, unseenSites)
-
-  # # add all the single array or weir sites
-  # singleSites = c(singleSites,
-  #                 node_order %>%
-  #                   filter(!(grepl('A0$', Node) | grepl('B0$', Node))) %>%
-  #                   select(NodeSite) %>%
-  #                   distinct() %>%
-  #                   as.matrix() %>%
-  #                   as.character()) %>%
-  #   unique()
+  # which sites have multiple nodes but only one had detections?
+  singleSites = node_detects %>%
+    group_by(NodeSite) %>%
+    summarise(nNodes = n_distinct(Node),
+              nSeen = sum(seen)) %>%
+    filter(nSeen == 1,
+           nNodes > nSeen) %>%
+    select(NodeSite) %>%
+    as.matrix %>%
+    as.character
 
   for(site in singleSites) {
     tmp = node_order %>%
@@ -109,10 +132,12 @@ fixNoFishNodes = function(init_file = NULL,
     as.character()
 
   if(sum(grepl('\\[', phiNodes)) > 0) {
-    phiNodes = str_split(phiNodes, '\\[', simplify = T)[,1]
+    phiSites = str_split(phiNodes, '\\[', simplify = T)[,1]
+  } else {
+    phiSites = phiNodes
   }
 
-  unseenPhiSites = intersect(str_to_upper(phiNodes), unseenSites)
+  unseenPhiSites = intersect(str_to_upper(phiSites), unseenSites)
   unseenNodePaths = unseenPhiSites %>%
     as.list() %>%
     map_df(.f = function(x) {
@@ -139,13 +164,20 @@ fixNoFishNodes = function(init_file = NULL,
     }
   }
 
+  phi_df = tibble(node = phiNodes,
+                  site = toupper(phiSites)) %>%
+    inner_join(tibble(site = intersect(unseenPhiSites, unseenSites)))
 
-  for(site in intersect(unseenPhiSites, unseenSites)) {
-    mod_file[grep(paste0('phi_', tolower(site), ' ~'), mod_file)] = paste0('  phi_', tolower(site), ' <- 0 # no upstream detections')
+  if(nrow(phi_df) > 0 ) {
+    for(i in 1:nrow(phi_df)) {
+      # phi_prior = paste0('phi_', phi_df$node[i], ' ~')
+      mod_file[grep(paste0('phi_', tolower(phi_df$site[i])), mod_file)[1]] = paste0('  phi_', phi_df$node[i], ' <- 0 # no upstream detections')
 
-    cat(paste('\nFixed upstream movement past site', site, 'to 0 because no detections there or upstream.\n'))
+      cat(paste('\nFixed upstream movement past site', phi_df$site[i], 'to 0 because no detections there or upstream.\n'))
 
+    }
   }
+
 
   if('STR' %in% unseenSites & 'KRS' %in% seenSites) {
     mod_file[grep('KRS_p ~', mod_file)] = 'KRS_p <- 1 # Single array, no upstream detections'
