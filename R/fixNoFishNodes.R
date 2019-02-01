@@ -121,63 +121,64 @@ fixNoFishNodes = function(init_file = NULL,
   }
 
   # if no observations at some terminal nodes, fix the movement probability past those nodes to 0
-  phiNodes = tibble(modLines = str_trim(mod_file[grep('phi_', mod_file)])) %>%
-    mutate(site = str_split(modLines, '\\~', simplify = T)[,1]) %>%
-    select(site) %>%
-    mutate(site = str_trim(site)) %>%
-    filter(grepl('phi', site)) %>%
-    distinct() %>%
-    mutate(site = str_replace(site, '^phi_', '')) %>%
-    as.matrix() %>%
-    as.character()
-
-  if(sum(grepl('\\[', phiNodes)) > 0) {
-    phiSites = str_split(phiNodes, '\\[', simplify = T)[,1]
-  } else {
-    phiSites = phiNodes
-  }
-
-  unseenPhiSites = intersect(str_to_upper(phiSites), unseenSites)
-  unseenNodePaths = unseenPhiSites %>%
-    as.list() %>%
-    map_df(.f = function(x) {
-      node_order %>%
-        filter(grepl(x, Path))
-    })
-  if(sum(!unseenNodePaths$NodeSite %in% unseenPhiSites) > 0) {
-    pathDf = unseenNodePaths %>%
-      filter(!NodeSite %in% unseenPhiSites) %>%
-      select(NodeSite) %>%
+  if(sum(grepl('phi', mod_file)) > 0) {
+    phiNodes = tibble(modLines = str_trim(mod_file[grep('phi_', mod_file)])) %>%
+      mutate(site = str_split(modLines, '\\~', simplify = T)[,1]) %>%
+      select(site) %>%
+      mutate(site = str_trim(site)) %>%
+      filter(grepl('phi', site)) %>%
       distinct() %>%
+      mutate(site = str_replace(site, '^phi_', '')) %>%
       as.matrix() %>%
-      as.character() %>%
+      as.character()
+
+    if(sum(grepl('\\[', phiNodes)) > 0) {
+      phiSites = str_split(phiNodes, '\\[', simplify = T)[,1]
+    } else {
+      phiSites = phiNodes
+    }
+
+    unseenPhiSites = intersect(str_to_upper(phiSites), unseenSites)
+    unseenNodePaths = unseenPhiSites %>%
       as.list() %>%
       map_df(.f = function(x) {
         node_order %>%
           filter(grepl(x, Path))
       })
+    if(sum(!unseenNodePaths$NodeSite %in% unseenPhiSites) > 0) {
+      pathDf = unseenNodePaths %>%
+        filter(!NodeSite %in% unseenPhiSites) %>%
+        select(NodeSite) %>%
+        distinct() %>%
+        as.matrix() %>%
+        as.character() %>%
+        as.list() %>%
+        map_df(.f = function(x) {
+          node_order %>%
+            filter(grepl(x, Path))
+        })
 
-    for(site in unseenPhiSites) {
-      if(sum(grepl(site, pathDf$Path)) > 0 ) {
-        unseenPhiSites = unseenPhiSites[-match(site, unseenPhiSites)]
+      for(site in unseenPhiSites) {
+        if(sum(grepl(site, pathDf$Path)) > 0 ) {
+          unseenPhiSites = unseenPhiSites[-match(site, unseenPhiSites)]
+        }
+      }
+    }
+
+    phi_df = tibble(node = phiNodes,
+                    site = toupper(phiSites)) %>%
+      inner_join(tibble(site = intersect(unseenPhiSites, unseenSites)))
+
+    if(nrow(phi_df) > 0 ) {
+      for(i in 1:nrow(phi_df)) {
+        # phi_prior = paste0('phi_', phi_df$node[i], ' ~')
+        mod_file[grep(paste0('phi_', tolower(phi_df$site[i])), mod_file)[1]] = paste0('  phi_', phi_df$node[i], ' <- 0 # no upstream detections')
+
+        cat(paste('\nFixed upstream movement past site', phi_df$site[i], 'to 0 because no detections there or upstream.\n'))
+
       }
     }
   }
-
-  phi_df = tibble(node = phiNodes,
-                  site = toupper(phiSites)) %>%
-    inner_join(tibble(site = intersect(unseenPhiSites, unseenSites)))
-
-  if(nrow(phi_df) > 0 ) {
-    for(i in 1:nrow(phi_df)) {
-      # phi_prior = paste0('phi_', phi_df$node[i], ' ~')
-      mod_file[grep(paste0('phi_', tolower(phi_df$site[i])), mod_file)[1]] = paste0('  phi_', phi_df$node[i], ' <- 0 # no upstream detections')
-
-      cat(paste('\nFixed upstream movement past site', phi_df$site[i], 'to 0 because no detections there or upstream.\n'))
-
-    }
-  }
-
 
   if('STR' %in% unseenSites & 'KRS' %in% seenSites) {
     mod_file[grep('KRS_p ~', mod_file)] = 'KRS_p <- 1 # Single array, no upstream detections'
