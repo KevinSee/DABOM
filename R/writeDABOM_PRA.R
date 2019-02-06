@@ -829,7 +829,7 @@ model
 
   for (i in 1:n_fish) {
 
-  a_ZSL[i] ~ dcat( pMatZSL[(catexp_WEA[i,3] * fishOrigin[i] + 1), 1:(n_pops_ZSL+1)] )
+  a_ZSL[i] ~ dcat( pMatZSL[(catexp_OKL[i,12] * fishOrigin[i] + 1), 1:(n_pops_ZSL+1)] )
 
   for (j in 1:(n_pops_ZSL+1))  {
   catexp_ZSL[i,j] <- equals(a_ZSL[i],j)
