@@ -829,7 +829,7 @@ model
 
   for (i in 1:n_fish) {
 
-  a_ZSL[i] ~ dcat( pMatZSL[(catexp_WEA[i,3] * fishOrigin[i] + 1), 1:(n_pops_ZSL+1)] )
+  a_ZSL[i] ~ dcat( pMatZSL[(catexp_OKL[i,12] * fishOrigin[i] + 1), 1:(n_pops_ZSL+1)] )
 
   for (j in 1:(n_pops_ZSL+1))  {
   catexp_ZSL[i,j] <- equals(a_ZSL[i],j)
@@ -844,8 +844,8 @@ model
   Okanogan[i,25] ~ dbern(NMCA0_p * catexp_ZSL[i,3])
 
   # next do OKI
-  Okanogan[i,26] ~ dbern(OKCB0_p * catexp_ZSL[i,4])
-  Okanogan[i,27] ~ dbern(OKCA0_p * catexp_ZSL[i,4])
+  Okanogan[i,26] ~ dbern(OKIB0_p * catexp_ZSL[i,4])
+  Okanogan[i,27] ~ dbern(OKIA0_p * catexp_ZSL[i,4])
 
   # next do OKC
   Okanogan[i,28] ~ dbern(OKCB0_p * catexp_ZSL[i,5])

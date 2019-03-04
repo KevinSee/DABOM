@@ -1,4 +1,4 @@
-#' @title Compile Transition Probabilities - LGD
+#' @title Compile Transition Probabilities - PRA
 #'
 #' @description Extracts the MCMC posteriors of transition probabilities for a DABOM model, and multiplies them appropriately. This function is specific to the Lower Granite version of DABOM.
 #'

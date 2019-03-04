@@ -24,6 +24,11 @@ summariseDetectProbs = function(dabom_mod = NULL,
 
   if(class(dabom_mod) != 'mcmc.list') dabom_mod = as.mcmc.list(dabom_mod)
 
+  if (sum(capHist_proc$UserProcStatus == "") > 0) {
+    stop("UserProcStatus must be defined for each observation.")
+  }
+  capHist_proc = capHist_proc %>% filter(UserProcStatus)
+
   # convert mcmc.list to tibble
   dabom_df = as.matrix(dabom_mod,
                        iters = T,

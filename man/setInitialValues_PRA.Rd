@@ -2,7 +2,7 @@
 % Please edit documentation in R/setInitialValues_PRA.R
 \name{setInitialValues_PRA}
 \alias{setInitialValues_PRA}
-\title{LGD DABOM Initial Values}
+\title{PRA DABOM Initial Values}
 \usage{
 setInitialValues_PRA(dabom_list = NULL)
 }
@@ -10,7 +10,7 @@ setInitialValues_PRA(dabom_list = NULL)
 \item{dabom_list}{output of \code{createDABOMcapHist} with parameter split_matrics set to \code{TRUE}.}
 }
 \description{
-Construct appropriate initial values for Lower Granite version of DABOM
+Construct appropriate initial values for Priest Rapids version of DABOM
 }
 \examples{
 setInitialValues_PRA()
