@@ -23,8 +23,8 @@ addTimeVaryData = function(proc_ch = NULL,
                            node_order = NULL,
                            spawn_yr,
                            spp = c('Chinook', 'Steelhead'),
-                           start_day = NULL,
-                           end_day = NULL,
+                           start_date = NULL,
+                           end_date = NULL,
                            strata_beg = 'Mon',
                            last_strata_min = 3) {
 
@@ -32,10 +32,9 @@ addTimeVaryData = function(proc_ch = NULL,
               !is.null(spawn_yr) |
               !is.null(spp))
 
-  week_strata = STADEM::weeklyStrata(spawn_yr = spawn_yr,
-                                     spp = spp,
-                                     start_day = start_day,
-                                     end_day = end_day,
+  week_strata = STADEM::weeklyStrata(spp = spp,
+                                     start_date = start_date,
+                                     end_date = start_date,
                                      strata_beg = strata_beg,
                                      last_strata_min = last_strata_min)
 
