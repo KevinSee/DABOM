@@ -13,17 +13,15 @@ addTimeVaryData(proc_ch = NULL, node_order = NULL, spawn_yr,
 
 \item{node_order}{output of function \code{createNodeOrder}}
 
-\item{spawn_yr}{spawn year to divide into weekly strata}
-
 \item{spp}{choices are either \code{Chinook} or \code{Steelhead}}
+
+\item{start_date}{character vector of date (\code{YYYYMMDD}) when query should start}
+
+\item{end_date}{character vector of date (\code{YYYYMMDD}) when query should end}
 
 \item{strata_beg}{3 letter code for the day of the week each weekly strata should begin on. Default value is \code{'Mon'}.}
 
 \item{last_strata_min}{minimum length (in days) for the final strata. Default value is 3.}
-
-\item{start_day}{date (\code{month / day}) when strata should start}
-
-\item{end_day}{date (\code{month / day}) when strata should end}
 }
 \description{
 Adds additional data required for the time-varying version of DABOM.

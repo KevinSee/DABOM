@@ -5,10 +5,9 @@
 #' @author Kevin See
 #'
 #' @inheritParams createDABOMcapHist
-#' @param spawn_yr spawn year to divide into weekly strata
 #' @param spp choices are either \code{Chinook} or \code{Steelhead}
-#' @param start_day date (\code{month / day}) when strata should start
-#' @param end_day date (\code{month / day}) when strata should end
+#' @param start_date character vector of date (\code{YYYYMMDD}) when query should start
+#' @param end_date character vector of date (\code{YYYYMMDD}) when query should end
 #' @param strata_beg 3 letter code for the day of the week each weekly strata should begin on. Default value is \code{'Mon'}.
 #' @param last_strata_min minimum length (in days) for the final strata. Default value is 3.
 
@@ -34,7 +33,7 @@ addTimeVaryData = function(proc_ch = NULL,
 
   week_strata = STADEM::weeklyStrata(spp = spp,
                                      start_date = start_date,
-                                     end_date = start_date,
+                                     end_date = end_date,
                                      strata_beg = strata_beg,
                                      last_strata_min = last_strata_min)
 
