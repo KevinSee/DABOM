@@ -4,22 +4,17 @@
 \alias{addTimeVaryData}
 \title{Add Time-Varying Data}
 \usage{
-addTimeVaryData(proc_ch = NULL, node_order = NULL, spawn_yr,
-  spp = c("Chinook", "Steelhead"), start_day = NULL, end_day = NULL,
-  strata_beg = "Mon", last_strata_min = 3)
+addTimeVaryData(proc_ch = NULL, node_order = NULL, start_date = NULL,
+  end_date = NULL, strata_beg = "Mon", last_strata_min = 3)
 }
 \arguments{
 \item{proc_ch}{capture history as returned by one of the \code{processCapHist} family of functions in \code{PITcleanr} package, which has then been verified by a user and all blank UserProcStatus entries have been completed.}
 
 \item{node_order}{output of function \code{createNodeOrder}}
 
-\item{spawn_yr}{spawn year to divide into weekly strata}
+\item{start_date}{character vector of date (\code{YYYYMMDD}) when query should start}
 
-\item{spp}{choices are either \code{Chinook} or \code{Steelhead}}
-
-\item{start_day}{date (\code{month / day}) when strata should start}
-
-\item{end_day}{date (\code{month / day}) when strata should end}
+\item{end_date}{character vector of date (\code{YYYYMMDD}) when query should end}
 
 \item{strata_beg}{3 letter code for the day of the week each weekly strata should begin on. Default value is \code{'Mon'}.}
 

@@ -5,10 +5,8 @@
 #' @author Kevin See
 #'
 #' @inheritParams createDABOMcapHist
-#' @param spawn_yr spawn year to divide into weekly strata
-#' @param spp choices are either \code{Chinook} or \code{Steelhead}
-#' @param start_day date (\code{month / day}) when strata should start
-#' @param end_day date (\code{month / day}) when strata should end
+#' @param start_date character vector of date (\code{YYYYMMDD}) when query should start
+#' @param end_date character vector of date (\code{YYYYMMDD}) when query should end
 #' @param strata_beg 3 letter code for the day of the week each weekly strata should begin on. Default value is \code{'Mon'}.
 #' @param last_strata_min minimum length (in days) for the final strata. Default value is 3.
 
@@ -21,21 +19,21 @@
 
 addTimeVaryData = function(proc_ch = NULL,
                            node_order = NULL,
-                           spawn_yr,
-                           spp = c('Chinook', 'Steelhead'),
-                           start_day = NULL,
-                           end_day = NULL,
+                           start_date = NULL,
+                           end_date = NULL,
                            strata_beg = 'Mon',
                            last_strata_min = 3) {
 
-  stopifnot(!is.null(proc_ch) |
-              !is.null(spawn_yr) |
-              !is.null(spp))
+  stopifnot(!is.null(proc_ch))
 
-  week_strata = STADEM::weeklyStrata(spawn_yr = spawn_yr,
-                                     spp = spp,
-                                     start_day = start_day,
-                                     end_day = end_day,
+  if(is.null(start_date)) start_date = min(proc_ch$TrapDate, na.rm = T) %>%
+      format('%Y%m%d')
+
+  if(is.null(end_date)) end_date = max(proc_ch$TrapDate, na.rm = T) %>%
+      format('%Y%m%d')
+
+  week_strata = STADEM::weeklyStrata(start_date = start_date,
+                                     end_date = end_date,
                                      strata_beg = strata_beg,
                                      last_strata_min = last_strata_min)
 
