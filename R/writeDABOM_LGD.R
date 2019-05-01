@@ -262,9 +262,9 @@ model{
   # only have to worry about observation piece
   for ( i in 1:n.fish ) {
 
-    Penawawa[i] ~ dbern(PENAWC_p * catexp[i,2])
-    Almota[i] ~ dbern(ALMOTC_p * catexp[i,3])
-    Alpowa[i] ~ dbern(ALPOWC_p * catexp[i,4])
+    Penawawa[i,1] ~ dbern(PENAWC_p * catexp[i,2])
+    Almota[i,1] ~ dbern(ALMOTC_p * catexp[i,3])
+    Alpowa[i,1] ~ dbern(ALPOWC_p * catexp[i,4])
 
   }
 
@@ -356,7 +356,7 @@ model{
   # only have to worry about observation piece
   for ( i in 1:n.fish ) {
 
-    TenMileCreek[i] ~ dbern(TENMC2_p * catexp[i,6])
+    TenMileCreek[i,1] ~ dbern(TENMC2_p * catexp[i,6])
 
   }
 
@@ -724,7 +724,7 @@ model{
   for (i in 1:n.fish) {
 
     # first array (SW1)
-    Selway[i] ~ dbern( SW1_p * catexp[i,16] )
+    Selway[i,1] ~ dbern( SW1_p * catexp[i,16] )
 
   }
 
@@ -736,7 +736,7 @@ model{
   for (i in 1:n.fish) {
 
     # first array (LOOKGC)
-    LookingGlass[i] ~ dbern( LOOKGC_p * catexp[i,17] )
+    LookingGlass[i,1] ~ dbern( LOOKGC_p * catexp[i,17] )
 
   }
 
@@ -828,7 +828,7 @@ model{
   for (i in 1:n.fish) {
 
     # first array (RAPH)
-    RapidRiver[i] ~ dbern( RAPH_p * catexp[i,20] )
+    RapidRiver[i,1] ~ dbern( RAPH_p * catexp[i,20] )
 
   }
 
@@ -1186,8 +1186,6 @@ model{
     a[i] ~ dcat( p_pop_main[dam_week[i], 1:n.pops.main] )
   }"
   }
-
-
   writeLines(model_file, file_name)
 
 }
