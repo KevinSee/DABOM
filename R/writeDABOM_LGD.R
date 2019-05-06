@@ -28,7 +28,8 @@ model{
   ACMB0_p ~ dbeta(1,1)
   GEORGC_p <- 1 # assume perfect detection
   ASOTIC_p ~ dbeta(1,1)
-  ACB_p ~ dbeta(1,1)
+  ACBA0_p ~ dbeta(1,1)
+  ACBB0_p ~ dbeta(1,1)
   AFCA0_p ~ dbeta(1,1)
   AFCB0_p ~ dbeta(1,1)
   CCAA0_p ~ dbeta(1,1)
@@ -303,14 +304,15 @@ model{
     Asotin[i,3] ~ dbern(ACMA0_p * max(catexp_Aso[i,1:(n.pops.Asotin[1])]))
 
     # George Creek (GEORGC)
-    Asotin[i,5] ~ dbern(GEORGC_p * catexp_Aso[i,2])
+    Asotin[i,6] ~ dbern(GEORGC_p * catexp_Aso[i,2])
 
     # Past adult trap (ASOTIC)
     Asotin[i,1] ~ dbern(ASOTIC_p * catexp_Aso[i,3])
 
     # Past ACB
     z_acb[i] ~ dbern(catexp_Aso[i,3] * phi_acb)
-    Asotin[i,4] ~ dbern(ACB_p * z_acb[i])
+    Asotin[i,4] ~ dbern(ACBB0_p * z_acb[i])
+    Asotin[i,5] ~ dbern(ACBA0_p * z_acb[i])
 
 
   }
@@ -341,12 +343,12 @@ model{
     #------------------------------------
     #first do main stem (if it is seen anywhere in mainstem OR tribs in Asotin -- thus the max statement)
     # CCA
-    Asotin[i,6] ~ dbern(CCAB0_p * catexp_AsoUp[i,2])
-    Asotin[i,7] ~ dbern(CCAA0_p * catexp_AsoUp[i,2])
+    Asotin[i,7] ~ dbern(CCAB0_p * catexp_AsoUp[i,2])
+    Asotin[i,8] ~ dbern(CCAA0_p * catexp_AsoUp[i,2])
 
     # AFC
-    Asotin[i,8] ~ dbern(AFCB0_p * catexp_AsoUp[i,3])
-    Asotin[i,9] ~ dbern(AFCA0_p * catexp_AsoUp[i,3])
+    Asotin[i,9] ~ dbern(AFCB0_p * catexp_AsoUp[i,3])
+    Asotin[i,10] ~ dbern(AFCA0_p * catexp_AsoUp[i,3])
 
   } # ends the ifish loop started at the top of this section
 
