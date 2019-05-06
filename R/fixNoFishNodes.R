@@ -181,23 +181,23 @@ fixNoFishNodes = function(init_file = NULL,
   }
 
   if('STR' %in% unseenSites & 'KRS' %in% seenSites) {
-    mod_file[grep('KRS_p ~', mod_file)] = 'KRS_p <- 1 # Single array, no upstream detections'
+    mod_file[grep('KRS_p ~', mod_file)] = '  KRS_p <- 1 # Single array, no upstream detections'
   }
 
   if('LRL' %in% unseenSites & 'FISTRP' %in% seenSites) {
-    mod_file[grep('phi_fistrp ~', mod_file)] = 'phi_fistrp <- 1 # no detections at LRL'
+    mod_file[grep('phi_fistrp ~', mod_file)] = '  phi_fistrp <- 1 # no detections at LRL'
   }
 
   if('IR4' %in% unseenSites & sum(c('IML', 'IMNAHW', 'IR5', 'GUMBTC', 'DRY2C') %in% seenSites) > 0) {
-    mod_file[grep('phi_iml ~', mod_file)] = 'phi_iml <- 1 # no detections at IR4'
+    mod_file[grep('phi_iml ~', mod_file)] = '  phi_iml <- 1 # no detections at IR4'
   }
 
   if(sum(c('MTR', 'UTR', 'TUCH') %in% unseenSites) == 3 & 'LTR' %in% seenSites) {
-    mod_file[grep('LTR_p ~', mod_file)] = 'LTR_p <- 1 # Single array, no upstream detections'
+    mod_file[grep('LTR_p ~', mod_file)] = '  LTR_p <- 1 # Single array, no upstream detections'
   }
 
   if('SC2A0' %in% unseenNodes & ('SC1' %in% seenNodes & 'SC2B0' %in% seenNodes)) {
-    mod_file[grep('SC2B0 ~', mod_file)] = 'SC2B0 ~ dbeta(1, 1)'
+    mod_file[grep('SC2B0 ~', mod_file)] = '  SC2B0 ~ dbeta(1, 1)'
   }
 
   writeLines(mod_file, mod_conn_new)
