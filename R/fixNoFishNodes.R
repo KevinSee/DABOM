@@ -28,37 +28,30 @@ fixNoFishNodes = function(init_file = NULL,
   node_detects = node_order %>%
     select(NodeSite, Node) %>%
     full_join(proc_ch %>%
-                filter(UserProcStatus) %>%
-                select(Node) %>%
-                distinct() %>%
-                mutate(seen = T),
-              by = 'Node') %>%
-    mutate_at(vars(seen),
-              funs(if_else(is.na(.), F, .)))
+                group_by(Node) %>%
+                summarise(nTags = n_distinct(TagID))) %>%
+    mutate_at(vars(nTags),
+              list(~ if_else(is.na(.), as.integer(0), .))) %>%
+    mutate(seen = if_else(nTags > 0, T, F))
 
   # which nodes had observations?
   seenNodes = node_detects %>%
     filter(seen) %>%
-    select(Node) %>%
-    as.matrix %>%
-    as.character
+    pull(Node)
 
   # which nodes had no observations?
   unseenNodes = node_detects %>%
     filter(!seen) %>%
-    select(Node) %>%
-    as.matrix %>%
-    as.character
+    pull(Node)
 
   # convert to site codes
   unseenSites = node_detects %>%
     group_by(NodeSite) %>%
     summarise(nNodes = n_distinct(Node),
+              nTags = sum(nTags),
               nSeen = sum(seen)) %>%
     filter(nSeen == 0) %>%
-    select(NodeSite) %>%
-    as.matrix %>%
-    as.character
+    pull(NodeSite)
 
   seenSites = node_detects %>%
     group_by(NodeSite) %>%
@@ -95,9 +88,7 @@ fixNoFishNodes = function(init_file = NULL,
               nSeen = sum(seen)) %>%
     filter(nSeen == 1,
            nNodes > nSeen) %>%
-    select(NodeSite) %>%
-    as.matrix %>%
-    as.character
+    pull(NodeSite)
 
   for(site in singleSites) {
     tmp = node_order %>%
@@ -129,8 +120,7 @@ fixNoFishNodes = function(init_file = NULL,
       filter(grepl('phi', site)) %>%
       distinct() %>%
       mutate(site = str_replace(site, '^phi_', '')) %>%
-      as.matrix() %>%
-      as.character()
+      pull(site)
 
     if(sum(grepl('\\[', phiNodes)) > 0) {
       phiSites = str_split(phiNodes, '\\[', simplify = T)[,1]
@@ -144,24 +134,34 @@ fixNoFishNodes = function(init_file = NULL,
       map_df(.f = function(x) {
         node_order %>%
           filter(grepl(x, Path))
-      })
+      }) %>%
+      distinct()
+
     if(sum(!unseenNodePaths$NodeSite %in% unseenPhiSites) > 0) {
-      pathDf = unseenNodePaths %>%
-        filter(!NodeSite %in% unseenPhiSites) %>%
-        select(NodeSite) %>%
-        distinct() %>%
-        as.matrix() %>%
-        as.character() %>%
-        as.list() %>%
-        map_df(.f = function(x) {
-          node_order %>%
-            filter(grepl(x, Path))
-        })
+      # pathDf = unseenNodePaths %>%
+      #   filter(!NodeSite %in% unseenPhiSites) %>%
+      #   pull(NodeSite) %>%
+      #   unique() %>%
+      #   as.list() %>%
+      #   map_df(.f = function(x) {
+      #     node_order %>%
+      #       filter(grepl(x, Path))
+      #   })
 
       for(site in unseenPhiSites) {
-        if(sum(grepl(site, pathDf$Path)) > 0 ) {
+        test = node_detects %>%
+          full_join(node_order,
+                    by = c('NodeSite', 'Node')) %>%
+          filter(NodeSite != site) %>%
+          filter(grepl(site, Path)) %>%
+          summarise_at(vars(nTags),
+                       list(sum)) %>%
+          pull(nTags) > 0
+
+        if(test) {
           unseenPhiSites = unseenPhiSites[-match(site, unseenPhiSites)]
         }
+        rm(test)
       }
     }
 
@@ -186,6 +186,10 @@ fixNoFishNodes = function(init_file = NULL,
 
   if('LRL' %in% unseenSites & 'FISTRP' %in% seenSites) {
     mod_file[grep('phi_fistrp ~', mod_file)] = 'phi_fistrp <- 1 # no detections at LRL'
+  }
+
+  if('IR4' %in% unseenSites & sum(c('IML', 'IMNAHW', 'IR5', 'GUMBTC', 'DRY2C') %in% seenSites) > 0) {
+    mod_file[grep('phi_iml ~', mod_file)] = 'phi_iml <- 1 # no detections at IR4'
   }
 
   if(sum(c('MTR', 'UTR', 'TUCH') %in% unseenSites) == 3 & 'LTR' %in% seenSites) {
