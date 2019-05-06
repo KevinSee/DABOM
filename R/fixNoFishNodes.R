@@ -188,10 +188,13 @@ fixNoFishNodes = function(init_file = NULL,
     mod_file[grep('phi_fistrp ~', mod_file)] = 'phi_fistrp <- 1 # no detections at LRL'
   }
 
+  if(sum(c('MTR', 'UTR', 'TUCH') %in% unseenSites) == 3 & 'LTR' %in% seenSites) {
+    mod_file[grep('LTR_p ~', mod_file)] = 'LTR_p <- 1 # Single array, no upstream detections'
+  }
+
   if('SC2A0' %in% unseenNodes & ('SC1' %in% seenNodes & 'SC2B0' %in% seenNodes)) {
     mod_file[grep('SC2B0 ~', mod_file)] = 'SC2B0 ~ dbeta(1, 1)'
   }
-
 
   writeLines(mod_file, mod_conn_new)
   close(mod_conn_new)
