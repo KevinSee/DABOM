@@ -65,7 +65,7 @@ setInitialValues_LGD = function(dabom_list = NULL) {
     apply(1, max)
   # past ASOTIC
   a_Aso_init[,3] = dabom_list$Asotin %>%
-    select(ASOTIC, ACB, CCAB0:AFCA0) %>%
+    select(ASOTIC, matches('ACB'), CCAB0:AFCA0) %>%
     apply(1, max)
   # Asotin bb
   a_Aso_init[,1] = ifelse(apply(a_Aso_init[,-1], 1, max) == 0,

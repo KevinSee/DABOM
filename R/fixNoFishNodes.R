@@ -28,37 +28,30 @@ fixNoFishNodes = function(init_file = NULL,
   node_detects = node_order %>%
     select(NodeSite, Node) %>%
     full_join(proc_ch %>%
-                filter(UserProcStatus) %>%
-                select(Node) %>%
-                distinct() %>%
-                mutate(seen = T),
-              by = 'Node') %>%
-    mutate_at(vars(seen),
-              funs(if_else(is.na(.), F, .)))
+                group_by(Node) %>%
+                summarise(nTags = n_distinct(TagID))) %>%
+    mutate_at(vars(nTags),
+              list(~ if_else(is.na(.), as.integer(0), .))) %>%
+    mutate(seen = if_else(nTags > 0, T, F))
 
   # which nodes had observations?
   seenNodes = node_detects %>%
     filter(seen) %>%
-    select(Node) %>%
-    as.matrix %>%
-    as.character
+    pull(Node)
 
   # which nodes had no observations?
   unseenNodes = node_detects %>%
     filter(!seen) %>%
-    select(Node) %>%
-    as.matrix %>%
-    as.character
+    pull(Node)
 
   # convert to site codes
   unseenSites = node_detects %>%
     group_by(NodeSite) %>%
     summarise(nNodes = n_distinct(Node),
+              nTags = sum(nTags),
               nSeen = sum(seen)) %>%
     filter(nSeen == 0) %>%
-    select(NodeSite) %>%
-    as.matrix %>%
-    as.character
+    pull(NodeSite)
 
   seenSites = node_detects %>%
     group_by(NodeSite) %>%
@@ -95,9 +88,7 @@ fixNoFishNodes = function(init_file = NULL,
               nSeen = sum(seen)) %>%
     filter(nSeen == 1,
            nNodes > nSeen) %>%
-    select(NodeSite) %>%
-    as.matrix %>%
-    as.character
+    pull(NodeSite)
 
   for(site in singleSites) {
     tmp = node_order %>%
@@ -121,76 +112,93 @@ fixNoFishNodes = function(init_file = NULL,
   }
 
   # if no observations at some terminal nodes, fix the movement probability past those nodes to 0
-  phiNodes = tibble(modLines = str_trim(mod_file[grep('phi_', mod_file)])) %>%
-    mutate(site = str_split(modLines, '\\~', simplify = T)[,1]) %>%
-    select(site) %>%
-    mutate(site = str_trim(site)) %>%
-    filter(grepl('phi', site)) %>%
-    distinct() %>%
-    mutate(site = str_replace(site, '^phi_', '')) %>%
-    as.matrix() %>%
-    as.character()
-
-  if(sum(grepl('\\[', phiNodes)) > 0) {
-    phiSites = str_split(phiNodes, '\\[', simplify = T)[,1]
-  } else {
-    phiSites = phiNodes
-  }
-
-  unseenPhiSites = intersect(str_to_upper(phiSites), unseenSites)
-  unseenNodePaths = unseenPhiSites %>%
-    as.list() %>%
-    map_df(.f = function(x) {
-      node_order %>%
-        filter(grepl(x, Path))
-    })
-  if(sum(!unseenNodePaths$NodeSite %in% unseenPhiSites) > 0) {
-    pathDf = unseenNodePaths %>%
-      filter(!NodeSite %in% unseenPhiSites) %>%
-      select(NodeSite) %>%
+  if(sum(grepl('phi', mod_file)) > 0) {
+    phiNodes = tibble(modLines = str_trim(mod_file[grep('phi_', mod_file)])) %>%
+      mutate(site = str_split(modLines, '\\~', simplify = T)[,1]) %>%
+      select(site) %>%
+      mutate(site = str_trim(site)) %>%
+      filter(grepl('phi', site)) %>%
       distinct() %>%
-      as.matrix() %>%
-      as.character() %>%
+      mutate(site = str_replace(site, '^phi_', '')) %>%
+      pull(site)
+
+    if(sum(grepl('\\[', phiNodes)) > 0) {
+      phiSites = str_split(phiNodes, '\\[', simplify = T)[,1]
+    } else {
+      phiSites = phiNodes
+    }
+
+    unseenPhiSites = intersect(str_to_upper(phiSites), unseenSites)
+    unseenNodePaths = unseenPhiSites %>%
       as.list() %>%
       map_df(.f = function(x) {
         node_order %>%
           filter(grepl(x, Path))
-      })
+      }) %>%
+      distinct()
 
-    for(site in unseenPhiSites) {
-      if(sum(grepl(site, pathDf$Path)) > 0 ) {
-        unseenPhiSites = unseenPhiSites[-match(site, unseenPhiSites)]
+    if(sum(!unseenNodePaths$NodeSite %in% unseenPhiSites) > 0) {
+      # pathDf = unseenNodePaths %>%
+      #   filter(!NodeSite %in% unseenPhiSites) %>%
+      #   pull(NodeSite) %>%
+      #   unique() %>%
+      #   as.list() %>%
+      #   map_df(.f = function(x) {
+      #     node_order %>%
+      #       filter(grepl(x, Path))
+      #   })
+
+      for(site in unseenPhiSites) {
+        test = node_detects %>%
+          full_join(node_order,
+                    by = c('NodeSite', 'Node')) %>%
+          filter(NodeSite != site) %>%
+          filter(grepl(site, Path)) %>%
+          summarise_at(vars(nTags),
+                       list(sum)) %>%
+          pull(nTags) > 0
+
+        if(test) {
+          unseenPhiSites = unseenPhiSites[-match(site, unseenPhiSites)]
+        }
+        rm(test)
+      }
+    }
+
+    phi_df = tibble(node = phiNodes,
+                    site = toupper(phiSites)) %>%
+      inner_join(tibble(site = intersect(unseenPhiSites, unseenSites)))
+
+    if(nrow(phi_df) > 0 ) {
+      for(i in 1:nrow(phi_df)) {
+        # phi_prior = paste0('phi_', phi_df$node[i], ' ~')
+        mod_file[grep(paste0('phi_', tolower(phi_df$site[i])), mod_file)[1]] = paste0('  phi_', phi_df$node[i], ' <- 0 # no upstream detections')
+
+        cat(paste('\nFixed upstream movement past site', phi_df$site[i], 'to 0 because no detections there or upstream.\n'))
+
       }
     }
   }
 
-  phi_df = tibble(node = phiNodes,
-                  site = toupper(phiSites)) %>%
-    inner_join(tibble(site = intersect(unseenPhiSites, unseenSites)))
-
-  if(nrow(phi_df) > 0 ) {
-    for(i in 1:nrow(phi_df)) {
-      # phi_prior = paste0('phi_', phi_df$node[i], ' ~')
-      mod_file[grep(paste0('phi_', tolower(phi_df$site[i])), mod_file)[1]] = paste0('  phi_', phi_df$node[i], ' <- 0 # no upstream detections')
-
-      cat(paste('\nFixed upstream movement past site', phi_df$site[i], 'to 0 because no detections there or upstream.\n'))
-
-    }
-  }
-
-
   if('STR' %in% unseenSites & 'KRS' %in% seenSites) {
-    mod_file[grep('KRS_p ~', mod_file)] = 'KRS_p <- 1 # Single array, no upstream detections'
+    mod_file[grep('KRS_p ~', mod_file)] = '  KRS_p <- 1 # Single array, no upstream detections'
   }
 
   if('LRL' %in% unseenSites & 'FISTRP' %in% seenSites) {
-    mod_file[grep('phi_fistrp ~', mod_file)] = 'phi_fistrp <- 1 # no detections at LRL'
+    mod_file[grep('phi_fistrp ~', mod_file)] = '  phi_fistrp <- 1 # no detections at LRL'
+  }
+
+  if('IR4' %in% unseenSites & sum(c('IML', 'IMNAHW', 'IR5', 'GUMBTC', 'DRY2C') %in% seenSites) > 0) {
+    mod_file[grep('phi_iml ~', mod_file)] = '  phi_iml <- 1 # no detections at IR4'
+  }
+
+  if(sum(c('MTR', 'UTR', 'TUCH') %in% unseenSites) == 3 & 'LTR' %in% seenSites) {
+    mod_file[grep('LTR_p ~', mod_file)] = '  LTR_p <- 1 # Single array, no upstream detections'
   }
 
   if('SC2A0' %in% unseenNodes & ('SC1' %in% seenNodes & 'SC2B0' %in% seenNodes)) {
-    mod_file[grep('SC2B0 ~', mod_file)] = 'SC2B0 ~ dbeta(1, 1)'
+    mod_file[grep('SC2B0 ~', mod_file)] = '  SC2B0 ~ dbeta(1, 1)'
   }
-
 
   writeLines(mod_file, mod_conn_new)
   close(mod_conn_new)

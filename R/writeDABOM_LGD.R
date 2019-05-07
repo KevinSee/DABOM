@@ -28,7 +28,8 @@ model{
   ACMB0_p ~ dbeta(1,1)
   GEORGC_p <- 1 # assume perfect detection
   ASOTIC_p ~ dbeta(1,1)
-  ACB_p ~ dbeta(1,1)
+  ACBA0_p ~ dbeta(1,1)
+  ACBB0_p ~ dbeta(1,1)
   AFCA0_p ~ dbeta(1,1)
   AFCB0_p ~ dbeta(1,1)
   CCAA0_p ~ dbeta(1,1)
@@ -262,9 +263,9 @@ model{
   # only have to worry about observation piece
   for ( i in 1:n.fish ) {
 
-    Penawawa[i] ~ dbern(PENAWC_p * catexp[i,2])
-    Almota[i] ~ dbern(ALMOTC_p * catexp[i,3])
-    Alpowa[i] ~ dbern(ALPOWC_p * catexp[i,4])
+    Penawawa[i,1] ~ dbern(PENAWC_p * catexp[i,2])
+    Almota[i,1] ~ dbern(ALMOTC_p * catexp[i,3])
+    Alpowa[i,1] ~ dbern(ALPOWC_p * catexp[i,4])
 
   }
 
@@ -303,14 +304,15 @@ model{
     Asotin[i,3] ~ dbern(ACMA0_p * max(catexp_Aso[i,1:(n.pops.Asotin[1])]))
 
     # George Creek (GEORGC)
-    Asotin[i,5] ~ dbern(GEORGC_p * catexp_Aso[i,2])
+    Asotin[i,6] ~ dbern(GEORGC_p * catexp_Aso[i,2])
 
     # Past adult trap (ASOTIC)
     Asotin[i,1] ~ dbern(ASOTIC_p * catexp_Aso[i,3])
 
     # Past ACB
     z_acb[i] ~ dbern(catexp_Aso[i,3] * phi_acb)
-    Asotin[i,4] ~ dbern(ACB_p * z_acb[i])
+    Asotin[i,4] ~ dbern(ACBB0_p * z_acb[i])
+    Asotin[i,5] ~ dbern(ACBA0_p * z_acb[i])
 
 
   }
@@ -341,12 +343,12 @@ model{
     #------------------------------------
     #first do main stem (if it is seen anywhere in mainstem OR tribs in Asotin -- thus the max statement)
     # CCA
-    Asotin[i,6] ~ dbern(CCAB0_p * catexp_AsoUp[i,2])
-    Asotin[i,7] ~ dbern(CCAA0_p * catexp_AsoUp[i,2])
+    Asotin[i,7] ~ dbern(CCAB0_p * catexp_AsoUp[i,2])
+    Asotin[i,8] ~ dbern(CCAA0_p * catexp_AsoUp[i,2])
 
     # AFC
-    Asotin[i,8] ~ dbern(AFCB0_p * catexp_AsoUp[i,3])
-    Asotin[i,9] ~ dbern(AFCA0_p * catexp_AsoUp[i,3])
+    Asotin[i,9] ~ dbern(AFCB0_p * catexp_AsoUp[i,3])
+    Asotin[i,10] ~ dbern(AFCA0_p * catexp_AsoUp[i,3])
 
   } # ends the ifish loop started at the top of this section
 
@@ -356,7 +358,7 @@ model{
   # only have to worry about observation piece
   for ( i in 1:n.fish ) {
 
-    TenMileCreek[i] ~ dbern(TENMC2_p * catexp[i,6])
+    TenMileCreek[i,1] ~ dbern(TENMC2_p * catexp[i,6])
 
   }
 
@@ -724,7 +726,7 @@ model{
   for (i in 1:n.fish) {
 
     # first array (SW1)
-    Selway[i] ~ dbern( SW1_p * catexp[i,16] )
+    Selway[i,1] ~ dbern( SW1_p * catexp[i,16] )
 
   }
 
@@ -736,7 +738,7 @@ model{
   for (i in 1:n.fish) {
 
     # first array (LOOKGC)
-    LookingGlass[i] ~ dbern( LOOKGC_p * catexp[i,17] )
+    LookingGlass[i,1] ~ dbern( LOOKGC_p * catexp[i,17] )
 
   }
 
@@ -828,7 +830,7 @@ model{
   for (i in 1:n.fish) {
 
     # first array (RAPH)
-    RapidRiver[i] ~ dbern( RAPH_p * catexp[i,20] )
+    RapidRiver[i,1] ~ dbern( RAPH_p * catexp[i,20] )
 
   }
 
@@ -1186,8 +1188,6 @@ model{
     a[i] ~ dcat( p_pop_main[dam_week[i], 1:n.pops.main] )
   }"
   }
-
-
   writeLines(model_file, file_name)
 
 }

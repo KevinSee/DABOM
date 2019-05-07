@@ -4,16 +4,13 @@
 \alias{addTimeVaryData}
 \title{Add Time-Varying Data}
 \usage{
-addTimeVaryData(proc_ch = NULL, node_order = NULL, spawn_yr,
-  spp = c("Chinook", "Steelhead"), start_date = NULL,
+addTimeVaryData(proc_ch = NULL, node_order = NULL, start_date = NULL,
   end_date = NULL, strata_beg = "Mon", last_strata_min = 3)
 }
 \arguments{
 \item{proc_ch}{capture history as returned by one of the \code{processCapHist} family of functions in \code{PITcleanr} package, which has then been verified by a user and all blank UserProcStatus entries have been completed.}
 
 \item{node_order}{output of function \code{createNodeOrder}}
-
-\item{spp}{choices are either \code{Chinook} or \code{Steelhead}}
 
 \item{start_date}{character vector of date (\code{YYYYMMDD}) when query should start}
 
