@@ -90,6 +90,12 @@ fixNoFishNodes = function(init_file = NULL,
            nNodes > nSeen) %>%
     pull(NodeSite)
 
+  # SC1, SC2B0 and SC2A0 are treated like a triple array, so we need this fix to avoid fixing SC2A0 or SC2B0 to 100% when it shouldn't be.
+  if('SC2' %in% singleSites &
+     'SC1' %in% seenNodes) {
+    singleSites = singleSites[-match('SC2', singleSites)]
+  }
+
   for(site in singleSites) {
     tmp = node_order %>%
       filter(grepl(site, Path),
