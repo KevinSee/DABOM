@@ -10,7 +10,6 @@
 #' @import dplyr tidyr
 #' @importFrom coda as.mcmc
 #' @importFrom coda HPDinterval
-#' @export
 #' @return NULL
 #' @examples #calcRepGrpEscape_LGD()
 
