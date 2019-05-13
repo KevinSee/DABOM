@@ -11,7 +11,7 @@
 #' @param node_order output of function \code{createNodeOrder}.
 #' @param summ_results Should the resulting posteriors be summarised or returned as posterior samples? Default value is \code{TRUE}.
 #' @param pt_est_nm Determines whether to use the mean, median of mode of posterior samples as the point estimate. Returns all 3 if \code{NULL}, which is default.
-#' @param cred_int_prob A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95%.
+#' @param cred_int_prob A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95 percent.
 #'
 #' @import dplyr tidyr stringr
 #' @export
