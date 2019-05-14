@@ -14,9 +14,6 @@ summariseTransProbs_LGD(dabom_mod = NULL, cred_int_prob = 0.95)
 \description{
 Extracts the MCMC posteriors of transition probabilities for a DABOM model, and summarises the results. This function is specific to the Lower Granite version of DABOM.
 }
-\examples{
-summariseTransProbs_LGD()
-}
 \author{
 Kevin See
 }

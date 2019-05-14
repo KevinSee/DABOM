@@ -5,12 +5,11 @@
 #' @author Kevin See
 #'
 #' @inheritParams calcTribEscape_LGD
-#' @inheritParams defineRepGrps
+#' @param spp Species, either "Chinook" or "Steelhead"
 #'
 #' @import dplyr tidyr
 #' @importFrom coda as.mcmc
 #' @importFrom coda HPDinterval
-#' @export
 #' @return NULL
 #' @examples #calcRepGrpEscape_LGD()
 

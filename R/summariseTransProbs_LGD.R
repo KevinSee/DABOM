@@ -10,7 +10,6 @@
 #' @import dplyr tidyr coda stringr
 #' @export
 #' @return NULL
-#' @examples summariseTransProbs_LGD()
 
 summariseTransProbs_LGD = function(dabom_mod = NULL,
                                    cred_int_prob = 0.95) {

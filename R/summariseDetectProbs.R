@@ -9,6 +9,7 @@
 #' @param capHist_proc Dataframe with the same format as that returned by \code{processCapHist_LGD}, under the name \code{ProcCapHist}. This is the data fed into DABOM as observations.
 #'
 #' @param cred_int_prob A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95\%.
+
 #'
 #' @import dplyr tidyr coda stringr
 #' @export
@@ -23,6 +24,11 @@ summariseDetectProbs = function(dabom_mod = NULL,
               !is.null(capHist_proc))
 
   if(class(dabom_mod) != 'mcmc.list') dabom_mod = as.mcmc.list(dabom_mod)
+
+  if (sum(capHist_proc$UserProcStatus == "") > 0) {
+    stop("UserProcStatus must be defined for each observation.")
+  }
+  capHist_proc = capHist_proc %>% filter(UserProcStatus)
 
   # convert mcmc.list to tibble
   dabom_df = as.matrix(dabom_mod,
