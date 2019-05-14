@@ -8,7 +8,7 @@
 #'
 #' @param capHist_proc Dataframe with the same format as that returned by \code{processCapHist_LGD}, under the name \code{ProcCapHist}. This is the data fed into DABOM as observations.
 #'
-#' @param cred_int_prob A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95\\%.
+#' @param cred_int_prob A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95\%.
 #'
 #' @import dplyr tidyr coda stringr
 #' @export

@@ -5,7 +5,7 @@
 #' @author Kevin See
 #'
 #' @param dabom_mod An MCMC.list, where the detection parameter names all end with "\code{_p}".
-#' @param cred_int_prob A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95%.
+#' @param cred_int_prob A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95\%.
 #'
 #' @import dplyr tidyr coda stringr
 #' @export

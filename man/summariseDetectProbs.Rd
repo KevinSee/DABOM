@@ -12,7 +12,7 @@ summariseDetectProbs(dabom_mod = NULL, capHist_proc = NULL,
 
 \item{capHist_proc}{Dataframe with the same format as that returned by \code{processCapHist_LGD}, under the name \code{ProcCapHist}. This is the data fed into DABOM as observations.}
 
-\item{cred_int_prob}{A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95\\%.}
+\item{cred_int_prob}{A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95\%.}
 }
 \value{
 a dataframe with number of tags detected, mean, median, mode, se, cv and credible intervals of detection probability posteriors.
