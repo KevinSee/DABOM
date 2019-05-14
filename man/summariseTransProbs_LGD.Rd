@@ -9,7 +9,7 @@ summariseTransProbs_LGD(dabom_mod = NULL, cred_int_prob = 0.95)
 \arguments{
 \item{dabom_mod}{An MCMC.list, where the detection parameter names all end with "\code{_p}".}
 
-\item{cred_int_prob}{A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95 percent.}
+\item{cred_int_prob}{A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95\%.}
 }
 \description{
 Extracts the MCMC posteriors of transition probabilities for a DABOM model, and summarises the results. This function is specific to the Lower Granite version of DABOM.
