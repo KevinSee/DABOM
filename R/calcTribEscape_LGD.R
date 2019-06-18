@@ -125,6 +125,8 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
                        site_list[[i]])
   }
 
+  site_list$Main_bb = 'Main_bb'
+
   # this functionality relies on specific format of naming in the compileTransProbs_LGD() function
   trib_list = site_list %>%
     purrr::map(.f = function(x) {
