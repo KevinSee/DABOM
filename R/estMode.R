@@ -10,8 +10,8 @@
 #' @return NULL
 #' @examples estMode(rgamma(1000, 5, 1/6))
 
-estMode = function(x) {
-  d = density(x)
+estMode = function(x, na.rm = F) {
+  d = density(x, na.rm = na.rm)
   d$x[which.max(d$y)]
 }
 
