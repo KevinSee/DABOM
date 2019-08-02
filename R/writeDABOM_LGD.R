@@ -211,6 +211,7 @@ model{
   STL_p <- 1 # assume perfect detection
   SALEFT_p <- 1 # assume perfect detection
   PAHH_p <- 1 # assume perfect detection
+  RFL_p <- 1 # assume perfect detection
 
   BRC_p <- 1 # assume perfect detection
 
@@ -870,8 +871,8 @@ model{
 
     # GRANDW
     GrandeRonde[i,5] ~ dbern(GRANDW_p * catexp_UGR[i, 3])
-    GrandeRonde[i,6] ~ dbern(UGSB0_p * catexp_URG[i,3])
-    GrandeRonde[i,7] ~ dbern(UGSA0_p * catexp_URG[i,3])
+    GrandeRonde[i,6] ~ dbern(UGSB0_p * catexp_UGR[i,3])
+    GrandeRonde[i,7] ~ dbern(UGSA0_p * catexp_UGR[i,3])
 
   }
 
@@ -1140,7 +1141,7 @@ model{
   #--------------------------------
   # Now a branching model past USI
   #--------------------------------
-  # 7 bins: mainstem (1), Pahsimeroi (2), East Fork Salmon (3), Yankee Fork (4), Valley Creek (5), Sawtooth (6), and not seen (7)
+  # 7 bins: mainstem (1), Pahsimeroi (2), East Fork Salmon (3), Yankee Fork (4), Valley Creek (5), Red Fish Lake Creek (6), Sawtooth (7), and not seen (8)
 
   p_pop_UpSalm[1:n.pops.UpSalm] ~ ddirch(upsalm_dirch_vec) # Dirichlet for probs for going to bins
 
@@ -1188,8 +1189,11 @@ model{
     UpperSalmon[i,7] ~ dbern(VC2_p * catexp_UpSalm[i, 5])
     UpperSalmon[i,8] ~ dbern(VC1_p * catexp_UpSalm[i, 5])
 
+    # Red Fish Lake Creek (RFL)
+    UpperSalmon[i,9] ~ dbern(RFL_p * catexp_UpSalm[i,6])
+
     # Sawtooth trap (STL or SAWT)...
-    UpperSalmon[i,9] ~ dbern(STL_p * catexp_UpSalm[i, 6])
+    UpperSalmon[i,10] ~ dbern(STL_p * catexp_UpSalm[i, 7])
 
   } # ends the ifish loop started at the top of this section
 

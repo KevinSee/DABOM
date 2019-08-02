@@ -378,8 +378,12 @@ setInitialValues_LGD = function(dabom_list = NULL) {
   a_UpSalm_init[,5] = dabom_list$UpperSalmon %>%
     select(VC2:VC1) %>%
     apply(1, max)
-  # Sawtooth
+  # Red Fish Lake Creek
   a_UpSalm_init[,6] = dabom_list$UpperSalmon %>%
+    select(RFL) %>%
+    apply(1, max)
+  # Sawtooth
+  a_UpSalm_init[,7] = dabom_list$UpperSalmon %>%
     select(STL) %>%
     apply(1, max)
   # Upper Salmon bb

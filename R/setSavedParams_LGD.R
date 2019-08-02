@@ -200,6 +200,7 @@ setSavedParams_LGD = function(time_varying = F) {
                 'STL_p',
                 'SALEFT_p',
                 'PAHH_p',
+                'RFL_p',
                 'BRC_p')
 
   if(time_varying) {
