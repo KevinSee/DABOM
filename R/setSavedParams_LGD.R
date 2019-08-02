@@ -114,6 +114,8 @@ setSavedParams_LGD = function(time_varying = F) {
                 'CCWB0_p',
                 'CATHEW_p',
                 'GRANDW_p',
+                'UGSB0_p',
+                'UGSA0_p',
                 'COCA0_p',
                 'COCB0_p',
                 'IR1_p',

@@ -107,6 +107,9 @@ model{
   CCWA0_p ~ dbeta(1,1)
   CCWB0_p ~ dbeta(1,1)
   CATHEW_p ~ dbeta(1,1)
+
+  UGSB0_p ~ dbeta(1,1)
+  UGSA0_p ~ dbeta(1,1)
   GRANDW_p <- 1 # assume perfect detection
 
   COCA0_p ~ dbeta(1,1)
@@ -867,6 +870,8 @@ model{
 
     # GRANDW
     GrandeRonde[i,5] ~ dbern(GRANDW_p * catexp_UGR[i, 3])
+    GrandeRonde[i,6] ~ dbern(UGSB0_p * catexp_URG[i,3])
+    GrandeRonde[i,7] ~ dbern(UGSA0_p * catexp_URG[i,3])
 
   }
 
@@ -1165,7 +1170,7 @@ model{
     # OBSERVATION part in Upper Salmon
     #-----------------------------------------------------
     # first array (USE)
-    UpperSalmon[i,1] ~ dbern( USE_p * catexp[i,26])
+    UpperSalmon[i,1] ~ dbern( USE_p * catexp[i,28])
     # second array (USI)
     UpperSalmon[i,2] ~ dbern( USI_p * z_usi[i])
 

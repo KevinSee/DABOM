@@ -195,7 +195,7 @@ setInitialValues_LGD = function(dabom_list = NULL) {
     apply(1, max)
   # Grande Ronde weir
   a_UGR_init[,3] = dabom_list$GrandeRonde %>%
-    select(GRANDW) %>%
+    select(GRANDW, UGSB0, UGSA0) %>%
     apply(1, max)
   # Grande Ronde bb
   a_UGR_init[,1] = ifelse(apply(a_UGR_init[,-1], 1, max) == 0,
