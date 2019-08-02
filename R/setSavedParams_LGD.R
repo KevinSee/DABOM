@@ -99,6 +99,8 @@ setSavedParams_LGD = function(time_varying = F) {
                 'JOCA0_p',
                 'JOCB0_p',
                 'JOSEPC_p',
+                'WENB0_p',
+                'WENA0_p',
                 'WR1_p',
                 'WALH_p',
                 'LOSTIW_p',
@@ -146,6 +148,8 @@ setSavedParams_LGD = function(time_varying = F) {
                 'LAKEC_p',
                 'TAYA0_p',
                 'TAYB0_p',
+                'PCAB0_p',
+                'PCAA0_p',
                 'NFSA0_p',
                 'NFSB0_p',
                 'CRCA0_p',
@@ -190,7 +194,8 @@ setSavedParams_LGD = function(time_varying = F) {
                 'YFKB0_p',
                 'STL_p',
                 'SALEFT_p',
-                'PAHH_p')
+                'PAHH_p',
+                'BRC_p')
 
   if(time_varying) {
     my_params = c(my_params,

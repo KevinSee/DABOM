@@ -16,7 +16,7 @@ renameTransParams_LGD = function(param_vec = NULL) {
   stopifnot(!is.null(param_vec))
 
   param_vec[grep('phi', param_vec)] = stringr::str_replace(toupper(param_vec[grep('phi', param_vec)]), 'PHI', 'past')
-  param_vec[grep('p_pop_main', param_vec)] = c("Tucannon", "Penawawa", "Almota", "Alpowa", "Asotin", "TenMileCreek", "Lapwai", "Potlatch", "JosephCreek", "CowCreek", "ImnahaRiver", "Lolo", "SFClearwater", "ClearCreek", "Lochsa", "Selway", "LookingGlass", "Wallowa", "GrandeRonde", "RapidRiver", "SFSalmon", "BigCreek", "NFSalmon", "CarmenCreek", "Lemhi", "UpperSalmon", 'Main_bb')
+  param_vec[grep('p_pop_main', param_vec)] = c("Tucannon", "Penawawa", "Almota", "Alpowa", "Asotin", "TenMileCreek", "Lapwai", "Potlatch", "JosephCreek", "CowCreek", "ImnahaRiver", "Lolo", "SFClearwater", "Wenaha", "ClearCreek", "Lochsa", "Selway", "LookingGlass", "Wallowa", "GrandeRonde", "RapidRiver", "SFSalmon", "Panther", "BigCreek", "NFSalmon", "CarmenCreek", "Lemhi", "UpperSalmon","BearValley", 'Main_bb')
   param_vec[grep('p_pop_Asotin', param_vec)] = c('Asotin_bb', 'GEORGC', 'past_ASOTIC')
   param_vec[grep('p_pop_AsoUpp', param_vec)] = c('ACB_bb', 'past_CCA', 'past_AFC')
   param_vec[grep('p_pop_Lapwai', param_vec)] = c('Lapwai_bb', 'past_MIS', 'past_SWT')

@@ -133,6 +133,9 @@ model{
   GUMBTC_p <- 1 # assume perfect detection
   DRY2C_p <- 1 # assume perfect detection
 
+  WENB0_p ~ dbeta(1,1)
+  WENA0_p ~ dbeta(1,1)
+
   #--------------------------------
   # Salmon branch sites
   #--------------------------------
@@ -147,6 +150,9 @@ model{
   ZENA0_p ~ dbeta(1,1)
   ZENB0_p ~ dbeta(1,1)
   LAKEC_p <- 1 # assume perfect detection
+
+  PCAB0_p ~ dbeta(1,1)
+  PCAA0_p ~ dbeta(1,1)
 
   TAYA0_p ~ dbeta(1,1)
   TAYB0_p ~ dbeta(1,1)
@@ -199,6 +205,8 @@ model{
   STL_p <- 1 # assume perfect detection
   SALEFT_p <- 1 # assume perfect detection
   PAHH_p <- 1 # assume perfect detection
+
+  BRC_p <- 1 # assume perfect detection
 
 
   ##################################################################
@@ -689,16 +697,28 @@ model{
   }
 
   ####################################################
+  #   Now we deal with Wenaha River
+  ####################################################
+  # only have to worry about observation piece
+  for (i in 1:n.fish) {
+
+    # first site (WEN)
+    Wenaha[i,1] ~ dbern( WENB0_p * catexp[i,14] )
+    Wenaha[i,2] ~ dbern( WENA0_p * catexp[i,14] )
+
+  }
+
+  ####################################################
   #   Now we deal with Clear Creek
   ####################################################
   # only have to worry about observation piece
   for (i in 1:n.fish) {
 
     # first array (CLC)
-    ClearCreek[i,1] ~ dbern( CLC_p * catexp[i,14] )
+    ClearCreek[i,1] ~ dbern( CLC_p * catexp[i,15] )
 
     # other observation spot (KOOS)
-    ClearCreek[i,2] ~ dbern( KOOS_p * catexp[i,14] )
+    ClearCreek[i,2] ~ dbern( KOOS_p * catexp[i,15] )
 
   }
 
@@ -711,10 +731,10 @@ model{
   for (i in 1:n.fish) {
 
     # first array (LRL)
-    Lochsa[i,1] ~ dbern( LRL_p * catexp[i,15] )
-    Lochsa[i,2] ~ dbern( LRU_p * catexp[i,15] )
+    Lochsa[i,1] ~ dbern( LRL_p * catexp[i,16] )
+    Lochsa[i,2] ~ dbern( LRU_p * catexp[i,16] )
 
-    z_fistrp[i] ~ dbern(phi_fistrp * catexp[i,15] )
+    z_fistrp[i] ~ dbern(phi_fistrp * catexp[i,16] )
 
     # other observation spot (FISTRP)
     Lochsa[i,3] ~ dbern( FISTRP_p * z_fistrp[i])
@@ -729,8 +749,8 @@ model{
   for (i in 1:n.fish) {
 
     # first array (SW1)
-    Selway[i,1] ~ dbern( SW1_p * catexp[i,16] )
-    Selway[i,2] ~ dbern( SW2_p * catexp[i,16] )
+    Selway[i,1] ~ dbern( SW1_p * catexp[i,17] )
+    Selway[i,2] ~ dbern( SW2_p * catexp[i,17] )
 
   }
 
@@ -742,7 +762,7 @@ model{
   for (i in 1:n.fish) {
 
     # first array (LOOKGC)
-    LookingGlass[i,1] ~ dbern( LOOKGC_p * catexp[i,17] )
+    LookingGlass[i,1] ~ dbern( LOOKGC_p * catexp[i,18] )
 
   }
 
@@ -764,7 +784,7 @@ model{
     # TRUE STATE part in Wallowa
     #------------------------------------
     # the row number acts as switch between rows 1&2 using stochastic node
-    a_Wal[i] ~ dcat( pMat_Wallow[(catexp[i,18]+1),1:(n.pops.Wallowa+1)] ) # the row number acts as on/off switch
+    a_Wal[i] ~ dcat( pMat_Wallow[(catexp[i,19]+1),1:(n.pops.Wallowa+1)] ) # the row number acts as on/off switch
     for (j in 1:(n.pops.Wallowa+1))	{ # now expand the dcat into matrix of zeros and ones
       catexp_Wal[i,j] <- equals(a_Wal[i],j) #equals(x,y) is a test for equality, returns [1,0]
     }
@@ -805,7 +825,7 @@ model{
     # TRUE STATE part in Upper Grande Ronde
     #------------------------------------
     # the row number acts as switch between rows 1&2 using stochastic node
-    a_UGR[i] ~ dcat( pMat_UppGR[(catexp[i,19]+1),1:(n.pops.UppGR+1)] ) # the row number acts as on/off switch
+    a_UGR[i] ~ dcat( pMat_UppGR[(catexp[i,20]+1),1:(n.pops.UppGR+1)] ) # the row number acts as on/off switch
     for (j in 1:(n.pops.UppGR+1))  { # now expand the dcat into matrix of zeros and ones
       catexp_UGR[i,j] <- equals(a_UGR[i],j) #equals(x,y) is a test for equality, returns [1,0]
     }
@@ -834,7 +854,7 @@ model{
   for (i in 1:n.fish) {
 
     # first array (RAPH)
-    RapidRiver[i,1] ~ dbern( RAPH_p * catexp[i,20] )
+    RapidRiver[i,1] ~ dbern( RAPH_p * catexp[i,21] )
 
   }
 
@@ -861,7 +881,7 @@ model{
     # TRUE STATE part in South Fork Salmon
     #------------------------------------
     # the row number acts as switch between rows 1&2 using stochastic node
-    a_SFS[i] ~ dcat( pMat_SFS[(catexp[i,21]+1),1:(n.pops.SFS+1)] ) # the row number acts as on/off switch
+    a_SFS[i] ~ dcat( pMat_SFS[(catexp[i,22]+1),1:(n.pops.SFS+1)] ) # the row number acts as on/off switch
     for (j in 1:(n.pops.SFS+1))	{ # now expand the dcat into matrix of zeros and ones
       catexp_SFS[i,j] <- equals(a_SFS[i],j) #equals(x,y) is a test for equality, returns [1,0]
     }
@@ -897,14 +917,26 @@ model{
   } #ends the ifish loop started at the top of this section
 
   ####################################################
+  #   Now we deal with Panther Creek
+  ####################################################
+  # only have to worry about observation piece
+  for (i in 1:n.fish) {
+
+    # first site (PCA)
+    Panther[i,1] ~ dbern( PCAB0_p * catexp[i,23] )
+    Panther[i,2] ~ dbern( PCAA0_p * catexp[i,23] )
+
+  }
+
+  ####################################################
   #   Now we deal with Big Creek
   ####################################################
   # only have to worry about observation piece
   for (i in 1:n.fish) {
 
     # first array (TAY)
-    BigCreek[i,1] ~ dbern( TAYB0_p * catexp[i,22] )
-    BigCreek[i,2] ~ dbern( TAYA0_p * catexp[i,22] )
+    BigCreek[i,1] ~ dbern( TAYB0_p * catexp[i,24] )
+    BigCreek[i,2] ~ dbern( TAYA0_p * catexp[i,24] )
 
   }
 
@@ -915,8 +947,8 @@ model{
   for (i in 1:n.fish) {
 
     # first array (NFS)
-    NFSalmon[i,1] ~ dbern( NFSB0_p * catexp[i,23] )
-    NFSalmon[i,2] ~ dbern( NFSA0_p * catexp[i,23] )
+    NFSalmon[i,1] ~ dbern( NFSB0_p * catexp[i,25] )
+    NFSalmon[i,2] ~ dbern( NFSA0_p * catexp[i,25] )
 
   }
 
@@ -927,8 +959,8 @@ model{
   for (i in 1:n.fish) {
 
     # first array (CRC)
-    CarmenCreek[i,1] ~ dbern( CRCB0_p * catexp[i,24] )
-    CarmenCreek[i,2] ~ dbern( CRCA0_p * catexp[i,24] )
+    CarmenCreek[i,1] ~ dbern( CRCB0_p * catexp[i,26] )
+    CarmenCreek[i,2] ~ dbern( CRCA0_p * catexp[i,26] )
 
   }
 
@@ -954,7 +986,7 @@ model{
     # TRUE STATE part in Lower Lemhi
     #------------------------------------
     # the row number acts as switch between rows 1&2 using stochastic node
-    a_LowLem[i] ~ dcat( pMat_LowLemhi[(catexp[i,25]+1),1:(n.pops.Lemhi[1]+1)] ) # the row number acts as on/off switch
+    a_LowLem[i] ~ dcat( pMat_LowLemhi[(catexp[i,27]+1),1:(n.pops.Lemhi[1]+1)] ) # the row number acts as on/off switch
     for (j in 1:(n.pops.Lemhi[1]+1))	{ # now expand the dcat into matrix of zeros and ones
       catexp_LowLem[i,j] <- equals(a_LowLem[i],j)
     }
@@ -1095,7 +1127,7 @@ model{
     # TRUE STATE part in first section of Upper Salmon
     #-----------------------------------------------------
     # migration up the Upper Salmon
-    z_usi[i] ~ dbern(catexp[i,26] * phi_usi ) # did fish make it past USI?
+    z_usi[i] ~ dbern(catexp[i,28] * phi_usi ) # did fish make it past USI?
 
     #-----------------------------------------------------
     # TRUE STATE part in second section of Upper Salmon
@@ -1133,6 +1165,16 @@ model{
 
   } # ends the ifish loop started at the top of this section
 
+  ####################################################
+  #   Now we deal with Bear Valley
+  ####################################################
+  # only have to worry about observation piece
+  for (i in 1:n.fish) {
+
+    # first site (BRC)
+    BearValley[i,1] ~ dbern( BRC_p * catexp[i,29] )
+
+  }
 
 } # ends model file
 '
