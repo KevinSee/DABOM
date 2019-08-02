@@ -30,7 +30,8 @@ setInitialValues_LGD = function(dabom_list = NULL) {
   a_Imn_init = array(0, dim=c(n.fish, n_branch_list$n.pops.Imnaha[1]+1))
   a_ImnUp_init = array(0, dim=c(n.fish, n_branch_list$n.pops.Imnaha[2]+1))
   a_ImnWeir_init = array(0, dim = c(n.fish, n_branch_list$n.pops.Imnaha[3]+1))
-  a_Wal_init = array(0, dim=c(n.fish, n_branch_list$n.pops.Wallowa+1))
+  a_Wal_init = array(0, dim=c(n.fish, n_branch_list$n.pops.Wallowa[1]+1))
+  a_WalUp_init = array(0,dim=c(n.fish, n_branch_list$n.pops.Wallowa[2]+1))
   a_UGR_init = array(0, dim=c(n.fish, n_branch_list$n.pops.UppGR+1))
   a_SFS_init = array(0, dim=c(n.fish, n_branch_list$n.pops.SFS+1))
   a_LowLem_init = array(0, dim=c(n.fish, n_branch_list$n.pops.Lemhi[1]+1))
@@ -165,16 +166,25 @@ setInitialValues_LGD = function(dabom_list = NULL) {
   a_Wal_init[,2] = dabom_list$Wallowa %>%
     select(BCANF) %>%
     apply(1, max)
-  # LOSTIW
+  # WR2
   a_Wal_init[,3] = dabom_list$Wallowa %>%
-    select(LOSTIW) %>%
-    apply(1, max)
-  # WALH
-  a_Wal_init[,4] = dabom_list$Wallowa %>%
-    select(WALH) %>%
+    select(WR2B0, WR2A0, LOSTIW, WALH) %>%
     apply(1, max)
   # Wallowa bb
   a_Wal_init[,1] = ifelse(apply(a_Wal_init[,-1], 1, max) == 0,
+                          1, 0)
+  # Upper Wallowa
+  a_WalUp_init[,ncol(a_WalUp_init)] = abs(a_Wal_init[,3]-1) # not in upper wallowa
+  # LOSTIW
+  a_WalUp_init[,2] = dabom_list$Wallowa %>%
+    select(LOSTIW) %>%
+    apply(1, max)
+  # WALH
+  a_WalUp_init[,3] = dabom_list$Wallowa %>%
+    select(WALH) %>%
+    apply(1, max)
+  # Upper Wallowa bb
+  a_WalUp_init[,1] = ifelse(apply(a_WalUp_init[,-1], 1, max) == 0,
                           1, 0)
 
   # Grande Ronde
@@ -414,6 +424,7 @@ setInitialValues_LGD = function(dabom_list = NULL) {
                       a_ImnUp = a_ImnUp_init,
                       a_ImnWeir = a_ImnWeir_init,
                       a_Wal = a_Wal_init,
+                      a_WalUp = a_WalUp_init,
                       a_UGR = a_UGR_init,
                       a_SFS = a_SFS_init,
                       a_LowLem = a_LowLem_init,

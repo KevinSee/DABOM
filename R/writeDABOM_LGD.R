@@ -94,9 +94,12 @@ model{
   JOSEPC_p ~ dbeta(1,1)
 
   WR1_p ~ dbeta(1,1)
+  BCANF_p <- 1 # assume perfect detection
+  WR2B0_p ~ dbeta(1,1)
+  WR2A0_p ~ dbeta(1,1)
   WALH_p <- 1 # assume perfect detection
   LOSTIW_p <- 1 # assume perfect detection
-  BCANF_p <- 1 # assume perfect detection
+
 
   LOOKGC_p <- 1 # assume perfect detection
 
@@ -769,24 +772,40 @@ model{
   ####################################################
   #   Now we deal with Wallowa
   ####################################################
-  # 5 bins: mainstem (1), BCANF (2), Lostine River (3), WALH (4) and not seen (5)
+  # 5 bins: mainstem (1), BCANF (2), WR2 (3) and not seen (4)
 
-  p_pop_Wallowa[1:n.pops.Wallowa] ~ ddirch(wal_dirch_vec) # Dirichlet for probs for going to bins
+  p_pop_Wallowa[1:n.pops.Wallowa[1]] ~ ddirch(wal_dirch_vec) # Dirichlet for probs for going to bins
 
   # set up a matrix that deals with yes/no in the tributary or not
-  pMat_Wallow[1,1:n.pops.Wallowa] <- zero_vec[1:(n.pops.Wallowa)] # when not in trib, 0 prob of being in sub areas
-  pMat_Wallow[1,(n.pops.Wallowa+1)] <- 1 #set the "not there" bin to prob = 1
-  pMat_Wallow[2,1:n.pops.Wallowa] <- p_pop_Wallowa # when in trib, >0 probs of being in sub areas
-  pMat_Wallow[2,(n.pops.Wallowa+1)] <- 0 #set the "not there" bin to prob = 0
+  pMat_Wallow[1,1:n.pops.Wallowa[1]] <- zero_vec[1:(n.pops.Wallowa[1])] # when not in trib, 0 prob of being in sub areas
+  pMat_Wallow[1,(n.pops.Wallowa[1]+1)] <- 1 #set the "not there" bin to prob = 1
+  pMat_Wallow[2,1:n.pops.Wallowa[1]] <- p_pop_Wallowa # when in trib, >0 probs of being in sub areas
+  pMat_Wallow[2,(n.pops.Wallowa[1]+1)] <- 0 #set the "not there" bin to prob = 0
+
+
+  # Upper Wallowa
+  p_pop_UppWall[1:n.pops.Wallowa[2]] ~ ddirch(walUp_dirch_vec) # Dirichlet for probs for going to bins
+
+  # set up a matrix that deals with yes/no in the tributary or not
+  pMat_WalUp[1,1:n.pops.Wallowa[2]] <- zero_vec[1:(n.pops.Wallowa[2])] # when not in trib, 0 prob of being in sub areas
+  pMat_WalUp[1,(n.pops.Wallowa[2]+1)] <- 1 #set the "not there" bin to prob = 1
+  pMat_WalUp[2,1:n.pops.Wallowa[2]] <- p_pop_UppWall # when in trib, >0 probs of being in sub areas
+  pMat_WalUp[2,(n.pops.Wallowa[2]+1)] <- 0 #set the "not there" bin to prob = 0
 
   for (i in 1:n.fish) {
     #------------------------------------
     # TRUE STATE part in Wallowa
     #------------------------------------
     # the row number acts as switch between rows 1&2 using stochastic node
-    a_Wal[i] ~ dcat( pMat_Wallow[(catexp[i,19]+1),1:(n.pops.Wallowa+1)] ) # the row number acts as on/off switch
-    for (j in 1:(n.pops.Wallowa+1))	{ # now expand the dcat into matrix of zeros and ones
+    a_Wal[i] ~ dcat( pMat_Wallow[(catexp[i,19]+1),1:(n.pops.Wallowa[1]+1)] ) # the row number acts as on/off switch
+    for (j in 1:(n.pops.Wallowa[1]+1))	{ # now expand the dcat into matrix of zeros and ones
       catexp_Wal[i,j] <- equals(a_Wal[i],j) #equals(x,y) is a test for equality, returns [1,0]
+    }
+
+     # above WR2
+    a_WalUp[i] ~ dcat( pMat_WalUp[(catexp_Wal[i,3]+1),1:(n.pops.Wallowa[2]+1)] ) # the row number acts as on/off switch
+    for (j in 1:(n.pops.Wallowa[2]+1))  { # now expand the dcat into matrix of zeros and ones
+      catexp_WalUp[i,j] <- equals(a_WalUp[i],j) #equals(x,y) is a test for equality, returns [1,0]
     }
 
     #------------------------------------
@@ -794,18 +813,22 @@ model{
     #------------------------------------
     #first do main stem (if it is seen anywhere in mainstem OR tribs in Wallowa -- thus the max statement)
     #first array (WR1)
-    Wallowa[i,1] ~ dbern(WR1_p * max(catexp_Wal[i,1:(n.pops.Wallowa)]))
+    Wallowa[i,1] ~ dbern(WR1_p * max(catexp_Wal[i,1:(n.pops.Wallowa[1])]))
 
     # BCANF
     Wallowa[i,2] ~ dbern(BCANF_p * catexp_Wal[i, 2])
 
+    # WR2
+    Wallowa[i,3] ~ dbern(WR2B0_p * catexp_Wal[i,3])
+    Wallowa[i,4] ~ dbern(WR2A0_p * catexp_Wal[i,3])
+
     # LOSTIW
-    Wallowa[i,3] ~ dbern(LOSTIW_p * catexp_Wal[i, 3])
+    Wallowa[i,5] ~ dbern(LOSTIW_p * catexp_WalUp[i, 2])
 
     # WALH
-    Wallowa[i,4] ~ dbern(WALH_p * catexp_Wal[i, 4])
+    Wallowa[i,6] ~ dbern(WALH_p * catexp_WalUp[i, 3])
 
-  }
+}
 
   ####################################################
   #   Now we deal with Grande Ronde

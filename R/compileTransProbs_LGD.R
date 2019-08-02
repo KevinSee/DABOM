@@ -72,8 +72,10 @@ compileTransProbs_LGD = function(dabom_mod = NULL,
                   past_IR5 = past_IML * past_IR5) %>%
     mutate_at(vars(IR5_bb, GUMBTC, DRY2C),
                      funs(. * past_IR5)) %>%
-    mutate_at(vars(Wallowa_bb, BCANF, LOSTIW, WALH),
+    mutate_at(vars(Wallowa_bb, BCANF, past_WR2),
                      funs(. * Wallowa)) %>%
+    mutate_at(vars(LOSTIW, WALH),
+              funs(. * past_WR2)) %>%
     mutate_at(vars(GrandeRonde_bb, CATHEW, GRANDW),
                      funs(. * GrandeRonde)) %>%
     mutate_at(vars(SFSalmon_bb, past_ZEN, past_ESS, past_KRS),
