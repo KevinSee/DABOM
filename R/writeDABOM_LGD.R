@@ -80,9 +80,11 @@ model{
   KOOS_p ~ dbeta(1,1)
 
   LRL_p ~ dbeta(1,1)
+  LRU_p ~ dbeta(1,1)
   FISTRP_p <- 1 # assume perfect detection
 
-  SW1_p <- 1 # assume perfect detection
+  SW1_p ~ dbeta(1,1)
+  SW2_p ~ dbeta(1,1)
 
   #--------------------------------
   # NE Oregon sites
@@ -710,11 +712,12 @@ model{
 
     # first array (LRL)
     Lochsa[i,1] ~ dbern( LRL_p * catexp[i,15] )
+    Lochsa[i,2] ~ dbern( LRU_p * catexp[i,15] )
 
     z_fistrp[i] ~ dbern(phi_fistrp * catexp[i,15] )
 
     # other observation spot (FISTRP)
-    Lochsa[i,2] ~ dbern( FISTRP_p * z_fistrp[i])
+    Lochsa[i,3] ~ dbern( FISTRP_p * z_fistrp[i])
 
   }
 
@@ -727,6 +730,7 @@ model{
 
     # first array (SW1)
     Selway[i,1] ~ dbern( SW1_p * catexp[i,16] )
+    Selway[i,2] ~ dbern( SW2_p * catexp[i,16] )
 
   }
 
