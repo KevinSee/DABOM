@@ -151,6 +151,8 @@ model{
   ESSA0_p ~ dbeta(1,1)
   ESSB0_p ~ dbeta(1,1)
   JOHNSC_p <- 1 # assume perfect detection
+  YPPB0_p ~ dbeta(1,1)
+  YPPA0_p ~ dbeta(1,1)
   KRS_p ~ dbeta(1,1)
   STR_p <- 1 # assume perfect detection
   ZENA0_p ~ dbeta(1,1)
@@ -219,7 +221,7 @@ model{
   ##################################################################
   # Set up initial branching structure after leaving Lower Granite
   ##################################################################
-  # 27 bins: 	Tucannon (1), Penawawa (2), Almota (3), Alpowa (4), Asotin (5), Ten Mile Cr. (6), Lapwai (7), Potlatch (8), Joseph Creek (9), Cow Creek (10), Imnaha (11), Lolo (12), SF Clearwater (13), Clear Creek (14), Lochsa (15), Selway (16), Lookingglass Creek (17), Wallowa (18),  Grande Ronde (19), Rapid River (20), South Fork Salmon (21), Big Creek (22), North Fork Salmon (23), Carmen Creek (24), Lemhi (25), Upper Salmon (26), Not Seen (27)
+  # 27 bins: 	Tucannon (1), Penawawa (2), Almota (3), Alpowa (4), Asotin (5), Ten Mile Cr. (6), Lapwai (7), Potlatch (8), Joseph Creek (9), Cow Creek (10), Imnaha (11), Lolo (12), SF Clearwater (13), Wenaha River (14), Clear Creek (15), Lochsa (16), Selway (17), Lookingglass Creek (18), Wallowa (19),  Grande Ronde (20), Rapid River (21), South Fork Salmon (22), Panther Creek (23), Big Creek (24), North Fork Salmon (25), Carmen Creek (26), Lemhi (27), Upper Salmon (28), Bear Valley (29) Not Seen (27)
 
   # set probability to any main bin that saw NO fish to 0
   p_pop_main ~ ddirch(main_dirch_vec) # Dirichlet for probs for going to n.pops bins
@@ -892,32 +894,45 @@ model{
   ####################################################
   # 5 bins: mainstem (1), ZEN (2), ESS (3), KRS (4), and not seen (5)
 
-  p_pop_SFS[1:n.pops.SFS] ~ ddirch(sfs_dirch_vec) # Dirichlet for probs for going to bins
+  p_pop_SFS[1:n.pops.SFS[1]] ~ ddirch(sfs_dirch_vec) # Dirichlet for probs for going to bins
+  p_pop_ESS[1:n.pops.SFS[2]] ~ ddirch(ess_dirch_vec)
 
   # set up a matrix that deals with yes/no in the tributary or not
-  pMat_SFS[1,1:n.pops.SFS] <- zero_vec[1:(n.pops.SFS)] # when not in trib, 0 prob of being in sub areas
-  pMat_SFS[1,(n.pops.SFS+1)] <- 1 #set the "not there" bin to prob = 1
-  pMat_SFS[2,1:n.pops.SFS] <- p_pop_SFS # when in trib, >0 probs of being in sub areas
-  pMat_SFS[2,(n.pops.SFS+1)] <- 0 #set the "not there" bin to prob = 0
+  pMat_SFS[1,1:n.pops.SFS[1]] <- zero_vec[1:(n.pops.SFS[1])] # when not in trib, 0 prob of being in sub areas
+  pMat_SFS[1,(n.pops.SFS[1]+1)] <- 1 #set the "not there" bin to prob = 1
+  pMat_SFS[2,1:n.pops.SFS[1]] <- p_pop_SFS # when in trib, >0 probs of being in sub areas
+  pMat_SFS[2,(n.pops.SFS[1]+1)] <- 0 #set the "not there" bin to prob = 0
 
   # upstream migration parameters
   phi_lakec ~ dbeta(1,1)
-  phi_johnsc ~ dbeta(1,1)
+  #phi_johnsc ~ dbeta(1,1)
   phi_str ~ dbeta(1,1)
+
+  # set up a matrix that deals with yes/no in the tributary or not
+  pMat_ESS[1,1:n.pops.SFS[2]] <- zero_vec[1:(n.pops.SFS[2])] # when not in trib, 0 prob of being in sub areas
+  pMat_ESS[1,(n.pops.SFS[2]+1)] <- 1 #set the "not there" bin to prob = 1
+  pMat_ESS[2,1:n.pops.SFS[2]] <- p_pop_ESS # when in trib, >0 probs of being in sub areas
+  pMat_ESS[2,(n.pops.SFS[2]+1)] <- 0 #set the "not there" bin to prob = 0
 
   for (i in 1:n.fish) {
     #------------------------------------
     # TRUE STATE part in South Fork Salmon
     #------------------------------------
     # the row number acts as switch between rows 1&2 using stochastic node
-    a_SFS[i] ~ dcat( pMat_SFS[(catexp[i,22]+1),1:(n.pops.SFS+1)] ) # the row number acts as on/off switch
-    for (j in 1:(n.pops.SFS+1))	{ # now expand the dcat into matrix of zeros and ones
+    a_SFS[i] ~ dcat( pMat_SFS[(catexp[i,22]+1),1:(n.pops.SFS[1]+1)] ) # the row number acts as on/off switch
+    for (j in 1:(n.pops.SFS[1]+1))	{ # now expand the dcat into matrix of zeros and ones
       catexp_SFS[i,j] <- equals(a_SFS[i],j) #equals(x,y) is a test for equality, returns [1,0]
+    }
+
+    # the row number acts as switch between rows 1&2 using stochastic node
+    a_ESS[i] ~ dcat( pMat_ESS[(catexp_SFS[i,3]+1),1:(n.pops.SFS[2]+1)] ) # the row number acts as on/off switch
+    for (j in 1:(n.pops.SFS[2]+1))	{ # now expand the dcat into matrix of zeros and ones
+      catexp_ESS[i,j] <- equals(a_ESS[i],j) #equals(x,y) is a test for equality, returns [1,0]
     }
 
     # on/off for whether fish moved to end of each branch
     z_lakec[i] ~ dbern(catexp_SFS[i,2] * phi_lakec)
-    z_johnsc[i] ~ dbern(catexp_SFS[i,3] * phi_johnsc)
+    #z_johnsc[i] ~ dbern(catexp_SFS[i,3] * phi_johnsc)
     z_str[i] ~ dbern(catexp_SFS[i,4] * phi_str)
 
     #------------------------------------
@@ -925,7 +940,7 @@ model{
     #------------------------------------
     #first do main stem (if it is seen anywhere in mainstem OR tribs in SFS -- thus the max statement)
     # first array (SFG)
-    SFSalmon[i,1] ~ dbern(SFG_p * max(catexp_SFS[i,1:(n.pops.SFS)]))
+    SFSalmon[i,1] ~ dbern(SFG_p * max(catexp_SFS[i,1:(n.pops.SFS[1])]))
 
     #  Zena Creek array (ZEN)
     SFSalmon[i,2] ~ dbern(ZENB0_p * catexp_SFS[i, 2])
@@ -935,13 +950,16 @@ model{
     # East Fork South Fork array (ESS)
     SFSalmon[i,5] ~ dbern(ESSB0_p * catexp_SFS[i, 3])
     SFSalmon[i,6] ~ dbern(ESSA0_p * catexp_SFS[i, 3])
-    # upstream of ESS, at Johnson Creek weir
-    SFSalmon[i,7] ~ dbern( JOHNSC_p * z_johnsc[i])
+
+    # upstream of ESS, at Johnson Creek weir or YPP
+    SFSalmon[i,7] ~ dbern( JOHNSC_p * catexp_ESS[i,2])
+    SFSalmon[i,8] ~ dbern( YPPB0_p * catexp_ESS[i,3])
+    SFSalmon[i,9] ~ dbern( YPPA0_p * catexp_ESS[i,3])
 
     # Krassel Creek array (KRS)
-    SFSalmon[i,8] ~ dbern( KRS_p * catexp_SFS[i, 4] )
+    SFSalmon[i,10] ~ dbern( KRS_p * catexp_SFS[i, 4] )
     # upstream of KRS, at McCall hatchery (STR)
-    SFSalmon[i,9] ~ dbern( STR_p * z_str[i] )
+    SFSalmon[i,11] ~ dbern( STR_p * z_str[i] )
 
   } #ends the ifish loop started at the top of this section
 

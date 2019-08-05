@@ -33,7 +33,8 @@ setInitialValues_LGD = function(dabom_list = NULL) {
   a_Wal_init = array(0, dim=c(n.fish, n_branch_list$n.pops.Wallowa[1]+1))
   a_WalUp_init = array(0,dim=c(n.fish, n_branch_list$n.pops.Wallowa[2]+1))
   a_UGR_init = array(0, dim=c(n.fish, n_branch_list$n.pops.UppGR+1))
-  a_SFS_init = array(0, dim=c(n.fish, n_branch_list$n.pops.SFS+1))
+  a_SFS_init = array(0, dim=c(n.fish, n_branch_list$n.pops.SFS[1]+1))
+  a_ESS_init = array(0, dim=c(n.fish, n_branch_list$n.pops.SFS[2]+1))
   a_LowLem_init = array(0, dim=c(n.fish, n_branch_list$n.pops.Lemhi[1]+1))
   a_UpLem_init = array(0, dim=c(n.fish, n_branch_list$n.pops.Lemhi[2]+1))
   a_UpSalm_init = array(0, dim=c(n.fish, n_branch_list$n.pops.UpSalm+1))
@@ -276,7 +277,7 @@ setInitialValues_LGD = function(dabom_list = NULL) {
     apply(1, max)
   # ESS
   a_SFS_init[,3] = dabom_list$SFSalmon %>%
-    select(ESSB0:JOHNSC) %>%
+    select(ESSB0:YPPA0) %>%
     apply(1, max)
   # KRS
   a_SFS_init[,4] = dabom_list$SFSalmon %>%
@@ -286,12 +287,25 @@ setInitialValues_LGD = function(dabom_list = NULL) {
   a_SFS_init[,1] = ifelse(apply(a_SFS_init[,-1], 1, max) == 0,
                           1, 0)
 
+  a_ESS_init[,ncol(a_ESS_init)] = abs(a_SFS_init[,3] - 1) # not in ESS
+  #Johnson
+  a_ESS_init[,2] = dabom_list$SFSalmon %>%
+    select(JOHNSC) %>%
+    apply(1, max)
+  #YPP
+  a_ESS_init[,3] = dabom_list$SFSalmon %>%
+    select(YPPB0, YPPA0) %>%
+    apply(1, max)
+  # ESS BB
+  a_ESS_init[,1] = ifelse(apply(a_ESS_init[,-1], 1, max) == 0,
+                          1, 0)
+
   z_lakec_init = dabom_list$SFSalmon %>%
     select(LAKEC) %>%
     apply(1, max)
-  z_johnsc_init = dabom_list$SFSalmon %>%
-    select(JOHNSC) %>%
-    apply(1, max)
+  # z_johnsc_init = dabom_list$SFSalmon %>%
+  #   select(JOHNSC) %>%
+  #   apply(1, max)
   z_str_init = dabom_list$SFSalmon %>%
     select(STR) %>%
     apply(1, max)
@@ -431,6 +445,7 @@ setInitialValues_LGD = function(dabom_list = NULL) {
                       a_WalUp = a_WalUp_init,
                       a_UGR = a_UGR_init,
                       a_SFS = a_SFS_init,
+                      a_ESS = a_ESS_init,
                       a_LowLem = a_LowLem_init,
                       a_UpLem = a_UpLem_init,
                       a_UpSalm = a_UpSalm_init),
@@ -448,7 +463,7 @@ setInitialValues_LGD = function(dabom_list = NULL) {
                       z_iml = z_iml_init,
                       z_ir5 = z_ir5_init,
                       z_lakec = z_lakec_init,
-                      z_johnsc = z_johnsc_init,
+                      #z_johnsc = z_johnsc_init,
                       z_str = z_str_init,
                       z_usi = z_usi_init),
                  as.vector))
