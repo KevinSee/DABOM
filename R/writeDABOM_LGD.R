@@ -872,9 +872,9 @@ model{
     GrandeRonde[i,4] ~ dbern(CATHEW_p * catexp_UGR[i, 2])
 
     # GRANDW
-    GrandeRonde[i,5] ~ dbern(GRANDW_p * catexp_UGR[i, 3])
-    GrandeRonde[i,6] ~ dbern(UGSB0_p * catexp_UGR[i,3])
-    GrandeRonde[i,7] ~ dbern(UGSA0_p * catexp_UGR[i,3])
+    GrandeRonde[i,7] ~ dbern(GRANDW_p * catexp_UGR[i, 3])
+    GrandeRonde[i,5] ~ dbern(UGSB0_p * catexp_UGR[i,3])
+    GrandeRonde[i,6] ~ dbern(UGSA0_p * catexp_UGR[i,3])
 
   }
 
