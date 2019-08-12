@@ -80,10 +80,10 @@ compileTransProbs_LGD = function(dabom_mod = NULL,
                      funs(. * GrandeRonde)) %>%
     mutate_at(vars(SFSalmon_bb, past_ZEN, past_ESS, past_KRS),
                      funs(. * SFSalmon)) %>%
-    mutate_at(vars(JOHNSC, past_YPP) %>%
+    mutate_at(vars(JOHNSC, past_YPP),
                      funs(. * past_ESS)) %>%
     mutate(past_LAKEC = past_ZEN * past_LAKEC,
-                  past_JOHNSC = past_ESS * past_JOHNSC,
+                  JOHNSC = past_ESS * JOHNSC,
                   past_STR = past_KRS * past_STR) %>%
     mutate_at(vars(Lemhi_bb:past_LRW),
                      funs(. * Lemhi)) %>%
