@@ -210,6 +210,10 @@ fixNoFishNodes = function(init_file = NULL,
     mod_file[grep('CLC_p ~', mod_file )] = '  CLC_p <- 1 # Single array, no upstream detections'
   }
 
+  if('KOOS' %in% seenSites & ('CLC' %in% unseenSites)){
+    mod_file[grep('KOOS_p ~', mod_file )] = ' KOOS_p <- 1 # Single array, no upstream detections'
+  }
+
   writeLines(mod_file, mod_conn_new)
   close(mod_conn_new)
 
