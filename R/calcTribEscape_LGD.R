@@ -46,7 +46,7 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
     ungroup() %>%
     tidyr::gather(param, value, -CHAIN, -ITER) %>%
     mutate(week = stringr::str_extract(param, '[:digit:]+'),
-                  week = as.integer(week)) %>%
+           week = as.integer(week)) %>%
     group_by(param) %>%
     mutate(iter = 1:n()) %>%
     ungroup() %>%
@@ -55,11 +55,11 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
   stadem_summ = stadem_df %>%
     group_by(week) %>%
     summarise(mean = mean(tot_escape),
-                     median = median(tot_escape),
-                     mode = estMode(tot_escape),
-                     sd = sd(tot_escape)) %>%
+              median = median(tot_escape),
+              mode = estMode(tot_escape),
+              sd = sd(tot_escape)) %>%
     mutate_at(vars(mean, median, mode, sd),
-                     funs(ifelse(. < 0, 0, .))) %>%
+              list(~if_else(. < 0, 0, .))) %>%
     mutate(var = sd^2)
 
 
@@ -80,21 +80,21 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
   branch_escape_list = stadem_df %>%
     group_by(week) %>%
     sample_n(size = bootstrap_samp,
-                    replace = T) %>%
+             replace = T) %>%
     mutate(iter = 1:n()) %>%
     ungroup() %>%
     left_join(init_trans %>%
-                       select(week, branch, prob) %>%
-                       group_by(week, branch) %>%
-                       sample_n(size = bootstrap_samp,
-                                       replace = T) %>%
-                       mutate(iter = 1:n()) %>%
-                       ungroup(),
-                     by = c('iter', 'week')) %>%
+                select(week, branch, prob) %>%
+                group_by(week, branch) %>%
+                sample_n(size = bootstrap_samp,
+                         replace = T) %>%
+                mutate(iter = 1:n()) %>%
+                ungroup(),
+              by = c('iter', 'week')) %>%
     mutate(branch_escape = tot_escape * prob) %>%
     group_by(iter, branch) %>%
     summarise_at(vars(branch_escape),
-                        funs(sum)) %>%
+                 list(sum)) %>%
     ungroup() %>%
     split(list(.$branch))
 
@@ -108,17 +108,17 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
     arrange(param, iter) %>%
     tidyr::spread(param, value) %>%
     sample_n(size = bootstrap_samp,
-                    replace = T) %>%
+             replace = T) %>%
     mutate(iter = 1:n()) %>%
     ungroup()
 
   site_list = createNodeList(node_order) %>%
     purrr::map(.f = function(x) {
-                 x = gsub('B0$', '', x)
-                 x = gsub('A0$', '', x)
-                 x = gsub('^X', '', x)
-                 return(unique(x))
-               })
+      x = gsub('B0$', '', x)
+      x = gsub('A0$', '', x)
+      x = gsub('^X', '', x)
+      return(unique(x))
+    })
   # add name of tributary to site_list
   for(i in 1:length(site_list)) {
     site_list[[i]] = c(names(site_list)[i],
@@ -142,8 +142,8 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
   for(brch in names(trib_list)) {
     trib_list[[brch]] = trib_list[[brch]] %>%
       left_join(branch_escape_list[[brch]] %>%
-                         select(-branch),
-                       by = 'iter')
+                  select(-branch),
+                by = 'iter')
   }
 
 
@@ -153,7 +153,7 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
                   .f = function(x) {
                     x %>%
                       mutate_at(vars(-iter, -branch_escape),
-                                       funs(. * branch_escape)) %>%
+                                list(~ . * branch_escape)) %>%
                       select(-branch_escape) %>%
                       tidyr::gather(area, escape, -iter)
                   })
@@ -173,29 +173,29 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
       as.data.frame() %>%
       mutate(area = rownames(.)) %>%
       rename(lowerCI = lower,
-                    upperCI = upper) %>%
+             upperCI = upper) %>%
       tbl_df() %>%
       select(area, everything())
 
     escape_summ = escape_post %>%
       group_by(area) %>%
       summarise(mean = mean(escape),
-                       median = median(escape),
-                       mode = estMode(escape),
-                       sd = sd(escape),
-                       cv = sd / mean) %>%
+                median = median(escape),
+                mode = estMode(escape),
+                sd = sd(escape),
+                cv = sd / mean) %>%
       mutate_at(vars(mean, median, mode, sd),
-                       funs(ifelse(. < 0, 0, .))) %>%
+                list(~ ifelse(. < 0, 0, .))) %>%
       left_join(credInt,
-                       by = 'area') %>%
+                by = 'area') %>%
       mutate_at(vars(mean, median, mode),
-                       funs(round)) %>%
+                list(round)) %>%
       mutate_at(vars(sd, lowerCI, upperCI),
-                       funs(round),
-                       digits = 1) %>%
+                list(round),
+                digits = 1) %>%
       mutate_at(vars(cv),
-                       funs(round),
-                       digits = 3)
+                list(round),
+                digits = 3)
 
     if(!is.null(pt_est_nm) & pt_est_nm %in% c('mean', 'median', 'mode')) {
       names(escape_summ)[match(pt_est_nm, names(escape_summ))] = 'estimate'
