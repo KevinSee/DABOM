@@ -63,7 +63,7 @@ setInitialValues_PRA = function(dabom_list = NULL) {
 
   # above LWE
   # not there
-  a_list[['LWE']][,ncol(a_list[['LWE']])] = abs(a_list$RIA[,2] - 1)
+  a_list[['LWE']][,ncol(a_list[['LWE']])] = abs(a_list$RIA[,3] - 1)
   # MCL
   a_list[['LWE']][,2] = dabom_list$Wenatchee %>%
     select(matches('MCL')) %>%
@@ -158,7 +158,7 @@ setInitialValues_PRA = function(dabom_list = NULL) {
 
   # Rocky Reach
   # not there
-  a_list[['RRF']][,ncol(a_list[['RRF']])] = abs(a_list$RIA[,3] - 1)
+  a_list[['RRF']][,ncol(a_list[['RRF']])] = abs(a_list$RIA[,4] - 1)
   # ENL
   a_list[['RRF']][,2] = dabom_list$Entiat %>%
     select(ENLB0:ENFA0) %>%
