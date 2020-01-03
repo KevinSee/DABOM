@@ -12,7 +12,7 @@
 setBranchNums_PRA = function() {
 
   n_branch_list = list(n_pops_PRA = 3,           # number of main branches
-                       n_pops_RIA = 3,           # number of branches after RIA
+                       n_pops_RIA = 4,           # number of branches after RIA
                        n_pops_LWE = 6,
                        n_pops_ICL = 3,
                        n_pops_TUM = 4,
