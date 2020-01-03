@@ -125,7 +125,7 @@ fixNoFishNodes = function(init_file = NULL,
       mutate(site = str_trim(site)) %>%
       filter(grepl('phi', site)) %>%
       distinct() %>%
-      mutate(site = str_replace(site, '^phi_', '')) %>%
+      mutate(site = str_remove(site, '^phi_')) %>%
       pull(site)
 
     if(sum(grepl('\\[', phiNodes)) > 0) {
@@ -212,6 +212,11 @@ fixNoFishNodes = function(init_file = NULL,
 
   if('CLC' %in% unseenNodes & ('KOOS' %in% seenSites)){
     mod_file[grep('KOOS_p ~', mod_file )] = '  KOOS_p <- 1 # Single array, no detections at CLC'
+  }
+
+  if(("ASOTIC" %in% unseenNodes & "ACB" %in% seenSites) |
+     ("ACB" %in% unseenSites & "ASOTIC" %in% seenNodes)) {
+    mod_file[grep('phi_acb ~', mod_file)] = '  phi_acb <- 1 # Either ASOTIC or ACB had no detections, but the other did'
   }
 
   writeLines(mod_file, mod_conn_new)
