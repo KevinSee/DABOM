@@ -4,10 +4,16 @@
 \alias{summariseTransProbs_LGD}
 \title{Summarise Transition Probabilities - LGD}
 \usage{
-summariseTransProbs_LGD(dabom_mod = NULL, cred_int_prob = 0.95)
+summariseTransProbs_LGD(
+  dabom_mod = NULL,
+  time_varying = TRUE,
+  cred_int_prob = 0.95
+)
 }
 \arguments{
 \item{dabom_mod}{An MCMC.list, where the detection parameter names all end with "\code{_p}".}
+
+\item{time_varying}{Should the initial movement probabilities be time-varying? Default value is \code{TRUE}}
 
 \item{cred_int_prob}{A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95\%.}
 }

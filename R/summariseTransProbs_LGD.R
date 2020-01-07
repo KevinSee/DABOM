@@ -6,12 +6,14 @@
 #'
 #' @param dabom_mod An MCMC.list, where the detection parameter names all end with "\code{_p}".
 #' @param cred_int_prob A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95\%.
+#' @inheritParams compileTransProbs_LGD
 #'
 #' @import dplyr tidyr coda stringr
 #' @export
 #' @return NULL
 
 summariseTransProbs_LGD = function(dabom_mod = NULL,
+                                   time_varying = TRUE,
                                    cred_int_prob = 0.95) {
 
   stopifnot(!is.null(dabom_mod))
@@ -26,7 +28,8 @@ summariseTransProbs_LGD = function(dabom_mod = NULL,
     select(param, everything()) %>%
     mutate(param = renameTransParams_LGD(param))
 
-  trans_df = compileTransProbs_LGD(dabom_mod) %>%
+  trans_df = compileTransProbs_LGD(dabom_mod,
+                                   time_varying = time_varying) %>%
     group_by(param) %>%
     summarise(mean = mean(value),
                      median = median(value),
