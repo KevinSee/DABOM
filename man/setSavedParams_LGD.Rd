@@ -12,9 +12,6 @@ setSavedParams_LGD(time_varying = F)
 \description{
 Returns a character vector of parameters to be saved by JAGS in the Lower Granite version of DABOM
 }
-\examples{
-setSavedParams()
-}
 \author{
 Kevin See
 }
