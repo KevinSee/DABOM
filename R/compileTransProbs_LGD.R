@@ -20,10 +20,14 @@ compileTransProbs_LGD = function(dabom_mod = NULL,
   trans_mat = as.matrix(dabom_mod,
                         iters = T,
                         chains = T) %>%
-    as.data.frame() %>%
-    tbl_df() %>%
+    as_tibble() %>%
     # remove detection parameters
     select(-matches('_p$'))
+
+  if("deviance" %in% names(trans_mat)) {
+    trans_mat = trans_mat %>%
+      select(-deviance)
+  }
 
   # drop first branch tranistions if time-varying
   if(time_varying) {
