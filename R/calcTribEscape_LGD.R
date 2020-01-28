@@ -128,10 +128,13 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
       })
     # add name of tributary to site_list
     for(i in 1:length(site_list)) {
-      site_list[[i]] = c(names(site_list)[i],
-                         site_list[[i]])
+      names(site_list)[i] <- site_list[[i]][1]
+      #site_list[[i]] = c(names(site_list)[i],
+      #                   site_list[[i]])
     }
 
+    names(site_list)[5] <- 'ACM'
+    names(site_list)[9] <- 'JOC'
     site_list$Main_bb = 'Main_bb'
 
     # this functionality relies on specific format of naming in the compileTransProbs_LGD() function
@@ -140,30 +143,20 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
         y = trans_df %>%
           select(iter,
                  one_of(x),
-                 one_of(paste0('past_', x)),
+                 #one_of(paste0('past_', x)),
                  one_of(paste0(x, '_bb')))
       })
 
 
-    # add total escapement to transition probabilities within each main branch
-    for(brch in names(trib_list)) {
-      trib_list[[brch]] = trib_list[[brch]] %>%
-        left_join(branch_escape_list[[brch]] %>%
-                    select(-branch),
-                  by = 'iter')
-    }
-
-
-    # combine all tributaries into single dataframe and transform transition probabilities into escapement
-    escape_post = trib_list %>%
-      purrr::map_df(.id = 'branch',
-                    .f = function(x) {
-                      x %>%
-                        mutate_at(vars(-iter, -branch_escape),
-                                  list(~ . * branch_escape)) %>%
-                        select(-branch_escape) %>%
-                        tidyr::gather(area, escape, -iter)
-                    })
+    # add total escapement to transition probabilities and calculate escapement within each main branch
+    escape_post <- map_df(.x = trib_list,
+                          .id = 'branch',
+                          .f = function(x){
+                           pivot_longer(x, names_to = 'site', values_to = 'phi', -iter)
+                          }) %>%
+      left_join(bind_rows(branch_escape_list), by = c('iter', 'branch')) %>%
+      mutate(escape = phi * branch_escape) %>%
+      select(-phi, -branch_escape)
   }
 
   if(!time_varying) {
@@ -176,7 +169,7 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
       mutate_at(vars(-iter, -tot_escape),
                 list(~ . * tot_escape)) %>%
       select(-tot_escape) %>%
-      tidyr::gather(area, escape, -iter)
+      tidyr::gather(site, escape, -iter)
   }
 
 
@@ -194,19 +187,19 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
     # estimate the credible interval for each parameter
     credInt = escape_post %>%
       # select(-branch) %>%
-      spread(area, escape) %>%
+      spread(site, escape) %>%
       select(-iter) %>%
       coda::as.mcmc() %>%
       coda::HPDinterval(prob = cred_int_prob) %>%
       as.data.frame() %>%
-      mutate(area = rownames(.)) %>%
+      mutate(site = rownames(.)) %>%
       rename(lowerCI = lower,
              upperCI = upper) %>%
       tbl_df() %>%
-      select(area, everything())
+      select(site, everything())
 
     escape_summ = escape_post %>%
-      group_by(area) %>%
+      group_by(site) %>%
       summarise(mean = mean(escape),
                 median = median(escape),
                 mode = estMode(escape),
@@ -215,7 +208,7 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
       mutate_at(vars(mean, median, mode, sd),
                 list(~ ifelse(. < 0, 0, .))) %>%
       left_join(credInt,
-                by = 'area') %>%
+                by = 'site') %>%
       mutate_at(vars(mean, median, mode),
                 list(round)) %>%
       mutate_at(vars(sd, lowerCI, upperCI),
@@ -228,7 +221,7 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
     if(!is.null(pt_est_nm)) {
       names(escape_summ)[match(pt_est_nm, names(escape_summ))] = 'estimate'
       escape_summ = escape_summ %>%
-        select(site = area, estimate, sd:upperCI)
+        select(site, estimate, sd:upperCI)
     }
 
     return(escape_summ)
