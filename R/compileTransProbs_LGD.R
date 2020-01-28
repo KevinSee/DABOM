@@ -48,56 +48,56 @@ compileTransProbs_LGD = function(dabom_mod = NULL,
   # multiply some probabilities together
   trans_df = trans_mat %>%
     rowwise() %>%
-    mutate(past_MTR = Tucannon * past_MTR,
-                  past_UTR = past_MTR * past_UTR,
-                  past_TUCH = past_UTR * past_TUCH) %>%
-    rename(past_TUCH_TFH = past_TUCH) %>%
-    mutate_at(vars(Asotin_bb, GEORGC, past_ASOTIC),
-                     funs(. * Asotin)) %>%
-    mutate(past_ACB = past_ASOTIC * past_ACB) %>%
-    mutate_at(vars(ACB_bb, past_CCA, past_AFC),
-                     funs(. * past_ACB)) %>%
-    mutate_at(vars(Lapwai_bb, past_MIS, past_SWT),
-                     funs(. * Lapwai)) %>%
-    mutate(past_WEB = past_SWT * past_WEB) %>%
-    mutate_at(vars(Potlatch_bb, past_KHS, past_PCM, past_HLM),
-                     funs(. * Potlatch)) %>%
+    mutate(MTR = LTR * MTR,
+                  UTR = MTR * UTR,
+                  TUCH = UTR * TUCH) %>%
+    rename(TUCH = TUCH) %>%
+    mutate_at(vars(ACM_bb, GEORGC, ASOTIC),
+                     funs(. * ACM)) %>%
+    mutate(ACB = ASOTIC * ACB) %>%
+    mutate_at(vars(ACB_bb, CCA, AFC),
+                     funs(. * ACB)) %>%
+    mutate_at(vars(LAP_bb, MIS, SWT),
+                     funs(. * LAP)) %>%
+    mutate(WEB = SWT * WEB) %>%
+    mutate_at(vars(JUL_bb, KHS, PCM, HLM),
+                     funs(. * JUL)) %>%
     mutate_at(vars(KHS_bb, BIGBEC, LBEARC),
-                     funs(. * past_KHS)) %>%
+                     funs(. * KHS)) %>%
     mutate_at(vars(HLM_bb, POTREF, POTRWF),
-                     funs(. * past_HLM)) %>%
-    mutate(past_FISTRP = Lochsa * past_FISTRP) %>%
-    mutate(past_JOSEPC = JosephCreek * past_JOSEPC) %>%
-    mutate_at(vars(ImnahaRiver_bb, HORS3C, past_CMP, LSHEEF, past_BSC, past_IR3),
-                     funs(. * ImnahaRiver)) %>%
-    mutate_at(vars(IR3_bb, FREEZC, past_CZY, MAHOGC, past_IR4),
-                     funs(. * past_IR3)) %>%
-    mutate(past_IML = past_IR4 * past_IML,
-                  past_IR5 = past_IML * past_IR5) %>%
+                     funs(. * HLM)) %>%
+    mutate(FISTRP = LRL * FISTRP) %>%
+    mutate(JOSEPC = JOC * JOSEPC) %>%
+    mutate_at(vars(IR1_bb, HORS3C, CMP, LSHEEF, BSC, IR3),
+                     funs(. * IR1)) %>%
+    mutate_at(vars(IR3_bb, FREEZC, CZY, MAHOGC, IR4),
+                     funs(. * IR3)) %>%
+    mutate(IML = IR4 * IML,
+                  IR5 = IML * IR5) %>%
     mutate_at(vars(IR5_bb, GUMBTC, DRY2C),
-                     funs(. * past_IR5)) %>%
-    mutate_at(vars(Wallowa_bb, BCANF, past_WR2),
-                     funs(. * Wallowa)) %>%
+                     funs(. * IR5)) %>%
+    mutate_at(vars(WR1_bb, BCANF, WR2),
+                     funs(. * WR1)) %>%
     mutate_at(vars(LOSTIW, WALH),
-              funs(. * past_WR2)) %>%
-    mutate_at(vars(GrandeRonde_bb, CATHEW, GRANDW),
-                     funs(. * GrandeRonde)) %>%
-    mutate_at(vars(SFSalmon_bb, past_ZEN, past_ESS, past_KRS),
-                     funs(. * SFSalmon)) %>%
-    mutate_at(vars(ESS_bb, JOHNSC, past_YPP),
-                     funs(. * past_ESS)) %>%
-    mutate(past_LAKEC = past_ZEN * past_LAKEC,
-                  JOHNSC = past_ESS * JOHNSC,
-                  past_STR = past_KRS * past_STR) %>%
-    mutate_at(vars(Lemhi_bb:past_LRW),
-                     funs(. * Lemhi)) %>%
-    mutate_at(vars(LRW_bb:past_HEC),
-                     funs(. * past_LRW)) %>%
-    mutate(past_BTM = past_BTC * past_BTM,
-                  past_BTU = past_BTM * past_BTU) %>%
-    mutate(past_USI = UpperSalmon * past_USI) %>%
-    mutate_at(vars(USI_bb:past_STL),
-                     funs(. * past_USI)) %>%
+              funs(. * WR2)) %>%
+    mutate_at(vars(UGR_bb, CATHEW, GRANDW),
+                     funs(. * UGR)) %>%
+    mutate_at(vars(SFG_bb, ZEN, ESS, KRS),
+                     funs(. * SFG)) %>%
+    mutate_at(vars(ESS_bb, JOHNSC, YPP),
+                     funs(. * ESS)) %>%
+    mutate(LAKEC = ZEN * LAKEC,
+                  JOHNSC = ESS * JOHNSC,
+                  STR = KRS * STR) %>%
+    mutate_at(vars(LLR_bb:LRW),
+                     funs(. * LLR)) %>%
+    mutate_at(vars(LRW_bb:HEC),
+                     funs(. * LRW)) %>%
+    mutate(BTM = BTC * BTM,
+                  BTU = BTM * BTU) %>%
+    mutate(USI = USE * USI) %>%
+    mutate_at(vars(USI_bb:STL),
+                     funs(. * USI)) %>%
     tidyr::gather(param, value, -CHAIN, -ITER) %>%
     group_by(CHAIN, param) %>%
     mutate(iter = 1:n()) %>%

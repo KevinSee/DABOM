@@ -228,7 +228,7 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
     if(!is.null(pt_est_nm)) {
       names(escape_summ)[match(pt_est_nm, names(escape_summ))] = 'estimate'
       escape_summ = escape_summ %>%
-        select(area, estimate, sd:upperCI)
+        select(site = area, estimate, sd:upperCI)
     }
 
     return(escape_summ)
