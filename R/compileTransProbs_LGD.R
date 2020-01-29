@@ -87,8 +87,7 @@ compileTransProbs_LGD = function(dabom_mod = NULL,
     mutate_at(vars(ESS_bb, JOHNSC, YPP),
                      funs(. * ESS)) %>%
     mutate(LAKEC = ZEN * LAKEC,
-                  JOHNSC = ESS * JOHNSC,
-                  STR = KRS * STR) %>%
+           STR = KRS * STR) %>%
     mutate_at(vars(LLR_bb:LRW),
                      funs(. * LLR)) %>%
     mutate_at(vars(LRW_bb:HEC),
