@@ -23,7 +23,7 @@ summariseTransProbs_LGD = function(dabom_mod = NULL,
     as.data.frame() %>%
     mutate(param = rownames(.)) %>%
     rename(lowerCI = lower,
-                  upperCI = upper) %>%
+           upperCI = upper) %>%
     tbl_df() %>%
     select(param, everything()) %>%
     mutate(param = renameTransParams_LGD(param))
@@ -32,11 +32,11 @@ summariseTransProbs_LGD = function(dabom_mod = NULL,
                                    time_varying = time_varying) %>%
     group_by(param) %>%
     summarise(mean = mean(value),
-                     median = median(value),
-                     mode = estMode(value),
-                     sd = sd(value)) %>%
+              median = median(value),
+              mode = estMode(value),
+              sd = sd(value)) %>%
     mutate_at(vars(mean, median, mode, sd),
-                     funs(ifelse(. < 0, 0, .))) %>%
+              funs(ifelse(. < 0, 0, .))) %>%
     left_join(credInt)
 
   return(trans_df)

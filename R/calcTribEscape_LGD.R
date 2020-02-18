@@ -152,7 +152,7 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
     escape_post <- map_df(.x = trib_list,
                           .id = 'branch',
                           .f = function(x){
-                           pivot_longer(x, names_to = 'site', values_to = 'phi', -iter)
+                            pivot_longer(x, names_to = 'site', values_to = 'phi', -iter)
                           }) %>%
       left_join(bind_rows(branch_escape_list), by = c('iter', 'branch')) %>%
       mutate(escape = phi * branch_escape) %>%
