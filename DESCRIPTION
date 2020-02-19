@@ -1,8 +1,8 @@
 Package: DABOM
 Title: Runs DABOM model
 Version: 0.1.0
-Authors@R: person("Kevin", "See", email = "Kevin@qcinc.org", role = c("aut", "cre"))
-Maintainer: Kevin See <Kevin@qcinc.org>
+Authors@R: person("Kevin", "See", email = "Kevin.See@biomark.com", role = c("aut", "cre"))
+Maintainer: Kevin See <Kevin.See@biomark.com>
 Description: Takes verified output from PITcleanr package and runs DABOM, a hierarchical patch-occupancy model to estimate adult salmonid escapement above a tagging location.
 Depends: 
   R (>= 3.4.1),
@@ -18,6 +18,7 @@ Imports:
   STADEM(>= 0.1.0)
 SystemRequirements: JAGS (http://mcmc-jags.sourceforge.net)
 URL: https://github.com/KevinSee/DABOM
+BugReports: https://github.com/KevinSee/DabomYakimaSthd/issues
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.0.2
