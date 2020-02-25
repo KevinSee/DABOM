@@ -47,7 +47,8 @@ model{
   TANA0_p ~ dbeta(1,1)
   SWKB0_p ~ dbeta(1,1)
   SWKA0_p ~ dbeta(1,1)
-  TEAN_p ~ dbeta(1,1)
+  LMTB0_p ~ dbeta(1,1)
+  LMTA0_p ~ dbeta(1,1)
   PRAB0_p ~ dbeta(1,1)
   PRAA0_p ~ dbeta(1,1)
 
@@ -224,7 +225,8 @@ model{
     Sunnyside[i,14] ~ dbern( SWKB0_p * catexp_ROZ[i,3] )
     Sunnyside[i,15] ~ dbern( SWKA0_p * catexp_ROZ[i,3] )
 
-    Sunnyside[i,16] ~ dbern( TEAN_p * catexp_ROZ[i,4] )
+    Sunnyside[i,16] ~ dbern( LMTB0_p * catexp_ROZ[i,4] )
+    Sunnyside[i,17] ~ dbern( LMTA0_p * catexp_ROZ[i,4] )
 
   }
 
