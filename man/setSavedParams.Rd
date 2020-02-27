@@ -2,7 +2,7 @@
 % Please edit documentation in R/setSavedParams.R
 \name{setSavedParams}
 \alias{setSavedParams}
-\title{Set Saved Parameters - LGD}
+\title{Set Saved Parameters}
 \usage{
 setSavedParams(model_file = NULL, time_varying = F)
 }
@@ -12,7 +12,7 @@ setSavedParams(model_file = NULL, time_varying = F)
 \item{time_varying}{Should the initial movement probabilities be time-varying? Default value is \code{FALSE}}
 }
 \description{
-Returns a character vector of parameters to be saved by JAGS in the Lower Granite version of DABOM
+Returns a character vector of parameters to be saved by JAGS for a DABOM model
 }
 \examples{
 setSavedParams()

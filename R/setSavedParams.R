@@ -1,6 +1,6 @@
-#' @title Set Saved Parameters - LGD
+#' @title Set Saved Parameters
 #'
-#' @description Returns a character vector of parameters to be saved by JAGS in the Lower Granite version of DABOM
+#' @description Returns a character vector of parameters to be saved by JAGS for a DABOM model
 #'
 #' @author Kevin See
 #'
