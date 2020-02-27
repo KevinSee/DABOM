@@ -24,19 +24,25 @@ model{
   MCN_p ~ dbeta(1,1)
   ICHB0_p ~ dbeta(1,1)
   ICHA0_p ~ dbeta(1,1)
+
   SATB0_p ~ dbeta(1,1)
   SATA0_p ~ dbeta(1,1)
+
   TOPB0_p ~ dbeta(1,1)
   TOPA0_p ~ dbeta(1,1)
   SM1B0_p ~ dbeta(1,1)
   SM1A0_p ~ dbeta(1,1)
   TP2B0_p ~ dbeta(1,1)
   TP2A0_p ~ dbeta(1,1)
+
   SUNB0_p ~ dbeta(1,1)
   SUNA0_p ~ dbeta(1,1)
   AH1B0_p ~ dbeta(1,1)
   AH1A0_p ~ dbeta(1,1)
   LNR_p ~ dbeta(1,1)
+
+  LWCB0_p ~ dbeta(1,1)
+  LWCA0_p ~ dbeta(1,1)
   ROZB0_p ~ dbeta(1,1)
   ROZA0_p ~ dbeta(1,1)
   LMCB0_p ~ dbeta(1,1)
@@ -178,8 +184,11 @@ model{
 
     Sunnyside[i,5] ~ dbern( LNR_p * catexp_SUN[i,2] )
 
-    Sunnyside[i,6] ~ dbern( ROZB0_p * catexp_SUN[i,3] )
-    Sunnyside[i,7] ~ dbern( ROZA0_p * catexp_SUN[i,3] )
+    Sunnyside[i,6] ~ dbern( LWCB0_p * catexp_SUN[i,3] )
+    Sunnyside[i,7] ~ dbern( LWCA0_p * catexp_SUN[i,3] )
+
+    Sunnyside[i,8] ~ dbern( ROZB0_p * catexp_SUN[i,3] )
+    Sunnyside[i,9] ~ dbern( ROZA0_p * catexp_SUN[i,3] )
   }
 
 
@@ -212,21 +221,21 @@ model{
       catexp_ROZ[i,j] <- equals(a_ROZ[i],j) # equals(x,y) is a test for equality, returns [1,0]
      }
 
-    Sunnyside[i,8] ~ dbern( LMCB0_p * catexp_ROZ[i,1] )
-    Sunnyside[i,9] ~ dbern( LMCA0_p * catexp_ROZ[i,1] )
+    Sunnyside[i,10] ~ dbern( LMCB0_p * catexp_ROZ[i,1] )
+    Sunnyside[i,11] ~ dbern( LMCA0_p * catexp_ROZ[i,1] )
 
     z_UMC[i] ~ dbern(catexp_ROZ[i,1] * phi_UMC[fishOrigin[i]] ) # did fish go past UMC?
-    Sunnyside[i,10] ~ dbern( UMCB0_p * z_UMC[i] )
-    Sunnyside[i,11] ~ dbern( UMCA0_p * z_UMC[i] )
+    Sunnyside[i,12] ~ dbern( UMCB0_p * z_UMC[i] )
+    Sunnyside[i,13] ~ dbern( UMCA0_p * z_UMC[i] )
 
-    Sunnyside[i,12] ~ dbern( TANB0_p * catexp_ROZ[i,2] )
-    Sunnyside[i,13] ~ dbern( TANA0_p * catexp_ROZ[i,2] )
+    Sunnyside[i,14] ~ dbern( TANB0_p * catexp_ROZ[i,2] )
+    Sunnyside[i,15] ~ dbern( TANA0_p * catexp_ROZ[i,2] )
 
-    Sunnyside[i,14] ~ dbern( SWKB0_p * catexp_ROZ[i,3] )
-    Sunnyside[i,15] ~ dbern( SWKA0_p * catexp_ROZ[i,3] )
+    Sunnyside[i,16] ~ dbern( SWKB0_p * catexp_ROZ[i,3] )
+    Sunnyside[i,17] ~ dbern( SWKA0_p * catexp_ROZ[i,3] )
 
-    Sunnyside[i,16] ~ dbern( LMTB0_p * catexp_ROZ[i,4] )
-    Sunnyside[i,17] ~ dbern( LMTA0_p * catexp_ROZ[i,4] )
+    Sunnyside[i,18] ~ dbern( LMTB0_p * catexp_ROZ[i,4] )
+    Sunnyside[i,19] ~ dbern( LMTA0_p * catexp_ROZ[i,4] )
 
   }
 
