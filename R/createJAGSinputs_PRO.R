@@ -55,14 +55,6 @@ createJAGSinputs_PRO = function(dabom_list = NULL,
   dirich_vecs = dirich_df$dirch_vec %>%
     rlang::set_names(paste0(dirich_df$site, '_dirch_vec'))
 
-  # if('fishOrigin' %in% names(dabom_list)) {
-  #   dirich_vecs = dirich_vecs %>%
-  #     map(.f = function(x) {
-  #       matrix(c(x, c(rep(0, length(x) - 1), 1)),
-  #              nrow = 2,
-  #              byrow = T)
-  #     })
-  # }
 
   jags_list = c(list(n_fish = nrow(dabom_list[[1]]),
                      # vector of zeros, large enough to match any element of dabom_list

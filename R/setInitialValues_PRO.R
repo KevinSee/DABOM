@@ -89,17 +89,17 @@ setInitialValues_PRO = function(dabom_list = NULL,
     select(matches('ICH')) %>%
     apply(1, max)
 
-  a_list[["PRO"]][,5] = dabom_list$Downstream %>%
+  a_list[["PRO"]][,5] = dabom_list$Status %>%
+    apply(1, max)
+
+  a_list[["PRO"]][,6] = dabom_list$Toppenish %>%
+    apply(1, max)
+
+  a_list[["PRO"]][,7] = dabom_list$Sunnyside %>%
+    apply(1, max)
+
+  a_list[["PRO"]][,8] = dabom_list$Downstream %>%
     select(matches('PRA')) %>%
-    apply(1, max)
-
-  a_list[["PRO"]][,6] = dabom_list$Status %>%
-    apply(1, max)
-
-  a_list[["PRO"]][,7] = dabom_list$Toppenish %>%
-    apply(1, max)
-
-  a_list[["PRO"]][,8] = dabom_list$Sunnyside %>%
     apply(1, max)
 
   # initial black box
@@ -107,7 +107,7 @@ setInitialValues_PRO = function(dabom_list = NULL,
 
   # above TOP
   # not there
-  a_list[["TOP"]][,ncol(a_list[["TOP"]])] = abs(a_list[["PRO"]][,7] - 1)
+  a_list[["TOP"]][,ncol(a_list[["TOP"]])] = abs(a_list[["PRO"]][,6] - 1)
   # SM1
   a_list[["TOP"]][,1] = dabom_list$Toppenish %>%
     select(matches('SM1')) %>%
@@ -121,7 +121,7 @@ setInitialValues_PRO = function(dabom_list = NULL,
 
   # above SUN
   # not there
-  a_list[["SUN"]][,ncol(a_list[["SUN"]])] = abs(a_list[["PRO"]][,8] - 1)
+  a_list[["SUN"]][,ncol(a_list[["SUN"]])] = abs(a_list[["PRO"]][,7] - 1)
   # AH1
   a_list[["SUN"]][,1] = dabom_list$Sunnyside %>%
     select(matches('AH1')) %>%
