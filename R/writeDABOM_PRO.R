@@ -132,7 +132,7 @@ model{
   # 1 = SM1, 2 = TP2, 3 = Black box
 
   for (i in 1:n_fish) {
-   a_TOP[i] ~ dcat( pMatTOP[(catexp_PRO[i,7] * fishOrigin[i] + 1), 1:(n_pops_TOP+1)] )
+   a_TOP[i] ~ dcat( pMatTOP[(catexp_PRO[i,6] * fishOrigin[i] + 1), 1:(n_pops_TOP+1)] )
      for (j in 1:n_pops_TOP)	{
       catexp_TOP[i,j] <- equals(a_TOP[i],j) # equals(x,y) is a test for equality, returns [1,0]
      }
