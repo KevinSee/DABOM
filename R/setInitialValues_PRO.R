@@ -164,7 +164,7 @@ setInitialValues_PRO = function(dabom_list = NULL,
   a_list[["ROZ"]][,5] = if_else(rowSums(a_list[["ROZ"]]) == 0, 1, 0)
 
   # UMC
-  z_list[["UMC"]] = dabom_list$Sunnyside %>%
+  z_list[["LMC"]] = dabom_list$Sunnyside %>%
     select(matches('UMC')) %>%
     apply(1, max)
 
