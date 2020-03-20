@@ -68,11 +68,11 @@ compileTransProbs_PRO = function(dabom_mod = NULL,
     tidyr::spread(ChildSite, value) %>%
     # multiply some probabilities together
     rowwise() %>%
-    mutate_at(vars(SM1, TP2),
+    mutate_at(vars(SM1, TP2, TOP_bb),
               list(~ . * TOP)) %>%
-    mutate_at(vars(AH1, LNR, LWC, ROZ),
+    mutate_at(vars(AH1, LNR, LWC, ROZ, SUN_bb),
               list(~ . * SUN)) %>%
-    mutate_at(vars(LMC, TAN, SWK, LMT),
+    mutate_at(vars(LMC, TAN, SWK, LMT, ROZ_bb),
               list(~ . * ROZ)) %>%
     mutate_at(vars(UMC),
               list(~ . * LMC)) %>%
