@@ -87,7 +87,7 @@ fixNoFishNodes = function(init_file = NULL,
     summarise(nNodes = n_distinct(Node),
               nSeen = sum(seen)) %>%
     filter(nSeen == 1,
-           nNodes > nSeen) %>%
+           nNodes >= nSeen) %>%
     pull(NodeSite)
 
   # SC1, SC2B0 and SC2A0 are treated like a triple array, so we need this fix to avoid fixing SC2A0 or SC2B0 to 100% when it shouldn't be.
