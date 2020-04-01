@@ -41,11 +41,11 @@ setInitialValues_TUM = function(dabom_list = NULL,
   # not there
   a_list[['ICL']][,ncol(a_list[['ICL']])] = abs(a_list[['TUM']][,2] - 1)
   # LNF / LEAV
-  a_list[['ICL']][,2] = dabom_list$Icicle %>%
+  a_list[['ICL']][,1] = dabom_list$Icicle %>%
     select(matches('LNF')) %>%
     apply(1, max)
   # ICM
-  a_list[['ICL']][,3] = dabom_list$Icicle %>%
+  a_list[['ICL']][,2] = dabom_list$Icicle %>%
     select(matches('ICM'), matches('ICU')) %>%
     apply(1, max)
   z_icu_init = dabom_list$Icicle %>%
