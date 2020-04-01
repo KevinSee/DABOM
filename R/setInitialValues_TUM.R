@@ -31,6 +31,7 @@ setInitialValues_TUM = function(dabom_list = NULL,
   # initial branching detects
   for(i in 1:(ncol(a_list[['TUM']]) - 1)) {
     a_list[['TUM']][,i] = dabom_list[[i]] %>%
+      select(-matches('UWE')) %>%
       apply(1, max)
   }
   # initial black box
