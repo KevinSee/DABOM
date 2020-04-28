@@ -109,7 +109,7 @@ fixNoFishNodes = function(init_file = NULL,
               grepl(site, Node)) %>%
        nrow() > 0) {
 
-      mod_file[grep(paste0(seenNodes[grepl(paste0("^", site), seenNodes)], '_p'), mod_file)[1]] = paste0('  ', seenNodes[grepl(site, seenNodes)], '_p <- 1 # Single array, no upstream detections')
+      mod_file[grep(paste0(seenNodes[grepl(paste0("^", site), seenNodes)], '_p'), mod_file)[1]] = paste0('  ', seenNodes[grepl(paste0("^", site), seenNodes)], '_p <- 1 # Single array, no upstream detections')
 
       cat(paste('\nFixed', site, 'at 100% detection probability, because it is a single array with no upstream detections.\n'))
 
