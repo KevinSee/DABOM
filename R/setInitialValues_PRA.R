@@ -50,7 +50,7 @@ setInitialValues_PRA = function(dabom_list = NULL) {
     apply(1, max)
   # Wenatachee
   a_list[['RIA']][,3] = dabom_list$Wenatchee %>%
-    select(-RIA) %>%
+    select(-RIA, -matches('CLK')) %>%
     apply(1, max)
   # above Rocky Reach
   a_list[['RIA']][,4] = dabom_list[c('Entiat', 'Methow', 'Okanogan')] %>%
