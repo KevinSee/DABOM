@@ -146,6 +146,8 @@ model
   OKIA0_p ~ dbeta(1,1)
   OKCB0_p ~ dbeta(1,1)
   OKCA0_p ~ dbeta(1,1)
+  OKVB0_p ~ dbeta(1,1)
+  OKVA0_p ~ dbeta(1,1)
 
   #-------------------------
   # Downstream of Priest Rapids
@@ -728,6 +730,7 @@ model
   for(j in 1:2) {
   phi_sa0[j] ~ dbeta(1,1) # prob of migrating past SA0
   phi_obf[j] ~ dbeta(1,1) # prob of migrating past OBF
+  phi_okv[j] ~ dbeta(1,1) # prob of migrating past OKV
   }
 
   # We use catexp_WEA[i,3] as an on/off switch for presence/absence of fish past OKL
@@ -850,6 +853,10 @@ model
   # next do OKC
   Okanogan[i,28] ~ dbern(OKCB0_p * catexp_ZSL[i,5])
   Okanogan[i,29] ~ dbern(OKCA0_p * catexp_ZSL[i,5])
+
+  z_okv[i] ~ dbern(catexp_ZSL[i,5] * phi_okv[fishOrigin[i]] )
+  Okanogan[i,30] ~ dbern(OKVB0_p * z_okv[i] )
+  Okanogan[i,31] ~ dbern(OKVA0_p * z_okv[i] )
 
   } #ends n_fish loop in this section
 

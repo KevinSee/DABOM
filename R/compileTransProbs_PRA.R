@@ -78,6 +78,7 @@ compileTransProbs_PRA = function(dabom_mod = NULL) {
                past_SA0 = past_SA0 * past_SA1) %>%
         mutate_at(vars(ZSL_bb, past_TON, past_NMC, past_OKI, past_OKC),
                   funs(. * past_ZSL)) %>%
+        mutate(past_OKV = past_OKV * past_OKC) %>%
         mutate_at(vars(BelowJD1, past_JD1, past_TMF, past_PRV, past_ICH, past_PRO, past_RSH, past_PRH),
                   funs(. * dwnStrm)) %>%
         mutate_at(vars(PRV_bb, past_HST, past_MDR),
