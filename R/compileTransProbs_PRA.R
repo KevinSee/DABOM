@@ -55,13 +55,11 @@ compileTransProbs_PRA = function(dabom_mod = NULL) {
         mutate_at(vars(UWE_bb, past_NAL, past_LWN, past_WTL),
                   funs(. * past_UWE)) %>%
         mutate(past_NAU = past_NAU * past_NAL) %>%
-        mutate_at(vars(RRF_bb, past_ENL, past_WEA, past_WVT),
+        mutate_at(vars(RRF_bb, past_ENL, past_WEA, past_WEH),
                   funs(. * past_RRF)) %>%
         mutate_at(vars(ENL_bb, past_RCT, past_EHL, past_MAD, past_ENA),
                   funs(. * past_ENL)) %>%
-        mutate(past_ENM = past_ENM * past_ENA,
-               past_ENS = past_ENS * past_ENM,
-               past_ENF = past_ENF * past_ENS) %>%
+        mutate(past_ENF = past_ENF * past_ENA) %>%
         mutate_at(vars(WEA_bb, past_LMR, past_OKL, past_FST),
                   funs(. * past_WEA)) %>%
         mutate_at(vars(LMR_bb, past_GLC, past_LBC, past_MRC),

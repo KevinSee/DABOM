@@ -73,14 +73,10 @@ model
   ENAA0_p ~ dbeta(1,1)
   MADB0_p ~ dbeta(1,1)
   MADA0_p ~ dbeta(1,1)
-  ENMB0_p ~ dbeta(1,1)
-  ENMA0_p ~ dbeta(1,1)
-  ENSB0_p ~ dbeta(1,1)
-  ENSA0_p ~ dbeta(1,1)
   ENFB0_p ~ dbeta(1,1)
   ENFA0_p ~ dbeta(1,1)
-  WVTB0_p ~ dbeta(1,1)
-  WVTA0_p ~ dbeta(1,1)
+  WEHB0_p ~ dbeta(1,1)
+  WEHA0_p ~ dbeta(1,1)
 
   #-------------------------
   # Methow sites
@@ -541,31 +537,21 @@ model
   Entiat[i,8] ~ dbern(ENAB0_p * catexp_ENL[i,4]) # did they go past ENA?
   Entiat[i,9] ~ dbern(ENAA0_p * catexp_ENL[i,4])
 
-  # did the fish pass ENM?
-  z_enm[i] ~ dbern(catexp_ENL[i,4] * phi_enm[fishOrigin[i]])
-  Entiat[i,12] ~ dbern(ENMB0_p * z_enm[i] )
-  Entiat[i,13] ~ dbern(ENMA0_p * z_enm[i] )
-
-  # did the fish pass ENS?
-  z_ens[i] ~ dbern(z_enm[i] * phi_ens[fishOrigin[i]])
-  Entiat[i,14] ~ dbern(ENSB0_p * z_ens[i] )
-  Entiat[i,15] ~ dbern(ENSA0_p * z_ens[i] )
-
   # did the fish pass ENF?
-  z_enf[i] ~ dbern(z_ens[i] * phi_enf[fishOrigin[i]])
-  Entiat[i,16] ~ dbern(ENFB0_p * z_enf[i] )
-  Entiat[i,17] ~ dbern(ENFA0_p * z_enf[i] )
+  z_enf[i] ~ dbern(catexp_ENL[i,4] * phi_enf[fishOrigin[i]])
+  Entiat[i,12] ~ dbern(ENFB0_p * z_enf[i] )
+  Entiat[i,13] ~ dbern(ENFA0_p * z_enf[i] )
 
 
   } #ends n_fish loop in this section
 
   ################################################################################
-  # Observations at WVT (right below Wells Dam)
+  # Observations at WEH (right below Wells Dam)
   ################################################################################
   # only have to worry about observation piece
   for ( i in 1:n_fish ) {
-    Entiat[i, 18] ~ dbern(WVTB0_p * catexp_RRF[i,4])
-    Entiat[i, 19] ~ dbern(WVTA0_p * catexp_RRF[i,4])
+    Entiat[i, 18] ~ dbern(WEHB0_p * catexp_RRF[i,4])
+    Entiat[i, 19] ~ dbern(WEHA0_p * catexp_RRF[i,4])
   }
 
   ################################################################################

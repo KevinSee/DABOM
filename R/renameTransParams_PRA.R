@@ -23,7 +23,7 @@ renameTransParams_PRA = function(param_vec = NULL) {
   param_vec[grep('p_pop_ICL', param_vec)] = c('ICL_bb', 'past_LNF', 'past_ICM')
   param_vec[grep('p_pop_TUM', param_vec)] = c('TUM_bb', 'past_CHW', 'past_CHL', 'past_UWE')
   param_vec[grep('p_pop_UWE', param_vec)] = c('UWE_bb', 'past_NAL', 'past_WTL', 'past_LWN')
-  param_vec[grep('p_pop_RRF', param_vec)] = c('RRF_bb', 'past_ENL', 'past_WEA', 'past_WVT')
+  param_vec[grep('p_pop_RRF', param_vec)] = c('RRF_bb', 'past_ENL', 'past_WEA', 'past_WEH')
   param_vec[grep('p_pop_ENL', param_vec)] = c('ENL_bb', 'past_RCT', 'past_EHL', 'past_ENA', 'past_MAD')
   param_vec[grep('p_pop_WEA', param_vec)] = c('WEA_bb', 'past_LMR', 'past_OKL', 'past_FST')
   param_vec[grep('p_pop_LMR', param_vec)] = c('LMR_bb', 'past_GLC', 'past_LBC', 'past_MRC')
