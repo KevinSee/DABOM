@@ -167,9 +167,9 @@ setInitialValues_PRA = function(dabom_list = NULL) {
   a_list[['RRF']][,3] = dabom_list[c('Methow', 'Okanogan')] %>%
     sapply(function(x) apply(x, 1, max, na.rm = T)) %>%
     apply(1, max)
-  # WVT
+  # WEH
   a_list[['RRF']][,4] = dabom_list$Entiat %>%
-    select(matches('WVT')) %>%
+    select(matches('WEH')) %>%
     apply(1, max)
   # RRF bb
   a_list[['RRF']][,1] = ifelse(apply(a_list[['RRF']][,-1], 1, max) == 0,
@@ -191,13 +191,13 @@ setInitialValues_PRA = function(dabom_list = NULL) {
   a_list[['ENL']][,4] = dabom_list$Entiat %>%
     select(matches('ENA'), matches('ENM'), matches('ENS'), matches('ENF')) %>%
     apply(1, max)
-  z_enm_init = dabom_list$Entiat %>%
-    select(matches('ENM'), matches('ENS'), matches('ENF')) %>%
-    apply(1, max)
-
-  z_ens_init = dabom_list$Entiat %>%
-    select(matches('ENS'), matches('ENF')) %>%
-    apply(1, max)
+  # z_enm_init = dabom_list$Entiat %>%
+  #   select(matches('ENM'), matches('ENS'), matches('ENF')) %>%
+  #   apply(1, max)
+  #
+  # z_ens_init = dabom_list$Entiat %>%
+  #   select(matches('ENS'), matches('ENF')) %>%
+  #   apply(1, max)
 
   z_enf_init = dabom_list$Entiat %>%
     select(matches('ENF')) %>%
@@ -371,6 +371,10 @@ setInitialValues_PRA = function(dabom_list = NULL) {
   a_list[['ZSL']][,5] = dabom_list$Okanogan %>%
     select(matches('OKC')) %>%
     apply(1, max)
+  # OKV
+  z_okv_init = dabom_list$Okanogan %>%
+    select(matches('^OKV')) %>%
+    apply(1, max)
   # OKL bb
   a_list[['ZSL']][,1] = ifelse(apply(a_list[['ZSL']][,-1], 1, max) == 0,
                                1, 0)
@@ -432,7 +436,7 @@ setInitialValues_PRA = function(dabom_list = NULL) {
   #     return(ifelse(y['1'] == nrow(x), 'OK', 'Problem'))
   #   }) %>%
   #   gather(vector, res) %>%
-  #   filter(res == 'Problem')
+  #   filter(res == 'Problem' | is.na(res))
 
 
   names(a_list) = paste0('a_', names(a_list))
@@ -447,15 +451,16 @@ setInitialValues_PRA = function(dabom_list = NULL) {
                       z_icu = z_icu_init,
                       z_chu = z_chu_init,
                       z_nau = z_nau_init,
-                      z_enm = z_enm_init,
-                      z_ens = z_ens_init,
+                      # z_enm = z_enm_init,
+                      # z_ens = z_ens_init,
                       z_enf = z_enf_init,
                       z_cru = z_cru_init,
                       z_meth = z_meth_init,
                       z_twispw = z_twispw_init,
                       z_wfc = z_wfc_init,
                       z_sa0 = z_sa0_init,
-                      z_obf = z_obf_init),
+                      z_obf = z_obf_init,
+                      z_okv = z_okv_init),
                  as.vector))
 
     # y$a[y$a == n_branch_list$n.pops.main+1] = NA

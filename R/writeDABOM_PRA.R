@@ -458,7 +458,7 @@ model
   ################################################################################
   # Now we deal with above Rocky Reach dam
   ################################################################################
-  # There are 5 bins -  mainstem (1), ENL (2), WEA (3), WVT (4)
+  # There are 5 bins -  mainstem (1), ENL (2), WEA (3), WEH (4)
 
   # first row is wild fish, second row is hatchery fish
   p_pop_RRF[1, 1:(n_pops_RRF)] ~ ddirch(RRF_dirch_vec[1,]); #Dirichlet for probs for going to bins
