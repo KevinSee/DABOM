@@ -12,6 +12,7 @@ calcTribEscape_LGD(
   node_order = NULL,
   summ_results = T,
   pt_est_nm = NULL,
+  time_varying = TRUE,
   cred_int_prob = 0.95
 )
 }
@@ -29,6 +30,8 @@ calcTribEscape_LGD(
 \item{summ_results}{Should the resulting posteriors be summarised or returned as posterior samples? Default value is \code{TRUE}.}
 
 \item{pt_est_nm}{Determines whether to use the mean, median of mode of posterior samples as the point estimate. Returns all 3 if \code{NULL}, which is default.}
+
+\item{time_varying}{Should the initial movement probabilities be time-varying? Default value is \code{TRUE}}
 
 \item{cred_int_prob}{A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95\%.}
 }

@@ -21,8 +21,7 @@ model{
   # Icicle
   ICLB0_p ~ dbeta(1,1)
   ICLA0_p ~ dbeta(1,1)
-  LNFB0_p ~ dbeta(1,1)
-  LNFA0_p ~ dbeta(1,1)
+  LNF_p ~ dbeta(1,1)
   ICMB0_p ~ dbeta(1,1)
   ICMA0_p ~ dbeta(1,1)
   ICUB0_p ~ dbeta(1,1)
@@ -133,19 +132,18 @@ model{
    }
 
    # LEAV/LNF
-   Icicle[i,3] ~ dbern( LNFB0_p * catexp_ICL[i,1])
-   Icicle[i,4] ~ dbern( LNFA0_p * catexp_ICL[i,1])
+   Icicle[i,3] ~ dbern( LNF_p * catexp_ICL[i,1])
 
    # ICM
-   Icicle[i,5] ~ dbern( ICMB0_p * catexp_ICL[i,2] )
-   Icicle[i,6] ~ dbern( ICMA0_p * catexp_ICL[i,2] )
+   Icicle[i,4] ~ dbern( ICMB0_p * catexp_ICL[i,2] )
+   Icicle[i,5] ~ dbern( ICMA0_p * catexp_ICL[i,2] )
 
    # ICU
    # did it make it?
    z_icu[i] ~ dbern(phi_icu[fishOrigin[i]] * catexp_ICL[i,2])
    # was it observed?
-   Icicle[i,7] ~ dbern( ICUB0_p * z_icu[i] )
-   Icicle[i,8] ~ dbern( ICUA0_p * z_icu[i] )
+   Icicle[i,6] ~ dbern( ICUB0_p * z_icu[i] )
+   Icicle[i,7] ~ dbern( ICUA0_p * z_icu[i] )
 
   }
 

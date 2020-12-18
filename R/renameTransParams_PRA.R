@@ -18,7 +18,7 @@ renameTransParams_PRA = function(param_vec = NULL) {
   param_vec[grep('phi', param_vec)] = stringr::str_replace(param_vec[grep('phi', param_vec)], '\\[[[:digit:]]\\]', '')
   param_vec[grep('phi', param_vec)] = stringr::str_replace(toupper(param_vec[grep('phi', param_vec)]), 'PHI', 'past')
   param_vec[grep('p_pop_PRA', param_vec)] = c('PRA_bb', 'past_RIA', 'dwnStrm')
-  param_vec[grep('p_pop_RIA', param_vec)] = c('RIA_bb', 'past_LWE', 'past_RRF')
+  param_vec[grep('p_pop_RIA', param_vec)] = c('RIA_bb', 'past_CLK', 'past_LWE', 'past_RRF')
   param_vec[grep('p_pop_LWE', param_vec)] = c('LWE_bb', 'past_MCL', 'past_PES', 'past_CHM', 'past_ICL', 'past_TUM')
   param_vec[grep('p_pop_ICL', param_vec)] = c('ICL_bb', 'past_LNF', 'past_ICM')
   param_vec[grep('p_pop_TUM', param_vec)] = c('TUM_bb', 'past_CHW', 'past_CHL', 'past_UWE')

@@ -41,7 +41,7 @@ compileTransProbs_PRA = function(dabom_mod = NULL) {
     purrr::map(.f = function(x) {
       x %>%
         rowwise() %>%
-        mutate_at(vars(RIA_bb, past_LWE, past_RRF),
+        mutate_at(vars(RIA_bb, past_CLK, past_LWE, past_RRF),
                   funs(. * past_RIA)) %>%
         mutate_at(vars(LWE_bb, past_MCL, past_PES, past_CHM, past_ICL, past_TUM),
                   funs(. * past_LWE)) %>%
