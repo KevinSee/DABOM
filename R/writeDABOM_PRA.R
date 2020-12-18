@@ -858,7 +858,7 @@ model
   # Observations at FST
   ################################################################################
   for(i in 1:n_fish) {
-  Okanogan[i,30] ~ dbern(FST_p * catexp_WEA[i,4])
+  Okanogan[i,32] ~ dbern(FST_p * catexp_WEA[i,4])
   }
 
 
