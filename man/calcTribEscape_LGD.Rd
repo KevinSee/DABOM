@@ -4,10 +4,16 @@
 \alias{calcTribEscape_LGD}
 \title{Estimate Escapement - LGD}
 \usage{
-calcTribEscape_LGD(dabom_mod = NULL, stadem_mod = NULL,
-  stadem_param_nm = "X.new.wild", bootstrap_samp = 2000,
-  node_order = NULL, summ_results = T, pt_est_nm = NULL,
-  cred_int_prob = 0.95)
+calcTribEscape_LGD(
+  dabom_mod = NULL,
+  stadem_mod = NULL,
+  stadem_param_nm = "X.new.wild",
+  bootstrap_samp = 2000,
+  node_order = NULL,
+  summ_results = T,
+  pt_est_nm = NULL,
+  cred_int_prob = 0.95
+)
 }
 \arguments{
 \item{dabom_mod}{The result of DABOM. An MCMC.list, where the detection parameter names all end with "\code{_p}".}

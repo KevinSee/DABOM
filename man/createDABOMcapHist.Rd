@@ -4,8 +4,7 @@
 \alias{createDABOMcapHist}
 \title{Prep DABOM capture histories}
 \usage{
-createDABOMcapHist(proc_ch = NULL, node_order = NULL,
-  split_matrices = F)
+createDABOMcapHist(proc_ch = NULL, node_order = NULL, split_matrices = F)
 }
 \arguments{
 \item{proc_ch}{capture history as returned by one of the \code{processCapHist} family of functions in \code{PITcleanr} package, which has then been verified by a user and all blank UserProcStatus entries have been completed.}

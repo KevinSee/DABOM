@@ -550,8 +550,8 @@ model
   ################################################################################
   # only have to worry about observation piece
   for ( i in 1:n_fish ) {
-    Entiat[i, 18] ~ dbern(WEHB0_p * catexp_RRF[i,4])
-    Entiat[i, 19] ~ dbern(WEHA0_p * catexp_RRF[i,4])
+    Entiat[i, 14] ~ dbern(WEHB0_p * catexp_RRF[i,4])
+    Entiat[i, 15] ~ dbern(WEHA0_p * catexp_RRF[i,4])
   }
 
   ################################################################################

@@ -4,8 +4,14 @@
 \alias{addTimeVaryData}
 \title{Add Time-Varying Data}
 \usage{
-addTimeVaryData(proc_ch = NULL, node_order = NULL, start_date = NULL,
-  end_date = NULL, strata_beg = "Mon", last_strata_min = 3)
+addTimeVaryData(
+  proc_ch = NULL,
+  node_order = NULL,
+  start_date = NULL,
+  end_date = NULL,
+  strata_beg = "Mon",
+  last_strata_min = 3
+)
 }
 \arguments{
 \item{proc_ch}{capture history as returned by one of the \code{processCapHist} family of functions in \code{PITcleanr} package, which has then been verified by a user and all blank UserProcStatus entries have been completed.}

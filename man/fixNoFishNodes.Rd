@@ -4,8 +4,12 @@
 \alias{fixNoFishNodes}
 \title{Modify basic JAGS model}
 \usage{
-fixNoFishNodes(init_file = NULL, file_name = NULL, proc_ch = NULL,
-  node_order = NULL)
+fixNoFishNodes(
+  init_file = NULL,
+  file_name = NULL,
+  proc_ch = NULL,
+  node_order = NULL
+)
 }
 \arguments{
 \item{init_file}{name (with file path) of basic JAGS model.}

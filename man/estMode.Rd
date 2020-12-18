@@ -4,7 +4,7 @@
 \alias{estMode}
 \title{Estimate Mode of Posterior Distribution}
 \usage{
-estMode(x)
+estMode(x, na.rm = F)
 }
 \arguments{
 \item{x}{numeric vector}
