@@ -510,8 +510,6 @@ model
 
   # deal with upstream migration like survival
   for( j in 1:2) {
-  phi_enm[j] ~ dbeta(1,1) #prob of migrating past ENM
-  phi_ens[j] ~ dbeta(1,1) #prob of migrating past ENS
   phi_enf[j] ~ dbeta(1,1) #prob of migrating past ENF
   }
 
