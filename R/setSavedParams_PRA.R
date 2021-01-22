@@ -32,15 +32,14 @@ setSavedParams_PRA = function(time_varying = F) {
                 'phi_peu',
                 'phi_chu',
                 'phi_nau',
-                'phi_enm',
-                'phi_ens',
                 'phi_enf',
                 'phi_meth',
                 'phi_twispw',
                 'phi_cru',
                 'phi_wfc',
                 'phi_sa0',
-                'phi_obf')
+                'phi_obf',
+                'phi_okv')
 
   # add detection probabilities
   my_params = c(my_params,
@@ -97,8 +96,8 @@ setSavedParams_PRA = function(time_varying = F) {
                 'ENSA0_p',
                 'ENFB0_p',
                 'ENFA0_p',
-                'WVTB0_p',
-                'WVTA0_p',
+                'WEHB0_p',
+                'WEHA0_p',
                 'WEA_p',
                 'LMRB0_p',
                 'LMRA0_p',
@@ -156,6 +155,8 @@ setSavedParams_PRA = function(time_varying = F) {
                 'OKIA0_p',
                 'OKCB0_p',
                 'OKCA0_p',
+                'OKVB0_p',
+                'OKVA0_p',
                 'BelowJD1_p',
                 'JD1B0_p',
                 'JD1A0_p',

@@ -73,14 +73,10 @@ model
   ENAA0_p ~ dbeta(1,1)
   MADB0_p ~ dbeta(1,1)
   MADA0_p ~ dbeta(1,1)
-  ENMB0_p ~ dbeta(1,1)
-  ENMA0_p ~ dbeta(1,1)
-  ENSB0_p ~ dbeta(1,1)
-  ENSA0_p ~ dbeta(1,1)
   ENFB0_p ~ dbeta(1,1)
   ENFA0_p ~ dbeta(1,1)
-  WVTB0_p ~ dbeta(1,1)
-  WVTA0_p ~ dbeta(1,1)
+  WEHB0_p ~ dbeta(1,1)
+  WEHA0_p ~ dbeta(1,1)
 
   #-------------------------
   # Methow sites
@@ -146,6 +142,8 @@ model
   OKIA0_p ~ dbeta(1,1)
   OKCB0_p ~ dbeta(1,1)
   OKCA0_p ~ dbeta(1,1)
+  OKVB0_p ~ dbeta(1,1)
+  OKVA0_p ~ dbeta(1,1)
 
   #-------------------------
   # Downstream of Priest Rapids
@@ -460,7 +458,7 @@ model
   ################################################################################
   # Now we deal with above Rocky Reach dam
   ################################################################################
-  # There are 5 bins -  mainstem (1), ENL (2), WEA (3), WVT (4)
+  # There are 5 bins -  mainstem (1), ENL (2), WEA (3), WEH (4)
 
   # first row is wild fish, second row is hatchery fish
   p_pop_RRF[1, 1:(n_pops_RRF)] ~ ddirch(RRF_dirch_vec[1,]); #Dirichlet for probs for going to bins
@@ -512,8 +510,6 @@ model
 
   # deal with upstream migration like survival
   for( j in 1:2) {
-  phi_enm[j] ~ dbeta(1,1) #prob of migrating past ENM
-  phi_ens[j] ~ dbeta(1,1) #prob of migrating past ENS
   phi_enf[j] ~ dbeta(1,1) #prob of migrating past ENF
   }
 
@@ -546,31 +542,21 @@ model
   Entiat[i,8] ~ dbern(ENAB0_p * catexp_ENL[i,4]) # did they go past ENA?
   Entiat[i,9] ~ dbern(ENAA0_p * catexp_ENL[i,4])
 
-  # did the fish pass ENM?
-  z_enm[i] ~ dbern(catexp_ENL[i,4] * phi_enm[fishOrigin[i]])
-  Entiat[i,12] ~ dbern(ENMB0_p * z_enm[i] )
-  Entiat[i,13] ~ dbern(ENMA0_p * z_enm[i] )
-
-  # did the fish pass ENS?
-  z_ens[i] ~ dbern(z_enm[i] * phi_ens[fishOrigin[i]])
-  Entiat[i,14] ~ dbern(ENSB0_p * z_ens[i] )
-  Entiat[i,15] ~ dbern(ENSA0_p * z_ens[i] )
-
   # did the fish pass ENF?
-  z_enf[i] ~ dbern(z_ens[i] * phi_enf[fishOrigin[i]])
-  Entiat[i,16] ~ dbern(ENFB0_p * z_enf[i] )
-  Entiat[i,17] ~ dbern(ENFA0_p * z_enf[i] )
+  z_enf[i] ~ dbern(catexp_ENL[i,4] * phi_enf[fishOrigin[i]])
+  Entiat[i,12] ~ dbern(ENFB0_p * z_enf[i] )
+  Entiat[i,13] ~ dbern(ENFA0_p * z_enf[i] )
 
 
   } #ends n_fish loop in this section
 
   ################################################################################
-  # Observations at WVT (right below Wells Dam)
+  # Observations at WEH (right below Wells Dam)
   ################################################################################
   # only have to worry about observation piece
   for ( i in 1:n_fish ) {
-    Entiat[i, 18] ~ dbern(WVTB0_p * catexp_RRF[i,4])
-    Entiat[i, 19] ~ dbern(WVTA0_p * catexp_RRF[i,4])
+    Entiat[i, 14] ~ dbern(WEHB0_p * catexp_RRF[i,4])
+    Entiat[i, 15] ~ dbern(WEHA0_p * catexp_RRF[i,4])
   }
 
   ################################################################################
@@ -735,6 +721,7 @@ model
   for(j in 1:2) {
   phi_sa0[j] ~ dbeta(1,1) # prob of migrating past SA0
   phi_obf[j] ~ dbeta(1,1) # prob of migrating past OBF
+  phi_okv[j] ~ dbeta(1,1) # prob of migrating past OKV
   }
 
   # We use catexp_WEA[i,3] as an on/off switch for presence/absence of fish past OKL
@@ -858,6 +845,10 @@ model
   Okanogan[i,28] ~ dbern(OKCB0_p * catexp_ZSL[i,5])
   Okanogan[i,29] ~ dbern(OKCA0_p * catexp_ZSL[i,5])
 
+  z_okv[i] ~ dbern(catexp_ZSL[i,5] * phi_okv[fishOrigin[i]] )
+  Okanogan[i,30] ~ dbern(OKVB0_p * z_okv[i] )
+  Okanogan[i,31] ~ dbern(OKVA0_p * z_okv[i] )
+
   } #ends n_fish loop in this section
 
 
@@ -865,7 +856,7 @@ model
   # Observations at FST
   ################################################################################
   for(i in 1:n_fish) {
-  Okanogan[i,30] ~ dbern(FST_p * catexp_WEA[i,4])
+  Okanogan[i,32] ~ dbern(FST_p * catexp_WEA[i,4])
   }
 
 
