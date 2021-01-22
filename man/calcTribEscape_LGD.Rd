@@ -4,10 +4,17 @@
 \alias{calcTribEscape_LGD}
 \title{Estimate Escapement - LGD}
 \usage{
-calcTribEscape_LGD(dabom_mod = NULL, stadem_mod = NULL,
-  stadem_param_nm = "X.new.wild", bootstrap_samp = 2000,
-  node_order = NULL, summ_results = T, pt_est_nm = NULL,
-  cred_int_prob = 0.95)
+calcTribEscape_LGD(
+  dabom_mod = NULL,
+  stadem_mod = NULL,
+  stadem_param_nm = "X.new.wild",
+  bootstrap_samp = 2000,
+  node_order = NULL,
+  summ_results = T,
+  pt_est_nm = NULL,
+  time_varying = TRUE,
+  cred_int_prob = 0.95
+)
 }
 \arguments{
 \item{dabom_mod}{The result of DABOM. An MCMC.list, where the detection parameter names all end with "\code{_p}".}
@@ -23,6 +30,8 @@ calcTribEscape_LGD(dabom_mod = NULL, stadem_mod = NULL,
 \item{summ_results}{Should the resulting posteriors be summarised or returned as posterior samples? Default value is \code{TRUE}.}
 
 \item{pt_est_nm}{Determines whether to use the mean, median of mode of posterior samples as the point estimate. Returns all 3 if \code{NULL}, which is default.}
+
+\item{time_varying}{Should the initial movement probabilities be time-varying? Default value is \code{TRUE}}
 
 \item{cred_int_prob}{A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95\%.}
 }

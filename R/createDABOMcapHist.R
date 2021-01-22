@@ -68,8 +68,10 @@ createDABOMcapHist = function(proc_ch = NULL,
 
   # replace all NAs with 0s
   dabom_df = dabom_df %>%
-    mutate_at(vars(-c(1:2)),
-              funs(ifelse(is.na(.), 0, .)))
+    mutate(across(where(is.numeric),
+                  tidyr::replace_na,
+                  replace = 0))
+
 
   if(!split_matrices) return(dabom_df)
 

@@ -87,7 +87,7 @@ fixNoFishNodes = function(init_file = NULL,
     summarise(nNodes = n_distinct(Node),
               nSeen = sum(seen)) %>%
     filter(nSeen == 1,
-           nNodes > nSeen) %>%
+           nNodes >= nSeen) %>%
     pull(NodeSite)
 
   # SC1, SC2B0 and SC2A0 are treated like a triple array, so we need this fix to avoid fixing SC2A0 or SC2B0 to 100% when it shouldn't be.
@@ -109,7 +109,7 @@ fixNoFishNodes = function(init_file = NULL,
               grepl(site, Node)) %>%
        nrow() > 0) {
 
-      mod_file[grep(paste0(seenNodes[grepl(site, seenNodes)], '_p'), mod_file)[1]] = paste0('  ', seenNodes[grepl(site, seenNodes)], '_p <- 1 # Single array, no upstream detections')
+      mod_file[grep(paste0(seenNodes[grepl(paste0("^", site), seenNodes)], '_p'), mod_file)[1]] = paste0('  ', seenNodes[grepl(paste0("^", site), seenNodes)], '_p <- 1 # Single array, no upstream detections')
 
       cat(paste('\nFixed', site, 'at 100% detection probability, because it is a single array with no upstream detections.\n'))
 
@@ -125,7 +125,7 @@ fixNoFishNodes = function(init_file = NULL,
       mutate(site = str_trim(site)) %>%
       filter(grepl('phi', site)) %>%
       distinct() %>%
-      mutate(site = str_replace(site, '^phi_', '')) %>%
+      mutate(site = str_remove(site, '^phi_')) %>%
       pull(site)
 
     if(sum(grepl('\\[', phiNodes)) > 0) {
@@ -204,6 +204,19 @@ fixNoFishNodes = function(init_file = NULL,
 
   if('SC2A0' %in% unseenNodes & ('SC1' %in% seenNodes & 'SC2B0' %in% seenNodes)) {
     mod_file[grep('SC2B0 ~', mod_file)] = '  SC2B0 ~ dbeta(1, 1)'
+  }
+
+  if('KOOS' %in% unseenNodes & ('CLC' %in% seenSites)){
+    mod_file[grep('CLC_p ~', mod_file )] = '  CLC_p <- 1 # Single array, no upstream detections'
+  }
+
+  if('CLC' %in% unseenNodes & ('KOOS' %in% seenSites)){
+    mod_file[grep('KOOS_p ~', mod_file )] = '  KOOS_p <- 1 # Single array, no detections at CLC'
+  }
+
+  if(("ASOTIC" %in% unseenNodes & "ACB" %in% seenSites) |
+     ("ACB" %in% unseenSites & "ASOTIC" %in% seenNodes)) {
+    mod_file[grep('phi_acb ~', mod_file)] = '  phi_acb <- 1 # Either ASOTIC or ACB had no detections, but the other did'
   }
 
   writeLines(mod_file, mod_conn_new)

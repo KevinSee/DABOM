@@ -73,14 +73,10 @@ model
   ENAA0_p ~ dbeta(1,1)
   MADB0_p ~ dbeta(1,1)
   MADA0_p ~ dbeta(1,1)
-  ENMB0_p ~ dbeta(1,1)
-  ENMA0_p ~ dbeta(1,1)
-  ENSB0_p ~ dbeta(1,1)
-  ENSA0_p ~ dbeta(1,1)
   ENFB0_p ~ dbeta(1,1)
   ENFA0_p ~ dbeta(1,1)
-  WVTB0_p ~ dbeta(1,1)
-  WVTA0_p ~ dbeta(1,1)
+  WEHB0_p ~ dbeta(1,1)
+  WEHA0_p ~ dbeta(1,1)
 
   #-------------------------
   # Methow sites
@@ -200,7 +196,7 @@ model
   ################################################################################
   # Now we deal with above Rock Island dam
   ################################################################################
-  # There are 3 bins -  mainstem (1), LWE (2), RRF(3)
+  # There are 4 bins -  mainstem (1), CLK (2), LWE (3), RRF (4)
 
   # first row is wild fish, second row is hatchery fish
   p_pop_RIA[1, 1:(n_pops_RIA)] ~ ddirch(RIA_dirch_vec[1,]); #Dirichlet for probs for going to bins
@@ -224,6 +220,13 @@ model
   for (j in 1:(n_pops_RIA+1))	{
   catexp_RIA[i,j] <- equals(a_RIA[i],j)
   }
+  }
+
+  ################################################################################
+  # Now we deal with CLK
+  ################################################################################
+  for(i in 1:n_fish) {
+    Wenatchee[i,2] ~ dbern(catexp_RIA[i,2] * CLK_p)
   }
 
   ################################################################################
@@ -270,7 +273,7 @@ model
   # True state of fish
   for (i in 1:n_fish) {
   # the row number acts as switch between rows 1&2 using stochastic node
-  a_LWE[i] ~ dcat( pMatLWE[(catexp_RIA[i,2] * fishOrigin[i] + 1), 1:(n_pops_LWE+1)] )
+  a_LWE[i] ~ dcat( pMatLWE[(catexp_RIA[i,3] * fishOrigin[i] + 1), 1:(n_pops_LWE+1)] )
 
   for (j in 1:(n_pops_LWE+1))	{ #now expand the dcat into matrix of zeros and ones
   catexp_LWE[i,j] <- equals(a_LWE[i],j)
@@ -298,40 +301,40 @@ model
 
   for (i in 1:n_fish) {
   # lowest array
-  Wenatchee[i,2] ~ dbern(LWEB0_p * max(catexp_LWE[i,1:(n_pops_LWE)]) )
-  Wenatchee[i,3] ~ dbern(LWEA0_p * max(catexp_LWE[i,1:(n_pops_LWE)]) )
+  Wenatchee[i,3] ~ dbern(LWEB0_p * max(catexp_LWE[i,1:(n_pops_LWE)]) )
+  Wenatchee[i,4] ~ dbern(LWEA0_p * max(catexp_LWE[i,1:(n_pops_LWE)]) )
 
   # next do MCL
-  Wenatchee[i,4] ~ dbern(MCLB0_p * catexp_LWE[i,2])
-  Wenatchee[i,5] ~ dbern(MCLA0_p * catexp_LWE[i,2])
+  Wenatchee[i,5] ~ dbern(MCLB0_p * catexp_LWE[i,2])
+  Wenatchee[i,6] ~ dbern(MCLA0_p * catexp_LWE[i,2])
 
   # next do PES
-  Wenatchee[i,6] ~ dbern(PESB0_p * catexp_LWE[i,3])
-  Wenatchee[i,7] ~ dbern(PESA0_p * catexp_LWE[i,3])
+  Wenatchee[i,7] ~ dbern(PESB0_p * catexp_LWE[i,3])
+  Wenatchee[i,8] ~ dbern(PESA0_p * catexp_LWE[i,3])
 
   z_peu[i] ~ dbern(catexp_LWE[i,3] * phi_peu[fishOrigin[i]] ) # did fish go past PEU?
-  Wenatchee[i,8] ~ dbern(PEUB0_p * z_peu[i])
-  Wenatchee[i,9] ~ dbern(PEUA0_p  * z_peu[i])
+  Wenatchee[i,9] ~ dbern(PEUB0_p * z_peu[i])
+  Wenatchee[i,10] ~ dbern(PEUA0_p  * z_peu[i])
 
   # next do CHM
-  Wenatchee[i,10] ~ dbern(CHMB0_p * catexp_LWE[i,4])
-  Wenatchee[i,11] ~ dbern(CHMA0_p * catexp_LWE[i,4])
+  Wenatchee[i,11] ~ dbern(CHMB0_p * catexp_LWE[i,4])
+  Wenatchee[i,12] ~ dbern(CHMA0_p * catexp_LWE[i,4])
 
 
   # next do ICL
-  Wenatchee[i,12] ~ dbern(ICLB0_p * catexp_LWE[i,5])
-  Wenatchee[i,13] ~ dbern(ICLA0_p * catexp_LWE[i,5])
-  Wenatchee[i,14] ~ dbern(LNFB0_p * catexp_ICL[i,2])
-  Wenatchee[i,15] ~ dbern(LNFA0_p * catexp_ICL[i,2])
-  Wenatchee[i,16] ~ dbern(ICMB0_p * catexp_ICL[i,3])
-  Wenatchee[i,17] ~ dbern(ICMA0_p * catexp_ICL[i,3])
+  Wenatchee[i,13] ~ dbern(ICLB0_p * catexp_LWE[i,5])
+  Wenatchee[i,14] ~ dbern(ICLA0_p * catexp_LWE[i,5])
+  Wenatchee[i,15] ~ dbern(LNFB0_p * catexp_ICL[i,2])
+  Wenatchee[i,16] ~ dbern(LNFA0_p * catexp_ICL[i,2])
+  Wenatchee[i,17] ~ dbern(ICMB0_p * catexp_ICL[i,3])
+  Wenatchee[i,18] ~ dbern(ICMA0_p * catexp_ICL[i,3])
 
   z_icu[i] ~ dbern(catexp_ICL[i,3] * phi_icu[fishOrigin[i]] ) # did fish go past ICU?
-  Wenatchee[i,18] ~ dbern(ICUB0_p * z_icu[i])
-  Wenatchee[i,19] ~ dbern(ICUA0_p * z_icu[i])
+  Wenatchee[i,19] ~ dbern(ICUB0_p * z_icu[i])
+  Wenatchee[i,20] ~ dbern(ICUA0_p * z_icu[i])
 
   # Tumwater (TUF)...
-  Wenatchee[i,20] ~ dbern(TUM_p * catexp_LWE[i,6])
+  Wenatchee[i,21] ~ dbern(TUM_p * catexp_LWE[i,6])
 
   } #ends the ifish loop started at the top of this section
 
@@ -372,19 +375,19 @@ model
   for (i in 1:n_fish) {
 
   # next do Chiwaukum Creek (CHW)
-  Wenatchee[i,21] ~ dbern(CHWB0_p * catexp_TUM[i,2])
-  Wenatchee[i,22] ~ dbern(CHWA0_p * catexp_TUM[i,2])
+  Wenatchee[i,22] ~ dbern(CHWB0_p * catexp_TUM[i,2])
+  Wenatchee[i,23] ~ dbern(CHWA0_p * catexp_TUM[i,2])
 
   # Chiwawa
-  Wenatchee[i,23] ~ dbern(CHLB0_p * catexp_TUM[i,3]) # did they go past CHL?
-  Wenatchee[i,24] ~ dbern(CHLA0_p * catexp_TUM[i,3])
+  Wenatchee[i,24] ~ dbern(CHLB0_p * catexp_TUM[i,3]) # did they go past CHL?
+  Wenatchee[i,25] ~ dbern(CHLA0_p * catexp_TUM[i,3])
 
   z_chu[i] ~ dbern(catexp_TUM[i,3] * phi_chu[fishOrigin[i]] ) # did they go past CHU?
-  Wenatchee[i,25] ~ dbern(CHUB0_p * z_chu[i])
-  Wenatchee[i,26] ~ dbern(CHUA0_p * z_chu[i])
+  Wenatchee[i,26] ~ dbern(CHUB0_p * z_chu[i])
+  Wenatchee[i,27] ~ dbern(CHUA0_p * z_chu[i])
 
   # UWE
-  Wenatchee[i,27] ~ dbern(UWE_p * catexp_TUM[i,4]) # did they go past UWE?
+  Wenatchee[i,28] ~ dbern(UWE_p * catexp_TUM[i,4]) # did they go past UWE?
 
   }
 
@@ -426,20 +429,20 @@ model
   for (i in 1:n_fish) {
 
   # Nason
-  Wenatchee[i,28] ~ dbern(NALB0_p * catexp_UWE[i,2]) # did they go past NAL?
-  Wenatchee[i,29] ~ dbern(NALA0_p * catexp_UWE[i,2])
+  Wenatchee[i,29] ~ dbern(NALB0_p * catexp_UWE[i,2]) # did they go past NAL?
+  Wenatchee[i,30] ~ dbern(NALA0_p * catexp_UWE[i,2])
 
   z_nau[i] ~ dbern(catexp_UWE[i,2] * phi_nau[fishOrigin[i]] )  # did fish go past NAU?
-  Wenatchee[i,30] ~ dbern(NAUB0_p * z_nau[i])
-  Wenatchee[i,31] ~ dbern(NAUA0_p * z_nau[i])
+  Wenatchee[i,31] ~ dbern(NAUB0_p * z_nau[i])
+  Wenatchee[i,32] ~ dbern(NAUA0_p * z_nau[i])
 
   # White River
-  Wenatchee[i,32] ~ dbern(WTLB0_p * catexp_UWE[i,3])
-  Wenatchee[i,33] ~ dbern(WTLA0_p * catexp_UWE[i,3])
+  Wenatchee[i,33] ~ dbern(WTLB0_p * catexp_UWE[i,3])
+  Wenatchee[i,34] ~ dbern(WTLA0_p * catexp_UWE[i,3])
 
   # Little Wenatchee
-  Wenatchee[i,34] ~ dbern(LWNB0_p * catexp_UWE[i,4])
-  Wenatchee[i,35] ~ dbern(LWNA0_p * catexp_UWE[i,4])
+  Wenatchee[i,35] ~ dbern(LWNB0_p * catexp_UWE[i,4])
+  Wenatchee[i,36] ~ dbern(LWNA0_p * catexp_UWE[i,4])
 
 
   } #ends the ifish loop started at the top of this section
@@ -449,13 +452,13 @@ model
   ################################################################################
   # only have to worry about observation piece
   for ( i in 1:n_fish ) {
-  Entiat[i, 1] ~ dbern(RRF_p * catexp_RIA[i,3])
+  Entiat[i, 1] ~ dbern(RRF_p * catexp_RIA[i,4])
   }
 
   ################################################################################
   # Now we deal with above Rocky Reach dam
   ################################################################################
-  # There are 5 bins -  mainstem (1), ENL (2), WEA (3), WVT (4)
+  # There are 5 bins -  mainstem (1), ENL (2), WEA (3), WEH (4)
 
   # first row is wild fish, second row is hatchery fish
   p_pop_RRF[1, 1:(n_pops_RRF)] ~ ddirch(RRF_dirch_vec[1,]); #Dirichlet for probs for going to bins
@@ -474,7 +477,7 @@ model
 
   for (i in 1:n_fish) {
   # the row number acts as switch between rows 1&2 using stochastic node
-  a_RRF[i] ~ dcat( pMatRRF[(catexp_RIA[i,3] * fishOrigin[i] + 1), 1:(n_pops_RRF+1)] )
+  a_RRF[i] ~ dcat( pMatRRF[(catexp_RIA[i,4] * fishOrigin[i] + 1), 1:(n_pops_RRF+1)] )
 
   for (j in 1:(n_pops_RRF+1))	{
   catexp_RRF[i,j] <- equals(a_RRF[i],j)
@@ -507,8 +510,6 @@ model
 
   # deal with upstream migration like survival
   for( j in 1:2) {
-  phi_enm[j] ~ dbeta(1,1) #prob of migrating past ENM
-  phi_ens[j] ~ dbeta(1,1) #prob of migrating past ENS
   phi_enf[j] ~ dbeta(1,1) #prob of migrating past ENF
   }
 
@@ -541,31 +542,21 @@ model
   Entiat[i,8] ~ dbern(ENAB0_p * catexp_ENL[i,4]) # did they go past ENA?
   Entiat[i,9] ~ dbern(ENAA0_p * catexp_ENL[i,4])
 
-  # did the fish pass ENM?
-  z_enm[i] ~ dbern(catexp_ENL[i,4] * phi_enm[fishOrigin[i]])
-  Entiat[i,12] ~ dbern(ENMB0_p * z_enm[i] )
-  Entiat[i,13] ~ dbern(ENMA0_p * z_enm[i] )
-
-  # did the fish pass ENS?
-  z_ens[i] ~ dbern(z_enm[i] * phi_ens[fishOrigin[i]])
-  Entiat[i,14] ~ dbern(ENSB0_p * z_ens[i] )
-  Entiat[i,15] ~ dbern(ENSA0_p * z_ens[i] )
-
   # did the fish pass ENF?
-  z_enf[i] ~ dbern(z_ens[i] * phi_enf[fishOrigin[i]])
-  Entiat[i,16] ~ dbern(ENFB0_p * z_enf[i] )
-  Entiat[i,17] ~ dbern(ENFA0_p * z_enf[i] )
+  z_enf[i] ~ dbern(catexp_ENL[i,4] * phi_enf[fishOrigin[i]])
+  Entiat[i,12] ~ dbern(ENFB0_p * z_enf[i] )
+  Entiat[i,13] ~ dbern(ENFA0_p * z_enf[i] )
 
 
   } #ends n_fish loop in this section
 
   ################################################################################
-  # Observations at WVT (right below Wells Dam)
+  # Observations at WEH (right below Wells Dam)
   ################################################################################
   # only have to worry about observation piece
   for ( i in 1:n_fish ) {
-    Entiat[i, 18] ~ dbern(WVTB0_p * catexp_RRF[i,4])
-    Entiat[i, 19] ~ dbern(WVTA0_p * catexp_RRF[i,4])
+    Entiat[i, 14] ~ dbern(WEHB0_p * catexp_RRF[i,4])
+    Entiat[i, 15] ~ dbern(WEHA0_p * catexp_RRF[i,4])
   }
 
   ################################################################################
@@ -865,7 +856,7 @@ model
   # Observations at FST
   ################################################################################
   for(i in 1:n_fish) {
-  Okanogan[i,30] ~ dbern(FST_p * catexp_WEA[i,4])
+  Okanogan[i,32] ~ dbern(FST_p * catexp_WEA[i,4])
   }
 
 

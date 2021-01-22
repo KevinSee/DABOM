@@ -4,8 +4,11 @@
 \alias{summariseDetectProbs}
 \title{Summarise Detection Probabilities}
 \usage{
-summariseDetectProbs(dabom_mod = NULL, capHist_proc = NULL,
-  cred_int_prob = 0.95)
+summariseDetectProbs(
+  dabom_mod = NULL,
+  capHist_proc = NULL,
+  cred_int_prob = 0.95
+)
 }
 \arguments{
 \item{dabom_mod}{An MCMC.list, where the detection parameter names all end with "\code{_p}".}

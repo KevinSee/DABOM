@@ -28,7 +28,8 @@ summariseDetectProbs = function(dabom_mod = NULL,
   if (sum(capHist_proc$UserProcStatus == "") > 0) {
     stop("UserProcStatus must be defined for each observation.")
   }
-  capHist_proc = capHist_proc %>% filter(UserProcStatus)
+  capHist_proc = capHist_proc %>%
+    filter(UserProcStatus)
 
   # convert mcmc.list to tibble
   dabom_df = as.matrix(dabom_mod,
@@ -40,22 +41,22 @@ summariseDetectProbs = function(dabom_mod = NULL,
     group_by(CHAIN, param) %>%
     mutate(iter = 1:n()) %>%
     select(chain = CHAIN,
-                  iter,
-                  param,
-                  value)
+           iter,
+           param,
+           value)
 
-  # summarise detection parameters
+  # summarize detection parameters
   detect_df = dabom_df %>%
     filter(grepl('_p$', param)) %>%
     group_by(param) %>%
     summarise(mean = mean(value),
-                     median = median(value),
-                     mode = estMode(value),
-                     sd = sd(value),
-                     lowerCI = coda::HPDinterval(coda::as.mcmc(value), prob = cred_int_prob)[,1],
-                     upperCI = coda::HPDinterval(coda::as.mcmc(value), prob = cred_int_prob)[,2]) %>%
-    mutate_at(vars(mean, median, mode, sd),
-                     funs(ifelse(. < 0, 0, .))) %>%
+              median = median(value),
+              mode = estMode(value),
+              sd = sd(value),
+              lowerCI = coda::HPDinterval(coda::as.mcmc(value), prob = cred_int_prob)[,1],
+              upperCI = coda::HPDinterval(coda::as.mcmc(value), prob = cred_int_prob)[,2]) %>%
+    mutate(across(c(mean, median, mode, sd),
+              ~ ifelse(. < 0, 0, .))) %>%
     rename(Node = param) %>%
     mutate(Node = stringr::str_replace(Node, '_p$', ''))
 
