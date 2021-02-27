@@ -34,9 +34,11 @@ createJAGSinputs_TUM = function(dabom_list = NULL,
   dirich_vecs = purrr::map(dirich_input,
                            .f = function(x) {
                              dirich_mat = c(createDirichletVector(x$n_brnch,
-                                                                  x$w_tab),
+                                                                  x$w_tab,
+                                                                  initial_one = F),
                                             createDirichletVector(x$n_brnch,
-                                                                  x$h_tab)) %>%
+                                                                  x$h_tab,
+                                                                  initial_one = F)) %>%
                                matrix(nrow = 2,
                                       byrow = T)
                              return(dirich_mat)
