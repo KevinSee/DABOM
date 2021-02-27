@@ -35,10 +35,12 @@ createJAGSinputs_TUM = function(dabom_list = NULL,
                            .f = function(x) {
                              dirich_mat = c(createDirichletVector(x$n_brnch,
                                                                   x$w_tab,
-                                                                  initial_one = F),
+                                                                  initial_one = F,
+                                                                  final_one = T),
                                             createDirichletVector(x$n_brnch,
                                                                   x$h_tab,
-                                                                  initial_one = F)) %>%
+                                                                  initial_one = F,
+                                                                  final_one = T)) %>%
                                matrix(nrow = 2,
                                       byrow = T)
                              return(dirich_mat)
