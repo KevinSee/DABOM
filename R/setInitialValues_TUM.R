@@ -53,7 +53,7 @@ setInitialValues_TUM = function(dabom_list = NULL,
     select(matches('ICU')) %>%
     apply(1, max)
   # ICL bb
-  a_list[['ICL']][,1] = ifelse(apply(a_list[['ICL']][,-1], 1, max) == 0,
+  a_list[['ICL']][,3] = ifelse(apply(a_list[['ICL']][,-1], 1, max) == 0,
                                1, 0)
 
 
