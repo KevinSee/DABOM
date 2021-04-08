@@ -14,10 +14,6 @@ addTimeVaryData(
 )
 }
 \arguments{
-\item{proc_ch}{capture history as returned by one of the \code{processCapHist} family of functions in \code{PITcleanr} package, which has then been verified by a user and all blank UserProcStatus entries have been completed.}
-
-\item{node_order}{output of function \code{createNodeOrder}}
-
 \item{start_date}{character vector of date (\code{YYYYMMDD}) when query should start}
 
 \item{end_date}{character vector of date (\code{YYYYMMDD}) when query should end}
