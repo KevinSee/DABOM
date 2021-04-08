@@ -63,7 +63,7 @@ createDABOMcapHist = function(filter_ch = NULL,
                       tidyr::pivot_wider(names_from = "node",
                                          values_from = "seen",
                                          values_fill = 0)) %>%
-    select(tag_code, matches(root_site), any_of(as.vector(unlist(col_nms))))
+    select(tag_code, matches(paste0("^", root_site, "$")), any_of(as.vector(unlist(col_nms))))
 
 
   # add the trap date
@@ -78,7 +78,7 @@ createDABOMcapHist = function(filter_ch = NULL,
   if(sum(!node_order$node[!(node_order$node %in% root_site)] %in% names(dabom_df)) > 0) {
     dabom_df[,node_order$node[!node_order$node %in% names(dabom_df)]] = NA
     dabom_df = dabom_df %>%
-      select(tag_code, matches(root_site), any_of(as.vector(unlist(col_nms))))
+      select(tag_code, matches(paste0("^", root_site, "$")), any_of(as.vector(unlist(col_nms))))
   }
 
   # replace all NAs with 0s
