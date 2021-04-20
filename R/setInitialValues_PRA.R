@@ -15,7 +15,7 @@ setInitialValues_PRA = function(dabom_list = NULL) {
 
   stopifnot(!is.null(dabom_list))
 
-  n.fish = nrow(dabom_list[[1]])
+  n_fish = nrow(dabom_list[[1]])
   n_branch_list = setBranchNums_PRA()
 
   # first lets create inits matrices
@@ -25,7 +25,7 @@ setInitialValues_PRA = function(dabom_list = NULL) {
     n_col = ifelse(names(a_list)[i] %in% c('PRA'),
                    n_branch_list[[i]],
                    n_branch_list[[i]] + 1)
-    a_list[[i]] = array(0, dim = c(n.fish, n_col))
+    a_list[[i]] = array(0, dim = c(n_fish, n_col))
     rm(n_col)
   }
 
@@ -57,9 +57,7 @@ setInitialValues_PRA = function(dabom_list = NULL) {
     sapply(function(x) apply(x, 1, max, na.rm = T)) %>%
     apply(1, max)
   # RIA bb
-  a_list[['RIA']][,1] = ifelse(apply(a_list[['RIA']][,-1], 1, max) == 0,
-                               1, 0)
-
+  a_list[['RIA']][,1] = if_else(rowSums(a_list[["RIA"]]) == 0, 1, 0)
 
   # above LWE
   # not there
@@ -384,7 +382,7 @@ setInitialValues_PRA = function(dabom_list = NULL) {
   a_list[['dwn']][,ncol(a_list[['dwn']])] = abs(a_list$PRA[,3] - 1)
   # below JD1
   a_list[['dwn']][,1] = dabom_list$BelowPriest %>%
-    select(matches('BelowJD1')) %>%
+    select(matches('JDA')) %>%
     apply(1, max)
   # JD1
   a_list[['dwn']][,2] = dabom_list$BelowPriest %>%

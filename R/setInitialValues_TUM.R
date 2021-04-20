@@ -14,18 +14,29 @@
 setInitialValues_TUM = function(dabom_list = NULL,
                                 n_branch_list = NULL) {
 
-  n.fish = nrow(dabom_list[[1]])
+  n_fish = nrow(dabom_list[[1]])
+
+  n_branch_list = n_branch_list %>%
+    rlang::set_names(nm = str_remove(names(.), 'n_pops_')) %>%
+    # add a black box
+    map(.f = function(x) x + 1)
 
   # first lets create inits matrices
-  a_list = vector('list', length(n_branch_list))
-  names(a_list) = str_replace(names(n_branch_list), 'n_pops_', '')
-  for(i in 1:length(a_list)) {
-    n_col = ifelse(names(a_list)[i] %in% c('TUM'),
-                   n_branch_list[[i]],
-                   n_branch_list[[i]] + 1)
-    a_list[[i]] = array(0, dim = c(n.fish, n_col))
-    rm(n_col)
-  }
+  a_list = n_branch_list %>%
+    purrr::map(.f = function(x) {
+      array(0,
+            dim = c(n_fish, x))
+    })
+
+  # a_list = vector('list', length(n_branch_list))
+  # names(a_list) = str_replace(names(n_branch_list), 'n_pops_', '')
+  # for(i in 1:length(a_list)) {
+  #   n_col = ifelse(names(a_list)[i] %in% c('TUM'),
+  #                  n_branch_list[[i]],
+  #                  n_branch_list[[i]] + 1)
+  #   a_list[[i]] = array(0, dim = c(n_fish, n_col))
+  #   rm(n_col)
+  # }
 
 
   # initial branching detects
@@ -35,8 +46,7 @@ setInitialValues_TUM = function(dabom_list = NULL,
       apply(1, max)
   }
   # initial black box
-  a_list[['TUM']][,8] = abs(apply(a_list[['TUM']], 1, max, na.rm=T) - 1) #not seen anywhere
-
+  a_list[['TUM']][,8] = if_else(rowSums(a_list[["TUM"]]) == 0, 1, 0)
 
   # ICL
   # not there
@@ -53,9 +63,7 @@ setInitialValues_TUM = function(dabom_list = NULL,
     select(matches('ICU')) %>%
     apply(1, max)
   # ICL bb
-  a_list[['ICL']][,3] = ifelse(apply(a_list[['ICL']][,-1], 1, max) == 0,
-                               1, 0)
-
+  a_list[["ICL"]][,3] = if_else(rowSums(a_list[["ICL"]]) == 0, 1, 0)
 
   # Peshastin
   z_peu_init = dabom_list$Peshastin %>%

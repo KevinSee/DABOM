@@ -6,9 +6,10 @@
 #'
 #' @param dabom_list output of \code{createDABOMcapHist} with parameter split_matrics set to \code{TRUE}.
 #' @param model_file file path to JAGS text file.
-#' @param parent_child parent-child table, output of \code{createParentChildDf} function.
 #'
-#' @import dplyr
+#' @inheritParams createDABOMcapHist
+#'
+#' @import dplyr PITcleanr
 #' @export
 #' @return NULL
 #' @examples setInitialValues_PR)()
@@ -20,16 +21,19 @@ setInitialValues_PRO = function(dabom_list = NULL,
   # how many tags?
   n_fish = nrow(dabom_list[[1]])
 
-  # what node does model start with?
-  root_node = parent_child %>%
-    filter(nodeOrder == 1) %>%
-    pull(ParentNode)
+  # # what node does model start with?
+  # root_node = parent_child %>%
+  #   PITcleanr::buildNodeOrder() %>%
+  #   filter(node_order == 1) %>%
+  #   pull(node)
 
   n_branch_list = setBranchNums(parent_child) %>%
-    rlang::set_names(nm = str_remove(names(.), 'n_pops_'))
-
-  n_branch_list[!grepl(root_node, names(n_branch_list))] = n_branch_list[!grepl(root_node, names(n_branch_list))] %>%
+    rlang::set_names(nm = str_remove(names(.), 'n_pops_')) %>%
+    # add a black box
     map(.f = function(x) x + 1)
+
+  # n_branch_list[!grepl(root_node, names(n_branch_list))] = n_branch_list[!grepl(root_node, names(n_branch_list))] %>%
+  #   map(.f = function(x) x + 1)
 
   # read in JAGS model file
   mod_conn = file(model_file, open = 'rt')
@@ -68,13 +72,9 @@ setInitialValues_PRO = function(dabom_list = NULL,
             dim = c(n_fish, x))
     })
 
-  # parent_child %>%
-  #   filter(ParentNode == root_node,
-  #          ChildNode != root_node)
-
   # initial branching detects
   a_list[["PRO"]][,1] = dabom_list$Downstream %>%
-    select(matches('BelowJD1')) %>%
+    select(matches('JDA')) %>%
     apply(1, max)
 
   a_list[["PRO"]][,2] = dabom_list$Downstream %>%

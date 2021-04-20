@@ -281,7 +281,7 @@ setInitialValues_LGD = function(dabom_list = NULL) {
     apply(1, max)
   # KRS
   a_SFS_init[,4] = dabom_list$SFSalmon %>%
-    select(KRS, STR) %>%
+    select(KRSB0:STR) %>%
     apply(1, max)
   # SF Salmon bb
   a_SFS_init[,1] = ifelse(apply(a_SFS_init[,-1], 1, max) == 0,
