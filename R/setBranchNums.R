@@ -4,38 +4,37 @@
 #'
 #' @author Kevin See
 #'
-#' @param parent_child dataframe with at least \code{ParentNode}, \code{ChildNode} and \code{RKM} columns
+#' @inheritParams createDABOMcapHist
+#'
+#' @import dplyr PITcleanr
+#' @importFrom rlang set_names
 #' @export
 #' @return NULL
 #' @examples setBranchNums()
 
 setBranchNums = function(parent_child = NULL) {
 
-  rootNode = parent_child %>%
-    filter(ParentNode == ChildNode) %>%
-    select(ParentNode) %>%
-    mutate(ParentNode = str_replace(ParentNode, 'A0$', '')) %>%
-    as.matrix() %>%
-    as.character()
+  root_node = parent_child %>%
+    PITcleanr::buildNodeOrder() %>%
+    filter(node_order == 1) %>%
+    pull(node)
 
   branchNodes = parent_child %>%
-    group_by(ParentNode) %>%
-    summarise(nChild = n_distinct(RKM)) %>%
-    filter(nChild > 1) %>%
-    mutate(ParentNode = str_replace(ParentNode, 'A0$', ''))
-
-  branchNodes = branchNodes %>%
-    filter(ParentNode == rootNode) %>%
-    bind_rows(branchNodes %>%
-                filter(ParentNode != rootNode) %>%
-                mutate(nChild = nChild + 1))
+    dplyr::count(parent,
+                 name = "n_child") %>%
+    filter(n_child > 1) %>%
+    mutate(across(parent,
+                  str_replace,
+                  'A0$', '')) %>%
+    # add a "not there" to every branch except root
+    mutate(n_child = if_else(parent == root_node,
+                             n_child,
+                             as.integer(n_child + 1)))
 
   branchNums_list = branchNodes %>%
-    select(nChild) %>%
-    as.matrix() %>%
-    as.integer() %>%
-    as.list()
-  names(branchNums_list) = paste0('n_pops_', branchNodes$ParentNode)
+    pull(n_child) %>%
+    as.list() %>%
+    rlang::set_names(paste0('n_pops_', branchNodes$parent))
 
   return(branchNums_list)
 }

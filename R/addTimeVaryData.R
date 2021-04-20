@@ -17,19 +17,18 @@
 #' @return NULL
 #' @examples addTimeVaryData()
 
-addTimeVaryData = function(proc_ch = NULL,
-                           node_order = NULL,
+addTimeVaryData = function(filter_ch = NULL,
                            start_date = NULL,
                            end_date = NULL,
                            strata_beg = 'Mon',
                            last_strata_min = 3) {
 
-  stopifnot(!is.null(proc_ch))
+  stopifnot(!is.null(filter_ch))
 
-  if(is.null(start_date)) start_date = min(proc_ch$TrapDate, na.rm = T) %>%
+  if(is.null(start_date)) start_date = min(filter_ch$start_date, na.rm = T) %>%
       format('%Y%m%d')
 
-  if(is.null(end_date)) end_date = max(proc_ch$TrapDate, na.rm = T) %>%
+  if(is.null(end_date)) end_date = max(filter_ch$start_date, na.rm = T) %>%
       format('%Y%m%d')
 
   week_strata = STADEM::weeklyStrata(start_date = start_date,
@@ -37,19 +36,17 @@ addTimeVaryData = function(proc_ch = NULL,
                                      strata_beg = strata_beg,
                                      last_strata_min = last_strata_min)
 
-  proc_trap_date = createDABOMcapHist(proc_ch,
-                                      node_order,
-                                      split_matrices = F) %>%
-    select(TagID, TrapDate) %>%
+  proc_trap_date = filter_ch %>%
+    select(tag_code, start_date) %>%
     distinct()
 
-  if(nrow(proc_trap_date) != n_distinct(proc_ch$TagID)) {
+  if(nrow(proc_trap_date) != n_distinct(filter_ch$tag_code)) {
     stop('Multiple trap dates for some tags')
   }
 
   dam_week = vector('integer', nrow(proc_trap_date))
   for(i in 1:length(week_strata)) {
-    dam_week[which(proc_trap_date$TrapDate %within% week_strata[[i]])] = i
+    dam_week[which(proc_trap_date$start_date %within% week_strata[[i]])] = i
   }
 
   tv_list = list(n.weeks = length(week_strata),

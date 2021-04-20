@@ -6,61 +6,77 @@
 #'
 #' @param init_file name (with file path) of basic JAGS model.
 #' @param file_name name (with file path) to save the model as.
-#' @param proc_ch capture history as returned by one of the \code{processCapHist} family of functions in \code{PITcleanr} package, which has then been verified by a user and all blank UserProcStatus entries have been completed.
-#' @param node_order output of function \code{createNodeOrder}
 #'
-#' @import dplyr stringr
+#' @inheritParams createDABOMcapHist
+#'
+#' @import dplyr stringr PITcleanr
 #' @export
 #' @return NULL
 #' @examples fixNoFishNodes()
 
 fixNoFishNodes = function(init_file = NULL,
                           file_name = NULL,
-                          proc_ch = NULL,
-                          node_order = NULL) {
+                          filter_ch = NULL,
+                          parent_child = NULL,
+                          configuration = NULL) {
 
-  stopifnot(!is.null(init_file) |
-              !is.null(file_name) |
-              !is.null(proc_ch) |
-              !is.null(node_order))
+  stopifnot(exprs = {
+    !is.null(init_file)
+    !is.null(file_name)
+    !is.null(filter_ch)
+    !is.null(parent_child)
+    !is.null(configuration)
+  })
+
+  node_order = parent_child %>%
+    PITcleanr::addParentChildNodes(configuration) %>%
+    PITcleanr::buildNodeOrder() %>%
+    mutate(node_site = if_else(nchar(node) >= 5 & (grepl("A0$", node) | grepl("B0$", node)),
+                               str_remove(str_remove(node, "A0$"), "B0$"),
+                               # str_sub(node, start = 1, end = 3),
+                               node))
 
   # dataframe of sites and nodes, and which nodes had at least one detection
   node_detects = node_order %>%
-    select(NodeSite, Node) %>%
-    full_join(proc_ch %>%
-                group_by(Node) %>%
-                summarise(nTags = n_distinct(TagID))) %>%
-    mutate_at(vars(nTags),
-              list(~ if_else(is.na(.), as.integer(0), .))) %>%
-    mutate(seen = if_else(nTags > 0, T, F))
+    select(node, node_site) %>%
+    full_join(filter_ch %>%
+                group_by(node) %>%
+                summarise(n_tags = n_distinct(tag_code),
+                          .groups = "drop")) %>%
+    mutate(across(n_tags,
+                  tidyr::replace_na,
+                  0)) %>%
+    mutate(seen = if_else(n_tags > 0, T, F))
+
 
   # which nodes had observations?
   seenNodes = node_detects %>%
     filter(seen) %>%
-    pull(Node)
+    pull(node)
 
   # which nodes had no observations?
   unseenNodes = node_detects %>%
     filter(!seen) %>%
-    pull(Node)
+    pull(node)
 
   # convert to site codes
   unseenSites = node_detects %>%
-    group_by(NodeSite) %>%
-    summarise(nNodes = n_distinct(Node),
-              nTags = sum(nTags),
-              nSeen = sum(seen)) %>%
-    filter(nSeen == 0) %>%
-    pull(NodeSite)
+    group_by(node_site) %>%
+    summarise(n_nodes = n_distinct(node),
+              n_tags = sum(n_tags),
+              n_seen = sum(seen),
+              .groups = "drop") %>%
+    filter(n_seen == 0) %>%
+    pull(node_site)
 
   seenSites = node_detects %>%
-    group_by(NodeSite) %>%
-    summarise(nNodes = n_distinct(Node),
-              nSeen = sum(seen)) %>%
-    filter(nSeen > 0) %>%
-    select(NodeSite) %>%
-    as.matrix %>%
-    as.character
+    group_by(node_site) %>%
+    summarise(n_nodes = n_distinct(node),
+              n_tags = sum(n_tags),
+              n_seen = sum(seen),
+              .groups = "drop") %>%
+    filter(n_seen > 0) %>%
+    pull(node_site)
 
   # read in basic model file
   # open a connection
@@ -83,12 +99,13 @@ fixNoFishNodes = function(init_file = NULL,
 
   # which sites have multiple nodes but only one had detections?
   singleSites = node_detects %>%
-    group_by(NodeSite) %>%
-    summarise(nNodes = n_distinct(Node),
-              nSeen = sum(seen)) %>%
-    filter(nSeen == 1,
-           nNodes >= nSeen) %>%
-    pull(NodeSite)
+    group_by(node_site) %>%
+    summarise(n_nodes = n_distinct(node),
+              n_seen = sum(seen),
+              .groups = "drop") %>%
+    filter(n_seen == 1,
+           n_nodes >= n_seen) %>%
+    pull(node_site)
 
   # SC1, SC2B0 and SC2A0 are treated like a triple array, so we need this fix to avoid fixing SC2A0 or SC2B0 to 100% when it shouldn't be.
   if('SC2' %in% singleSites &
@@ -98,15 +115,19 @@ fixNoFishNodes = function(init_file = NULL,
 
   for(site in singleSites) {
     tmp = node_order %>%
-      filter(grepl(site, Path),
-             Node %in% seenNodes) %>%
-      group_by(Node) %>%
-      summarise(maxNodeOrder = max(NodeOrder))
+      filter(grepl(paste0(" ", site), path),
+             node %in% seenNodes) %>%
+      group_by(node) %>%
+      summarise(across(node_order,
+                       list(max = max),
+                       na.rm = T,
+                       .names = "{.fn}_{.col}"),
+                .groups = "drop")
 
 
     if(tmp %>%
-       filter(maxNodeOrder == max(maxNodeOrder),
-              grepl(site, Node)) %>%
+       filter(max_node_order == max(max_node_order, na.rm = T),
+              grepl(site, node)) %>%
        nrow() > 0) {
 
       mod_file[grep(paste0(seenNodes[grepl(paste0("^", site), seenNodes)], '_p'), mod_file)[1]] = paste0('  ', seenNodes[grepl(paste0("^", site), seenNodes)], '_p <- 1 # Single array, no upstream detections')
@@ -139,14 +160,14 @@ fixNoFishNodes = function(init_file = NULL,
       as.list() %>%
       map_df(.f = function(x) {
         node_order %>%
-          filter(grepl(x, Path))
+          filter(grepl(x, path))
       }) %>%
       distinct()
 
-    if(sum(!unseenNodePaths$NodeSite %in% unseenPhiSites) > 0) {
+    if(sum(!unseenNodePaths$node_site %in% unseenPhiSites) > 0) {
       # pathDf = unseenNodePaths %>%
-      #   filter(!NodeSite %in% unseenPhiSites) %>%
-      #   pull(NodeSite) %>%
+      #   filter(!node_site %in% unseenPhiSites) %>%
+      #   pull(node_site) %>%
       #   unique() %>%
       #   as.list() %>%
       #   map_df(.f = function(x) {
@@ -157,12 +178,12 @@ fixNoFishNodes = function(init_file = NULL,
       for(site in unseenPhiSites) {
         test = node_detects %>%
           full_join(node_order,
-                    by = c('NodeSite', 'Node')) %>%
-          filter(NodeSite != site) %>%
-          filter(grepl(site, Path)) %>%
-          summarise_at(vars(nTags),
+                    by = c('node', 'node_site')) %>%
+          filter(node_site != site) %>%
+          filter(grepl(site, path)) %>%
+          summarise_at(vars(n_tags),
                        list(sum)) %>%
-          pull(nTags) > 0
+          pull(n_tags) > 0
 
         if(test) {
           unseenPhiSites = unseenPhiSites[-match(site, unseenPhiSites)]
