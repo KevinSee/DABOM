@@ -1,7 +1,7 @@
 # Author: Kevin See
 # Purpose: Test functions for preparing PTAGIS data for DABOM
 # Created: 4/8/2021
-# Last Modified: 4/19/2021
+# Last Modified: 4/22/2021
 # Notes:
 
 #-----------------------------------------------------------------
@@ -16,7 +16,7 @@ devtools::load_all()
 
 #-----------------------------------------------------------------
 # pick a DABOM version to test
-root_site = c("GRA", 'PRA', "TUM", "PRO")[1]
+root_site = c("GRA", 'PRA', "TUM", "PRO")[3]
 
 # determine where various test files are located
 ptagis_file_list = list(GRA = "LGR_Chinook_2014.csv",
@@ -122,6 +122,10 @@ if(root_site == "GRA") {
   writeDABOM_PRO(basic_modNm)
 }
 
+# writeDABOM(basic_modNm,
+#            pc,
+#            configuration)
+
 #------------------------------------------------------------------------------
 # Alter default model code for species and year of
 # interest; sets prior for some detection node efficiencies at 0 or 100%
@@ -144,13 +148,13 @@ if(root_site == "GRA") {
 } else if(root_site == "PRA") {
   init_fnc = setInitialValues_PRA(dabom_list)
 } else if(root_site == "TUM") {
-  n_branch_list = setBranchNums(pc_nodes)
   init_fnc = setInitialValues_TUM(dabom_list,
-                                  n_branch_list = n_branch_list)
+                                  mod_path,
+                                  pc)
 } else if(root_site == "PRO") {
   init_fnc = setInitialValues_PRO(dabom_list,
                                   mod_path,
-                                  pc_nodes)
+                                  pc)
 }
 
 # Create all the input data for the JAGS model
@@ -160,13 +164,13 @@ if(root_site == "GRA") {
 } else if(root_site == "PRA") {
   jags_data = createJAGSinputs_PRA(dabom_list)
 } else if(root_site == "TUM") {
-  n_branch_list = setBranchNums(pc_nodes)
   jags_data = createJAGSinputs_TUM(dabom_list,
-                                   n_branch_list = n_branch_list)
+                                   mod_path,
+                                   pc)
 } else if(root_site == "PRO") {
   jags_data = createJAGSinputs_PRO(dabom_list,
                                    mod_path,
-                                   pc_nodes)
+                                   pc)
 }
 
 # Tell JAGS which parameters in the model that it should save.
@@ -180,6 +184,29 @@ jags = jags.model(mod_path,
                   inits = init_fnc,
                   n.chains = 1,
                   n.adapt = 10)
+
+
+#--------------------------------------
+# test the MCMC outcome and summary functions
+dabom_mod = coda.samples(jags,
+                         jags_params,
+                         n.iter = 10)
+
+
+detect_summ = summariseDetectProbs(dabom_mod = dabom_mod,
+                                   filter_ch = filter_ch) %>%
+  filter(!is.na(mean))
+
+# compile all movement probabilities, and multiply them appropriately
+if(root_site == "PRO") {
+  trans_df = compileTransProbs_PRO(dabom_mod,
+                                   pc)
+} else if(root_site == "TUM") {
+  trans_df = compileTransProbs_TUM(dabom_mod,
+                                   pc)
+}
+
+
 
 #--------------------------------------
 # issues
