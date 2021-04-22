@@ -30,7 +30,7 @@ renameTransParams_PRA = function(param_vec = NULL) {
   param_vec[grep('p_pop_MRC', param_vec)] = c('MRC_bb', 'past_BVC', 'past_TWR', 'past_CRW', 'past_SCP', 'past_MSH', 'past_MRW')
   param_vec[grep('p_pop_OKL', param_vec)] = c('OKL_bb', 'past_LLC', 'past_SA1', 'past_OMK', 'past_WAN', 'past_JOH', 'past_TNK', 'past_AEN', 'past_BPC', 'past_ANT', 'past_WHS', 'past_ZSL')
   param_vec[grep('p_pop_ZSL', param_vec)] = c('ZSL_bb', 'past_TON', 'past_NMC', 'past_OKI', 'past_OKC')
-  param_vec[grep('p_pop_dwn', param_vec)] = c('BelowJD1', 'past_JD1', 'past_TMF', 'past_PRV', 'past_ICH', 'past_PRO', 'past_RSH', 'past_PRH')
+  param_vec[grep('p_pop_dwn', param_vec)] = c('past_JDA', 'past_JD1', 'past_TMF', 'past_PRV', 'past_ICH', 'past_PRO', 'past_RSH', 'past_PRH')
   param_vec[grep('p_pop_PRV', param_vec)] = c('PRV_bb', 'past_HST', 'past_MDR')
 
   return(param_vec)

@@ -380,7 +380,7 @@ setInitialValues_PRA = function(dabom_list = NULL) {
   # Downstream of Prieset
   # not there
   a_list[['dwn']][,ncol(a_list[['dwn']])] = abs(a_list$PRA[,3] - 1)
-  # below JD1
+  # below JDA
   a_list[['dwn']][,1] = dabom_list$BelowPriest %>%
     select(matches('JDA')) %>%
     apply(1, max)

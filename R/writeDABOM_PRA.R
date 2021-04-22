@@ -148,7 +148,7 @@ model
   #-------------------------
   # Downstream of Priest Rapids
   #-------------------------
-  BelowJD1_p <- 1 # assume perfect detection (i.e. worst case)
+  JDA_p <- 1 # assume perfect detection (i.e. worst case)
   JD1B0_p ~ dbeta(1,1)
   JD1A0_p ~ dbeta(1,1)
   TMF_p <- 1 # assume perfect detection (i.e. worst case)
@@ -887,7 +887,7 @@ model
   }
 
   # observation part for below JD1
-  BelowPriest[i,1] ~ dbern(BelowJD1_p * catexp_dwn[i,1])
+  BelowPriest[i,1] ~ dbern(JDA_p * catexp_dwn[i,1])
 
   # observation part for JD1
   BelowPriest[i,2] ~ dbern(JD1B0_p * catexp_dwn[i,2])

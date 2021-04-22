@@ -157,7 +157,7 @@ setSavedParams_PRA = function(time_varying = F) {
                 'OKCA0_p',
                 'OKVB0_p',
                 'OKVA0_p',
-                'BelowJD1_p',
+                'JDA_p',
                 'JD1B0_p',
                 'JD1A0_p',
                 'TMF_p',
