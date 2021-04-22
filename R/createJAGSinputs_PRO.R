@@ -18,7 +18,9 @@ createJAGSinputs_PRO = function(dabom_list = NULL,
   stopifnot(!is.null(dabom_list))
 
   # how many branches at each branching node?
-  n_branch_list = setBranchNums(parent_child)
+  n_branch_list = setBranchNums(parent_child) %>%
+    # add a black box
+    map(.f = function(x) x + 1)
 
   # set dirichlet vectors
   init_val_func = setInitialValues_PRO(dabom_list,
