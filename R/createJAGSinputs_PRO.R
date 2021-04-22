@@ -19,6 +19,7 @@ createJAGSinputs_PRO = function(dabom_list = NULL,
 
   # how many branches at each branching node?
   n_branch_list = setBranchNums(parent_child) %>%
+    rlang::set_names(nm = function(x) paste0("n_pops_", x)) %>%
     # add a black box
     map(.f = function(x) x + 1)
 

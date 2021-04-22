@@ -21,19 +21,19 @@ setInitialValues_PRO = function(dabom_list = NULL,
   # how many tags?
   n_fish = nrow(dabom_list[[1]])
 
-  # # what node does model start with?
-  # root_node = parent_child %>%
-  #   PITcleanr::buildNodeOrder() %>%
-  #   filter(node_order == 1) %>%
-  #   pull(node)
+  # what node does model start with?
+  root_node = parent_child %>%
+    PITcleanr::buildNodeOrder() %>%
+    filter(node_order == 1) %>%
+    pull(node)
 
   n_branch_list = setBranchNums(parent_child) %>%
-    rlang::set_names(nm = str_remove(names(.), 'n_pops_')) %>%
     # add a black box
     map(.f = function(x) x + 1)
 
-  # n_branch_list[!grepl(root_node, names(n_branch_list))] = n_branch_list[!grepl(root_node, names(n_branch_list))] %>%
-  #   map(.f = function(x) x + 1)
+  # add a "not there" bin for every branch node except root_node
+  n_branch_list[!grepl(root_node, names(n_branch_list))] = n_branch_list[!grepl(root_node, names(n_branch_list))] %>%
+    map(.f = function(x) x + 1)
 
   # read in JAGS model file
   mod_conn = file(model_file, open = 'rt')
@@ -167,6 +167,11 @@ setInitialValues_PRO = function(dabom_list = NULL,
   z_list[["LMC"]] = dabom_list$Sunnyside %>%
     select(matches('UMC')) %>%
     apply(1, max)
+
+  # # do all the "a" matrices have a single 1 in every row?
+  # a_list %>%
+  #   map(.f = rowSums) %>%
+  #   map(.f = table)
 
   # compile for JAGS
   names(a_list) = paste0('a_', names(a_list))
