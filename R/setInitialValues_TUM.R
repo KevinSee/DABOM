@@ -18,6 +18,12 @@ setInitialValues_TUM = function(dabom_list = NULL,
                                 model_file = NULL,
                                 parent_child = NULL) {
 
+  stopifnot(exprs = {
+    !is.null(dabom_list)
+    !is.null(model_file)
+    !is.null(parent_child)
+  })
+
   # how many tags?
   n_fish = nrow(dabom_list[[1]])
 
@@ -92,24 +98,24 @@ setInitialValues_TUM = function(dabom_list = NULL,
   a_list[['ICL']][,2] = dabom_list$Icicle %>%
     select(matches('ICM'), matches('ICU')) %>%
     apply(1, max)
-  z_list[["ICU"]] = dabom_list$Icicle %>%
+  z_list[["ICM"]] = dabom_list$Icicle %>%
     select(matches('ICU')) %>%
     apply(1, max)
   # ICL bb
   a_list[["ICL"]][,3] = if_else(rowSums(a_list[["ICL"]]) == 0, 1, 0)
 
   # Peshastin
-  z_list[["PEU"]] = dabom_list$Peshastin %>%
+  z_list[["PES"]] = dabom_list$Peshastin %>%
     select(matches('PEU')) %>%
     apply(1, max)
 
   # Chiwawa
-  z_list[["CHU"]] = dabom_list$Chiwawa %>%
+  z_list[["CHL"]] = dabom_list$Chiwawa %>%
     select(matches('CHU')) %>%
     apply(1, max)
 
   # Nason
-  z_list[["NAU"]] = dabom_list$Nason %>%
+  z_list[["NAL"]] = dabom_list$Nason %>%
     select(matches('NAU')) %>%
     apply(1, max)
 
