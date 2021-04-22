@@ -91,9 +91,9 @@ model{
     Peshastin[i,1] ~ dbern( PESB0_p * catexp_TUM[i,1] )
     Peshastin[i,2] ~ dbern( PESA0_p * catexp_TUM[i,1] )
 
-    z_peu[i] ~ dbern(catexp_TUM[i,1] * phi_peu[fishOrigin[i]] ) # did fish go past PEU?
-    Peshastin[i,3] ~ dbern( PEUB0_p * z_peu[i] )
-    Peshastin[i,4] ~ dbern( PEUA0_p * z_peu[i] )
+    z_PEU[i] ~ dbern(catexp_TUM[i,1] * phi_peu[fishOrigin[i]] ) # did fish go past PEU?
+    Peshastin[i,3] ~ dbern( PEUB0_p * z_PEU[i] )
+    Peshastin[i,4] ~ dbern( PEUA0_p * z_PEU[i] )
 
   }
 
@@ -140,10 +140,10 @@ model{
 
    # ICU
    # did it make it?
-   z_icu[i] ~ dbern(phi_icu[fishOrigin[i]] * catexp_ICL[i,2])
+   z_ICU[i] ~ dbern(phi_icu[fishOrigin[i]] * catexp_ICL[i,2])
    # was it observed?
-   Icicle[i,6] ~ dbern( ICUB0_p * z_icu[i] )
-   Icicle[i,7] ~ dbern( ICUA0_p * z_icu[i] )
+   Icicle[i,6] ~ dbern( ICUB0_p * z_ICU[i] )
+   Icicle[i,7] ~ dbern( ICUA0_p * z_ICU[i] )
 
   }
 
@@ -172,10 +172,10 @@ model{
 
    # CHU
    # did it make it?
-   z_chu[i] ~ dbern(phi_chu[fishOrigin[i]] * catexp_TUM[i,4] )
+   z_CHU[i] ~ dbern(phi_chu[fishOrigin[i]] * catexp_TUM[i,4] )
    # was it observed?
-   Chiwawa[i,3] ~ dbern( CHUB0_p * z_chu[i] )
-   Chiwawa[i,4] ~ dbern( CHUA0_p * z_chu[i] )
+   Chiwawa[i,3] ~ dbern( CHUB0_p * z_CHU[i] )
+   Chiwawa[i,4] ~ dbern( CHUA0_p * z_CHU[i] )
 
   }
 
@@ -194,10 +194,10 @@ model{
 
   # NAU
   # did it make it?
-   z_nau[i] ~ dbern(phi_nau[fishOrigin[i]] * catexp_TUM[i,5] )
+   z_NAU[i] ~ dbern(phi_nau[fishOrigin[i]] * catexp_TUM[i,5] )
   # was it observed?
-   Nason[i,3] ~ dbern( NAUB0_p * z_nau[i] )
-   Nason[i,4] ~ dbern( NAUA0_p * z_nau[i] )
+   Nason[i,3] ~ dbern( NAUB0_p * z_NAU[i] )
+   Nason[i,4] ~ dbern( NAUA0_p * z_NAU[i] )
 
   }
 

@@ -4,7 +4,10 @@
 #'
 #' @author Kevin See
 #'
-#' @inheritParams createJAGSinputs_TUM
+#' @param dabom_list output of \code{createDABOMcapHist} with parameter split_matrics set to \code{TRUE}.
+#' @param model_file file path to JAGS text file.
+#'
+#' @inheritParams createDABOMcapHist
 #'
 #' @import dplyr stringr
 #' @export
@@ -12,14 +15,55 @@
 #' @examples setInitialValues_TUM()
 
 setInitialValues_TUM = function(dabom_list = NULL,
-                                n_branch_list = NULL) {
+                                model_file = NULL,
+                                parent_child = NULL) {
 
+  # how many tags?
   n_fish = nrow(dabom_list[[1]])
 
-  n_branch_list = n_branch_list %>%
-    rlang::set_names(nm = str_remove(names(.), 'n_pops_')) %>%
+  # what node does model start with?
+  root_node = parent_child %>%
+    PITcleanr::buildNodeOrder() %>%
+    filter(node_order == 1) %>%
+    pull(node)
+
+  n_branch_list = setBranchNums(parent_child) %>%
     # add a black box
     map(.f = function(x) x + 1)
+
+  # add a "not there" bin for every branch node except root_node
+  n_branch_list[!grepl(root_node, names(n_branch_list))] = n_branch_list[!grepl(root_node, names(n_branch_list))] %>%
+    map(.f = function(x) x + 1)
+
+  # read in JAGS model file
+  mod_conn = file(model_file, open = 'rt')
+  mod_file = readLines(mod_conn)
+  close(mod_conn)
+  rm(mod_conn)
+
+  init_a = stringr::str_trim(mod_file[grep('a_', mod_file)])
+  init_a = init_a[grepl('^a_', init_a)]
+  init_a = init_a %>%
+    stringr::str_split('\\[') %>%
+    map_chr(.f = function(x) x[1])
+
+  if(sum(!str_remove(init_a, '^a_') %in% names(n_branch_list)) > 0) {
+    stop()
+  }
+
+  init_z = stringr::str_trim(mod_file[grep('z_', mod_file)])
+  init_z = init_z[grepl('^z_', init_z)]
+  init_z = init_z %>%
+    stringr::str_split('\\[') %>%
+    map_chr(.f = function(x) x[1])
+
+  z_list = init_z %>%
+    as.list() %>%
+    rlang::set_names() %>%
+    rlang::set_names(nm = str_remove(names(.), '^z_')) %>%
+    map(.f = function(x) {
+      rep(0, n_fish)
+    })
 
   # first lets create inits matrices
   a_list = n_branch_list %>%
@@ -27,17 +71,6 @@ setInitialValues_TUM = function(dabom_list = NULL,
       array(0,
             dim = c(n_fish, x))
     })
-
-  # a_list = vector('list', length(n_branch_list))
-  # names(a_list) = str_replace(names(n_branch_list), 'n_pops_', '')
-  # for(i in 1:length(a_list)) {
-  #   n_col = ifelse(names(a_list)[i] %in% c('TUM'),
-  #                  n_branch_list[[i]],
-  #                  n_branch_list[[i]] + 1)
-  #   a_list[[i]] = array(0, dim = c(n_fish, n_col))
-  #   rm(n_col)
-  # }
-
 
   # initial branching detects
   for(i in 1:(ncol(a_list[['TUM']]) - 1)) {
@@ -59,28 +92,35 @@ setInitialValues_TUM = function(dabom_list = NULL,
   a_list[['ICL']][,2] = dabom_list$Icicle %>%
     select(matches('ICM'), matches('ICU')) %>%
     apply(1, max)
-  z_icu_init = dabom_list$Icicle %>%
+  z_list[["ICU"]] = dabom_list$Icicle %>%
     select(matches('ICU')) %>%
     apply(1, max)
   # ICL bb
   a_list[["ICL"]][,3] = if_else(rowSums(a_list[["ICL"]]) == 0, 1, 0)
 
   # Peshastin
-  z_peu_init = dabom_list$Peshastin %>%
+  z_list[["PEU"]] = dabom_list$Peshastin %>%
     select(matches('PEU')) %>%
     apply(1, max)
 
   # Chiwawa
-  z_chu_init = dabom_list$Chiwawa %>%
+  z_list[["CHU"]] = dabom_list$Chiwawa %>%
     select(matches('CHU')) %>%
     apply(1, max)
 
   # Nason
-  z_nau_init = dabom_list$Nason %>%
+  z_list[["NAU"]] = dabom_list$Nason %>%
     select(matches('NAU')) %>%
     apply(1, max)
 
+  # # do all the "a" matrices have a single 1 in every row?
+  # a_list %>%
+  #   map(.f = rowSums) %>%
+  #   map(.f = table)
+
+  # compile for JAGS
   names(a_list) = paste0('a_', names(a_list))
+  names(z_list) = paste0('z_', names(z_list))
 
   jags.inits <- function() {
     y = c(purrr::map(a_list,
@@ -88,14 +128,8 @@ setInitialValues_TUM = function(dabom_list = NULL,
                        x %*% seq(1, ncol(x)) %>%
                          as.vector
                      }),
-          lapply(list(z_peu = z_peu_init,
-                      z_icu = z_icu_init,
-                      z_chu = z_chu_init,
-                      z_nau = z_nau_init),
-                 as.vector))
-
-    # y$a[y$a == n_branch_list$n.pops.main+1] = NA
-
+          purrr::map(z_list,
+                     .f = as.vector))
     return(y)
   }
 
