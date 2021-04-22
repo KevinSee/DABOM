@@ -34,7 +34,9 @@ compileTransProbs_PRO = function(dabom_mod = NULL,
            starts_with("phi_"))
 
   trans_df = trans_mat %>%
-    tidyr::gather(param, value, -CHAIN, -ITER) %>%
+    tidyr::pivot_longer(cols = -c(CHAIN, ITER),
+                        names_to = "param",
+                        values_to = "value") %>%
     mutate(origin = stringr::str_split(param, '\\[', simplify = T)[,2],
            origin = stringr::str_sub(origin, 1, 1)) %>%
     mutate(parent = stringr::str_split(param, '\\[', simplify = T)[,1],
@@ -44,8 +46,9 @@ compileTransProbs_PRO = function(dabom_mod = NULL,
            brnch_num = stringr::str_remove(brnch_num, '\\]')) %>%
     mutate_at(vars(brnch_num),
               list(as.numeric)) %>%
-    mutate(brnch_num = if_else(is.na(brnch_num),
-                               1, brnch_num)) %>%
+    mutate(across(brnch_num,
+                  replace_na,
+                  1)) %>%
     left_join(parent_child %>%
                 group_by(parent) %>%
                 arrange(child_rkm) %>%
@@ -61,15 +64,13 @@ compileTransProbs_PRO = function(dabom_mod = NULL,
     # multiply some probabilities together
     rowwise() %>%
     mutate(across(c(SM1, TP2, TOP_bb),
-                  list(~ . * TOP))) %>%
-    mutate(across(c(SM1, TP2, TOP_bb),
-                  list(~ . * TOP))) %>%
+                  ~ . * TOP)) %>%
     mutate(across(c(AH1, LNR, LWC, ROZ, SUN_bb),
-                  list(~ . * SUN))) %>%
+                  ~ . * SUN)) %>%
     mutate(across(c(LMC, TAN, SWK, LMT, ROZ_bb),
-                  list(~ . * ROZ))) %>%
+                  ~ . * ROZ)) %>%
     mutate(across(c(UMC),
-                  list(~ . * LMC))) %>%
+                  ~ . * LMC)) %>%
     ungroup() %>%
     mutate(iter = 1:n()) %>%
     tidyr::pivot_longer(cols = -c(CHAIN, ITER,
