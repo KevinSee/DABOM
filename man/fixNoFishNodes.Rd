@@ -7,8 +7,9 @@
 fixNoFishNodes(
   init_file = NULL,
   file_name = NULL,
-  proc_ch = NULL,
-  node_order = NULL
+  filter_ch = NULL,
+  parent_child = NULL,
+  configuration = NULL
 )
 }
 \arguments{
@@ -16,9 +17,15 @@ fixNoFishNodes(
 
 \item{file_name}{name (with file path) to save the model as.}
 
-\item{proc_ch}{capture history as returned by one of the \code{processCapHist} family of functions in \code{PITcleanr} package, which has then been verified by a user and all blank UserProcStatus entries have been completed.}
+\item{filter_ch}{filtered capture history as returned by the `filterDetections()`
+function in the `PITcleanr` package, which has then been verified by a user and all
+blank or NA `user_keep_obs` entries have been completed.}
 
-\item{node_order}{output of function \code{createNodeOrder}}
+\item{parent_child}{data frame with at least `parent` and `child` columns.
+Can be created with `buildParentChild()` function in the `PITcleanr` package.}
+
+\item{configuration}{is a data frame which assigns node names to unique SiteID, AntennaID, and
+site configuration ID combinations. One example can be built with the function `buildConfig`}
 }
 \description{
 Takes the basic JAGS model and modifies it based on particular observations. Specifically, it fixes the detection probability of all nodes that had no observations to 0.

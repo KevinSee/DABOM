@@ -4,12 +4,15 @@
 \alias{setInitialValues_TUM}
 \title{Tumwater DABOM Initial Values}
 \usage{
-setInitialValues_TUM(dabom_list = NULL, n_branch_list = NULL)
+setInitialValues_TUM(dabom_list = NULL, model_file = NULL, parent_child = NULL)
 }
 \arguments{
 \item{dabom_list}{output of \code{createDABOMcapHist} with parameter split_matrics set to \code{TRUE}.}
 
-\item{n_branch_list}{list containing an entry for each branching node, and an integer indicating the number of branches upstream of that node.}
+\item{model_file}{file path to JAGS text file.}
+
+\item{parent_child}{data frame with at least `parent` and `child` columns.
+Can be created with `buildParentChild()` function in the `PITcleanr` package.}
 }
 \description{
 Construct appropriate initial values for Tumwater version of DABOM

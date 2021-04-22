@@ -7,7 +7,8 @@
 setBranchNums(parent_child = NULL)
 }
 \arguments{
-\item{parent_child}{dataframe with at least \code{ParentNode}, \code{ChildNode} and \code{RKM} columns}
+\item{parent_child}{data frame with at least `parent` and `child` columns.
+Can be created with `buildParentChild()` function in the `PITcleanr` package.}
 }
 \description{
 Returns list with the number of branches at each branching node based on parent child relationship table.

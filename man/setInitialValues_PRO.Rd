@@ -11,7 +11,8 @@ setInitialValues_PRO(dabom_list = NULL, model_file = NULL, parent_child = NULL)
 
 \item{model_file}{file path to JAGS text file.}
 
-\item{parent_child}{parent-child table, output of \code{createParentChildDf} function.}
+\item{parent_child}{data frame with at least `parent` and `child` columns.
+Can be created with `buildParentChild()` function in the `PITcleanr` package.}
 }
 \description{
 Construct appropriate initial values for Prosser version of DABOM
