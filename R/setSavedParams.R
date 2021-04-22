@@ -30,6 +30,9 @@ setSavedParams = function(model_file = NULL,
   det_params = paste0(mod_nodes, '_p')
 
   # movement probabilities
+  # branch_params = stringr::str_trim(mod_file[grep('psi_', mod_file)])
+  # branch_params = branch_params[grep('^psi_', branch_params)]
+
   branch_params = stringr::str_trim(mod_file[grep('p_pop', mod_file)])
   branch_params = branch_params[grep('^p_pop', branch_params)]
   branch_params = branch_params %>%
