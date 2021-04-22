@@ -30,13 +30,9 @@ writeDABOM = function(file_name = NULL,
 
 
   # how many child sites does each parent site have?
-  n_child_df = parent_child %>%
+  parent_info = parent_child %>%
     group_by(parent, parent_rkm) %>%
-    summarise(across(child,
-                     list(n_child = n_distinct),
-                     .names = "{.fn}"),
-              .groups = "drop") %>%
-    arrange(parent_rkm)
+    mutate(n_child = n_distinct(child))
 
   # get the column names of the capture history matrix
   col_nms = defineDabomColNms(root_site = root_site,
@@ -47,7 +43,7 @@ writeDABOM = function(file_name = NULL,
 
 
   # how many nodes does each site have, what are their names and what column are they contained in?
-  n_nodes = configuration %>%
+  node_info = configuration %>%
     # filter(node %in% unique(c(pc_nodes$parent, pc_nodes$child))) %>%
     filter(node %in% pc_nodes$child) %>%
     mutate(node_site = if_else(nchar(node) > 3 & (grepl("A0$", node) | grepl("B0$", node)),
@@ -55,15 +51,30 @@ writeDABOM = function(file_name = NULL,
                                node)) %>%
     group_by(site_code = node_site) %>%
     summarise(n_nodes = n_distinct(node),
-              nodes = list(unique(node)),
+              node = list(unique(node)),
               .groups = "drop") %>%
-    unnest(cols = nodes) %>%
+    unnest(cols = node) %>%
     rowwise() %>%
-    mutate(matrix_col = if_else(nodes %in% col_nms,
-                                grep(nodes, col_nms),
+    mutate(matrix_col = if_else(node %in% col_nms,
+                                grep(node, col_nms),
                                 NA_integer_)) %>%
     ungroup() %>%
-    arrange(matrix_col)
+    arrange(matrix_col) %>%
+    left_join(parent_child %>%
+                select(site_code = child,
+                       parent_site = parent),
+              by = "site_code") %>%
+    left_join(parent_child %>%
+                split(list(.$parent)) %>%
+                map_df(.id = "parent_site",
+                       .f = function(x) {
+                         x %>%
+                           arrange(child_rkm) %>%
+                           mutate(child_num = 1:n()) %>%
+                           select(site_code = child,
+                                  child_num)
+                       }),
+              by = c("site_code", "parent_site"))
 
   #--------------------------------------------
   # write JAGS model
@@ -74,12 +85,12 @@ writeDABOM = function(file_name = NULL,
         mod_conn)
 
   # detection priors
-  write("\n# Priors for detection probabilities \n",
+  write("# Priors for detection probabilities \n",
         mod_conn,
         append = T)
-  n_nodes %>%
+  node_info %>%
     filter(site_code != root_site) %>%
-    mutate(prior = paste0(nodes, "_p ~ dbeta(1, 1);")) %>%
+    mutate(prior = paste0("\t ", node, "_p ~ dbeta(1, 1);")) %>%
     pull(prior) %>%
     paste(collapse = "\n") %>%
     write(file = mod_conn,
@@ -90,95 +101,99 @@ writeDABOM = function(file_name = NULL,
   write("\n# Priors for transition probabilities \n",
         mod_conn,
         append = T)
-  for(i in 1:nrow(n_child_df)) {
-    site = n_child_df$parent[i]
-    # cat(paste(site, ": \n"))
-    childs = pc %>%
-      filter(parent == site)
-    n_branch = nrow(childs)
-
-    node_df = n_nodes %>%
-      filter(site_code == site)
-
-    site_pc = pc %>%
-      filter(child == site) %>%
-      select(parent) %>%
-      left_join(pc,
-                by = "parent") %>%
-      arrange(child_rkm)
-    if(nrow(site_pc) == 0) {
-      child_num = NA
-    } else {
-      child_num = site_pc %>%
-        mutate(child_num = 1:n()) %>%
-        filter(child == site) %>%
-        pull(child_num)
-      parent_site = pc %>%
-        filter(child == site) %>%
-        pull(parent)
-    }
+  for(site in unique(parent_info$parent)) {
+    n_branch = parent_info %>%
+      filter(parent == site) %>%
+      pull(n_child) %>%
+      unique()
 
     if(n_branch == 1) {
-      paste0("phi_", site, "[1] ~ dbeta(1, 1); \n",
-             "phi_", site, "[2] ~ dbeta(1, 1); \n") %>%
-        write(file = mod_conn,
-              append = T)
-
-      paste0("\n for (i in 1:n_fish) {
-        eta_", site, "[i] ~ dbern(eta_", parent_site, "[i, ", child_num, "] * phi_", site, "[fishOrigin[i]])
-      }") %>%
-        write(file = mod_conn,
-              append = T)
+      move_prior_text = paste0("\t phi_", site, "[1] ~ dbeta(1, 1); \n",
+                               "\t phi_", site, "[2] ~ dbeta(1, 1); \n")
     } else {
 
-      paste0("psi_", site, "[1, 1:n_branch_", site, "] ~ ddirch(", site, "_dirch_vec[1,]); \n",
-             "psi_", site, "[2, 1:n_branch_", site, "] ~ ddirch(", site, "_dirch_vec[2,]); \n",
-             "\n",
-             "omega_", site, "[1, 1:n_branch_", site, "] <- zero_vec[1:(n_branch_", site, ")]; \n",
-             "omega_", site, "[1, (n_branch_", site, " + 1)] <- 1; \n",
-             "\n",
-             "omega_", site, "[2, 1:n_branch_", site, "] <- psi_", site, "[1,]; \n",
-             "omega_", site, "[2, (n_branch_", site, " + 1)] <- 0; \n",
-             "\n",
-             "omega_", site, "[3, 1:n_branch_", site, "] <- psi_", site, "[2,]; \n",
-             "omega_", site, "[3, (n_branch_", site, " + 1)] <- 0; \n") %>%
-        write(file = mod_conn,
-              append = T)
+      move_prior_text = paste0("\t psi_", site, "[1, 1:n_branch_", site, "] ~ ddirch(", site, "_dirch_vec[1,]); \n",
+                               "\t psi_", site, "[2, 1:n_branch_", site, "] ~ ddirch(", site, "_dirch_vec[2,]); \n",
+                               "\n",
+                               "\t omega_", site, "[1, 1:n_branch_", site, "] <- zero_vec[1:(n_branch_", site, ")]; \n",
+                               "\t omega_", site, "[1, (n_branch_", site, " + 1)] <- 1; \n",
+                               "\n",
+                               "\t omega_", site, "[2, 1:n_branch_", site, "] <- psi_", site, "[1,]; \n",
+                               "\t omega_", site, "[2, (n_branch_", site, " + 1)] <- 0; \n",
+                               "\n",
+                               "\t omega_", site, "[3, 1:n_branch_", site, "] <- psi_", site, "[2,]; \n",
+                               "\t omega_", site, "[3, (n_branch_", site, " + 1)] <- 0; \n")
+    }
+    write(move_prior_text,
+          file = mod_conn,
+          append = T)
+  }
 
-      if(!is.na(child_num)) {
-        paste0("\n for (i in 1:n_fish) {
-      a_", site, "[i] ~ dcat( omega_", site, "[(eta_", parent_site, "[i,", child_num, "] * fishOrigin[i] + 1), 1:(n_pops_", site, "+1)] )
-      for (j in 1:n_branch_", site, ")	{
-        eta_", site, "[i,j] <- equals(a_", site, "[i],j) # equals(x,y) is a test for equality, returns [1,0]
-      }\n") %>%
-          write(file = mod_conn,
-                append = T)
+  # Where is each fish?
+  write(paste0("# Where is each fish? \n\n",
+               "\t for(i in 1:n_fish) { \n",
+        "\n"),
+        mod_conn,
+        append = T)
+  for(site in unique(parent_info$parent)) {
+    n_branch = parent_info %>%
+      filter(parent == site) %>%
+      pull(n_child) %>%
+      unique()
+
+    parent_site = node_info %>%
+      filter(site_code == site) %>%
+      pull(parent_site) %>%
+      unique()
+
+    child_num = node_info %>%
+      filter(site_code == site) %>%
+      pull(child_num) %>%
+      unique()
+
+    if(n_branch == 1) {
+      fish_pos_text = paste0("\t\t eta_", site, "[i] ~ dbern(eta_", parent_site, "[i, ", child_num, "] * phi_", site, "[fishOrigin[i]]) \n")
+      write(fish_pos_text,
+            file = mod_conn,
+            append = T)
+    }
+
+    if(n_branch > 0) {
+      if(length(child_num) > 0) {
+        fish_pos_text = paste0("\t\t a_", site, "[i] ~ dcat( omega_", site, "[(eta_", parent_site, "[i,", child_num, "] * fishOrigin[i] + 1), 1:(n_pops_", site, "+1)] ) \n",
+                               "\t\t\t for (j in 1:n_branch_", site, ")	{ \n",
+                               "\t\t\t\t eta_", site, "[i,j] <- equals(a_", site, "[i],j) # equals(x,y) is a test for equality, returns [1,0] \n",
+                               "\t\t\t }\n")
       } else {
-        paste0("\n for (i in 1:n_fish) {
-        a_", site, "[i] ~ dcat( omega_", site, "[fishOrigin[i], 1:(n_pops_", site, ")] )
-        for (j in 1:n_branch_", site, ")	{
-          eta_", site, "[i,j] <- equals(a_", site, "[i],j) # equals(x,y) is a test for equality, returns [1,0]
-        }\n") %>%
-          write(file = mod_conn,
-                append = T)
+        fish_pos_text = paste0("\t\t a_", site, "[i] ~ dcat( omega_", site, "[fishOrigin[i], 1:(n_pops_", site, ")] ) \n",
+                               "\t\t\t for (j in 1:n_branch_", site, ")	{ \n",
+                               "\t\t\t\t eta_", site, "[i,j] <- equals(a_", site, "[i],j) # equals(x,y) is a test for equality, returns [1,0] \n",
+                               "\t\t\t }\n")
       }
+      write(fish_pos_text,
+            file = mod_conn,
+            append = T)
     }
   }
 
-  # detection
-  write("\n\n # Were tags observed? \n
-        for (i in 1:n_fish) {\n",
+  write("\t} # end the n_fish loop \n",
         file = mod_conn,
         append = T)
-  for(site in unique(n_nodes$site_code)) {
-    node_df = n_nodes %>%
+
+  # detection
+  write(paste0("\n# Were tags observed? \n\n",
+               "\t for (i in 1:n_fish) {\n"),
+        file = mod_conn,
+        append = T)
+  for(site in unique(node_info$site_code)) {
+    node_df = node_info %>%
       filter(site_code == site)
 
     # find parent site
     parent_site = node_df %>%
       select(child = site_code) %>%
       distinct() %>%
-      left_join(pc,
+      left_join(parent_child,
                 by = "child") %>%
       pull(parent)
 
@@ -188,7 +203,7 @@ writeDABOM = function(file_name = NULL,
 
     if(nrow(dwn_site_pc) == 1) {
       for(j in 1:nrow(node_df)) {
-        paste0("cap_hist[i,", node_df$matrix_col[j], "] ~ dbern( ", node_df$nodes[j], "_p * eta_", parent_site, "[i] );\n") %>%
+        paste0("\t\t cap_hist[i,", node_df$matrix_col[j], "] ~ dbern( ", node_df$node[j], "_p * eta_", parent_site, "[i] );\n") %>%
           write(file = mod_conn,
                 append = T)
       }
@@ -199,7 +214,7 @@ writeDABOM = function(file_name = NULL,
         pull(id)
 
       for(j in 1:nrow(node_df)) {
-        paste0("cap_hist[i,", node_df$matrix_col[j], "] ~ dbern( ", node_df$nodes[j], "_p * eta_", parent_site, "[i,", child_num, "] );\n") %>%
+        paste0("\t\t cap_hist[i,", node_df$matrix_col[j], "] ~ dbern( ", node_df$node[j], "_p * eta_", parent_site, "[i,", child_num, "] );\n") %>%
           write(file = mod_conn,
                 append = T)
       }
@@ -207,7 +222,8 @@ writeDABOM = function(file_name = NULL,
     }
   }
 
-  write("}\n }",
+  write(paste0("\t}  # end the n_fish loop \n",
+               "}"),
         file = mod_conn,
         append = T)
 
