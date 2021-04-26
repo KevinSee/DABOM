@@ -293,8 +293,8 @@ model
   # migration model up Peshastin and Icicle (like survival):
   #-----------------------------------------------------------
   for(j in 1:2) {
-  phi_icu[j] ~ dbeta(1,1) # prob of migrating up past ICU
-  phi_peu[j] ~ dbeta(1,1) # prob of migrating up past PEU
+  phi_ICM[j] ~ dbeta(1,1) # prob of migrating up past ICU
+  phi_PES[j] ~ dbeta(1,1) # prob of migrating up past PEU
   }
 
   # OBSERTVATION PART FOR LOWER WENACHEE
@@ -312,9 +312,9 @@ model
   Wenatchee[i,7] ~ dbern(PESB0_p * catexp_LWE[i,3])
   Wenatchee[i,8] ~ dbern(PESA0_p * catexp_LWE[i,3])
 
-  z_peu[i] ~ dbern(catexp_LWE[i,3] * phi_peu[fishOrigin[i]] ) # did fish go past PEU?
-  Wenatchee[i,9] ~ dbern(PEUB0_p * z_peu[i])
-  Wenatchee[i,10] ~ dbern(PEUA0_p  * z_peu[i])
+  z_PES[i] ~ dbern(catexp_LWE[i,3] * phi_PES[fishOrigin[i]] ) # did fish go past PEU?
+  Wenatchee[i,9] ~ dbern(PEUB0_p * z_PES[i])
+  Wenatchee[i,10] ~ dbern(PEUA0_p  * z_PES[i])
 
   # next do CHM
   Wenatchee[i,11] ~ dbern(CHMB0_p * catexp_LWE[i,4])
@@ -329,9 +329,9 @@ model
   Wenatchee[i,17] ~ dbern(ICMB0_p * catexp_ICL[i,3])
   Wenatchee[i,18] ~ dbern(ICMA0_p * catexp_ICL[i,3])
 
-  z_icu[i] ~ dbern(catexp_ICL[i,3] * phi_icu[fishOrigin[i]] ) # did fish go past ICU?
-  Wenatchee[i,19] ~ dbern(ICUB0_p * z_icu[i])
-  Wenatchee[i,20] ~ dbern(ICUA0_p * z_icu[i])
+  z_ICM[i] ~ dbern(catexp_ICL[i,3] * phi_ICM[fishOrigin[i]] ) # did fish go past ICU?
+  Wenatchee[i,19] ~ dbern(ICUB0_p * z_ICM[i])
+  Wenatchee[i,20] ~ dbern(ICUA0_p * z_ICM[i])
 
   # Tumwater (TUF)...
   Wenatchee[i,21] ~ dbern(TUM_p * catexp_LWE[i,6])
@@ -368,7 +368,7 @@ model
 
   # Past CHU
   for(j in 1:2) {
-  phi_chu[j] ~ dbeta(1,1) # prob of migrating up past CHU
+  phi_CHL[j] ~ dbeta(1,1) # prob of migrating up past CHU
   }
 
   # OBSERTVATION PART FOR UPPER WENACHEE
@@ -382,9 +382,9 @@ model
   Wenatchee[i,24] ~ dbern(CHLB0_p * catexp_TUM[i,3]) # did they go past CHL?
   Wenatchee[i,25] ~ dbern(CHLA0_p * catexp_TUM[i,3])
 
-  z_chu[i] ~ dbern(catexp_TUM[i,3] * phi_chu[fishOrigin[i]] ) # did they go past CHU?
-  Wenatchee[i,26] ~ dbern(CHUB0_p * z_chu[i])
-  Wenatchee[i,27] ~ dbern(CHUA0_p * z_chu[i])
+  z_CHL[i] ~ dbern(catexp_TUM[i,3] * phi_CHL[fishOrigin[i]] ) # did they go past CHU?
+  Wenatchee[i,26] ~ dbern(CHUB0_p * z_CHL[i])
+  Wenatchee[i,27] ~ dbern(CHUA0_p * z_CHL[i])
 
   # UWE
   Wenatchee[i,28] ~ dbern(UWE_p * catexp_TUM[i,4]) # did they go past UWE?
@@ -422,7 +422,7 @@ model
   # migration model up Nason Creek (like survival):
   #-----------------------------------------------------------
   for(j in 1:2) {
-  phi_nau[j] ~ dbeta(1,1) #prob of migrating past NAU
+  phi_NAL[j] ~ dbeta(1,1) #prob of migrating past NAU
   }
 
   # OBSERTVATION PART FOR UPPER WENACHEE
@@ -432,9 +432,9 @@ model
   Wenatchee[i,29] ~ dbern(NALB0_p * catexp_UWE[i,2]) # did they go past NAL?
   Wenatchee[i,30] ~ dbern(NALA0_p * catexp_UWE[i,2])
 
-  z_nau[i] ~ dbern(catexp_UWE[i,2] * phi_nau[fishOrigin[i]] )  # did fish go past NAU?
-  Wenatchee[i,31] ~ dbern(NAUB0_p * z_nau[i])
-  Wenatchee[i,32] ~ dbern(NAUA0_p * z_nau[i])
+  z_NAL[i] ~ dbern(catexp_UWE[i,2] * phi_NAL[fishOrigin[i]] )  # did fish go past NAU?
+  Wenatchee[i,31] ~ dbern(NAUB0_p * z_NAL[i])
+  Wenatchee[i,32] ~ dbern(NAUA0_p * z_NAL[i])
 
   # White River
   Wenatchee[i,33] ~ dbern(WTLB0_p * catexp_UWE[i,3])
@@ -510,7 +510,7 @@ model
 
   # deal with upstream migration like survival
   for( j in 1:2) {
-  phi_enf[j] ~ dbeta(1,1) #prob of migrating past ENF
+  phi_ENA[j] ~ dbeta(1,1) #prob of migrating past ENF
   }
 
 
@@ -543,9 +543,9 @@ model
   Entiat[i,9] ~ dbern(ENAA0_p * catexp_ENL[i,4])
 
   # did the fish pass ENF?
-  z_enf[i] ~ dbern(catexp_ENL[i,4] * phi_enf[fishOrigin[i]])
-  Entiat[i,12] ~ dbern(ENFB0_p * z_enf[i] )
-  Entiat[i,13] ~ dbern(ENFA0_p * z_enf[i] )
+  z_ENA[i] ~ dbern(catexp_ENL[i,4] * phi_ENA[fishOrigin[i]])
+  Entiat[i,12] ~ dbern(ENFB0_p * z_ENA[i] )
+  Entiat[i,13] ~ dbern(ENFA0_p * z_ENA[i] )
 
 
   } #ends n_fish loop in this section
@@ -644,10 +644,10 @@ model
   # Now we deal with upper Methow - past MRC
   ################################################################################
   for(j in 1:2) {
-  phi_meth[j] ~ dbeta(1,1) # probability of moving past METH
-  phi_twispw[j] ~ dbeta(1,1) # probability of moving past TWISPW
-  phi_cru[j] ~ dbeta(1,1) # probability of moving past CRU
-  phi_wfc[j] ~ dbeta(1,1) # probability of moving past WFC
+  phi_MSH[j] ~ dbeta(1,1) # probability of moving past METH
+  phi_TWR[j] ~ dbeta(1,1) # probability of moving past TWISPW
+  phi_CRW[j] ~ dbeta(1,1) # probability of moving past CRU
+  phi_MRW[j] ~ dbeta(1,1) # probability of moving past WFC
   }
 
   # We use catexp_LMR[i,4] as an on/off switch for presence/absence of fish in Methow
@@ -681,17 +681,17 @@ model
   Methow[i,12] ~ dbern(TWRB0_p * catexp_MRC[i,3])
   Methow[i,13] ~ dbern(TWRA0_p * catexp_MRC[i,3])
 
-  z_twispw[i] ~ dbern(catexp_MRC[i,3] * phi_twispw[fishOrigin[i]] ) # did fish move past TWISPW?
-  Method[i,14] ~ dbern(TWISPW_p * z_twispw[i])
+  z_TWR[i] ~ dbern(catexp_MRC[i,3] * phi_TWR[fishOrigin[i]] ) # did fish move past TWISPW?
+  Method[i,14] ~ dbern(TWISPW_p * z_TWR[i])
 
   # observation part for CRW
   Methow[i,15] ~ dbern(CRWB0_p * catexp_MRC[i,4])
   Methow[i,16] ~ dbern(CRWA0_p * catexp_MRC[i,4])
 
   # upper array (CRU, above CRW)
-  z_cru[i] ~ dbern(catexp_MRC[i,4] * phi_cru[fishOrigin[i]] ) # did fish move past CRU?
-  Methow[i,17] ~ dbern(CRUB0_p * z_cru[i])
-  Methow[i,18] ~ dbern(CRUA0_p * z_cru[i])
+  z_CRW[i] ~ dbern(catexp_MRC[i,4] * phi_CRW[fishOrigin[i]] ) # did fish move past CRU?
+  Methow[i,17] ~ dbern(CRUB0_p * z_CRW[i])
+  Methow[i,18] ~ dbern(CRUA0_p * z_CRW[i])
 
   # observation part for SCP
   Methow[i,19] ~ dbern(SCPB0_p * catexp_MRC[i,5])
@@ -701,17 +701,17 @@ model
   Methow[i,21] ~ dbern(MSHB0_p * catexp_MRC[i,6])
   Methow[i,22] ~ dbern(MSHA0_p * catexp_MRC[i,6])
 
-  z_meth[i] ~ dbern(catexp_MRC[i,6] * phi_meth[fishOrigin[i]] ) # did fish move past METH?
-  Methow[i,23] ~ dbern(METHB0_p * z_meth[i])
-  Methow[i,24] ~ dbern(METHA0_p * z_meth[i])
+  z_MSH[i] ~ dbern(catexp_MRC[i,6] * phi_MSH[fishOrigin[i]] ) # did fish move past METH?
+  Methow[i,23] ~ dbern(METHB0_p * z_MSH[i])
+  Methow[i,24] ~ dbern(METHA0_p * z_MSH[i])
 
   # observation part for MRW
   Methow[i,25] ~ dbern(MRWB0_p * catexp_MRC[i,7])
   Methow[i,26] ~ dbern(MRWA0_p * catexp_MRC[i,7])
 
   # upper array (WFC, above MRW)
-  z_wfc[i] ~ dbern(catexp_MRC[i,7] * phi_wfc[fishOrigin[i]] ) # did fish move past WFC?
-  Methow[i,27] ~ dbern(WFC_p * z_wfc[i])
+  z_MRW[i] ~ dbern(catexp_MRC[i,7] * phi_MRW[fishOrigin[i]] ) # did fish move past WFC?
+  Methow[i,27] ~ dbern(WFC_p * z_MRW[i])
 
   } #ends n_fish loop in this section
 
@@ -719,9 +719,9 @@ model
   # Now we deal with Okanogan
   ################################################################################
   for(j in 1:2) {
-  phi_sa0[j] ~ dbeta(1,1) # prob of migrating past SA0
-  phi_obf[j] ~ dbeta(1,1) # prob of migrating past OBF
-  phi_okv[j] ~ dbeta(1,1) # prob of migrating past OKV
+  phi_SA1[j] ~ dbeta(1,1) # prob of migrating past SA0
+  phi_OMK[j] ~ dbeta(1,1) # prob of migrating past OBF
+  phi_OKC[j] ~ dbeta(1,1) # prob of migrating past OKV
   }
 
   # We use catexp_WEA[i,3] as an on/off switch for presence/absence of fish past OKL
@@ -760,18 +760,18 @@ model
   Okanogan[i,5] ~ dbern(SA1B0_p * catexp_OKL[i,3])
   Okanogan[i,6] ~ dbern(SA1A0_p * catexp_OKL[i,3])
 
-  z_sa0[i] ~ dbern(catexp_OKL[i,3] * phi_sa0[fishOrigin[i]] ) # did fish move past SA0?
+  z_SA1[i] ~ dbern(catexp_OKL[i,3] * phi_SA1[fishOrigin[i]] ) # did fish move past SA0?
 
   # observation part for SA0
-  Okanogan[i,7] ~ dbern(SA0B0_p * z_sa0[i])
-  Okanogan[i,8] ~ dbern(SA0A0_p * z_sa0[i])
+  Okanogan[i,7] ~ dbern(SA0B0_p * z_SA1[i])
+  Okanogan[i,8] ~ dbern(SA0A0_p * z_SA1[i])
 
   # observation part for OMK
   Okanogan[i,9] ~ dbern(OMKB0_p * catexp_OKL[i,4])
   Okanogan[i,10] ~ dbern(OMKA0_p * catexp_OKL[i,4])
 
-  z_obf[i] ~ dbern(catexp_OKL[i,4] * phi_obf[fishOrigin[i]] )
-  Okanogan[i,11] ~ dbern(OBF_p * z_obf[i] )
+  z_OMK[i] ~ dbern(catexp_OKL[i,4] * phi_OMK[fishOrigin[i]] )
+  Okanogan[i,11] ~ dbern(OBF_p * z_OMK[i] )
 
   # observation part for WAN
   Okanogan[i,12] ~ dbern(WAN_p * catexp_OKL[i,5])
@@ -845,9 +845,9 @@ model
   Okanogan[i,28] ~ dbern(OKCB0_p * catexp_ZSL[i,5])
   Okanogan[i,29] ~ dbern(OKCA0_p * catexp_ZSL[i,5])
 
-  z_okv[i] ~ dbern(catexp_ZSL[i,5] * phi_okv[fishOrigin[i]] )
-  Okanogan[i,30] ~ dbern(OKVB0_p * z_okv[i] )
-  Okanogan[i,31] ~ dbern(OKVA0_p * z_okv[i] )
+  z_OKC[i] ~ dbern(catexp_ZSL[i,5] * phi_OKC[fishOrigin[i]] )
+  Okanogan[i,30] ~ dbern(OKVB0_p * z_OKC[i] )
+  Okanogan[i,31] ~ dbern(OKVA0_p * z_OKC[i] )
 
   } #ends n_fish loop in this section
 
