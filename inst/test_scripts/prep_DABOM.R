@@ -1,7 +1,7 @@
 # Author: Kevin See
 # Purpose: Test functions for preparing PTAGIS data for DABOM
 # Created: 4/8/2021
-# Last Modified: 4/22/2021
+# Last Modified: 4/27/2021
 # Notes:
 
 #-----------------------------------------------------------------
@@ -84,47 +84,60 @@ tag_summ = summarizeTagData(filter_ch,
          origin = recode(origin,
                          "U" = "W"))
 
-
-# construct DABOM matrices
-dabom_df = createDABOMcapHist(filter_ch,
-                              parent_child = pc,
-                              configuration = configuration,
-                              split_matrices = F)
-
-dabom_list = createDABOMcapHist(filter_ch,
-                                parent_child = pc,
-                                configuration = configuration,
-                                split_matrices = T)
-
-if(root_site %in% c("PRA", 'TUM')) {
-  dabom_list$fishOrigin = dabom_df %>%
-    left_join(tag_summ %>%
-                select(tag_code, origin) %>%
-                distinct() %>%
-                mutate(origin = recode(origin,
-                                       "W" = 1,
-                                       "H" = 2))) %>%
-    pull(origin)
-} else if(root_site == "PRO") {
-  dabom_list$fishOrigin = rep(1, nrow(dabom_df))
+# for Prosser, mark all fish as wild
+if(root_site == "PRO") {
+  tag_summ %<>%
+    mutate(origin = "W")
 }
+
+spawn_site = estimateSpawnLoc(filter_ch, spawn_site = T, ptagis_file) %>%
+  select(-event_type_name) %>%
+  distinct() %>%
+  left_join(pc %>%
+              buildNodeOrder() %>%
+              select(spawn_site = node,
+                     spawn_path = path))
+
+# # construct DABOM matrices
+# dabom_df = createDABOMcapHist(filter_ch,
+#                               parent_child = pc,
+#                               configuration = configuration,
+#                               split_matrices = F)
+#
+# dabom_list = createDABOMcapHist(filter_ch,
+#                                 parent_child = pc,
+#                                 configuration = configuration,
+#                                 split_matrices = T)
+#
+# if(root_site %in% c("PRA", 'TUM')) {
+#   dabom_list$fishOrigin = dabom_df %>%
+#     left_join(tag_summ %>%
+#                 select(tag_code, origin) %>%
+#                 distinct() %>%
+#                 mutate(origin = recode(origin,
+#                                        "W" = 1,
+#                                        "H" = 2))) %>%
+#     pull(origin)
+# } else if(root_site == "PRO") {
+#   dabom_list$fishOrigin = rep(1, nrow(dabom_df))
+# }
 
 # file path to the default and initial model
 basic_modNm = paste0('~/Desktop/', root_site, '_DABOM.txt')
 
-if(root_site == "GRA") {
-  writeDABOM_LGD(basic_modNm)
-} else if(root_site == "PRA") {
-  writeDABOM_PRA(basic_modNm)
-} else if(root_site == "TUM") {
-  writeDABOM_TUM(basic_modNm)
-} else if(root_site == "PRO") {
-  writeDABOM_PRO(basic_modNm)
-}
+# if(root_site == "GRA") {
+#   writeDABOM_LGD(basic_modNm)
+# } else if(root_site == "PRA") {
+#   writeDABOM_PRA(basic_modNm)
+# } else if(root_site == "TUM") {
+#   writeDABOM_TUM(basic_modNm)
+# } else if(root_site == "PRO") {
+#   writeDABOM_PRO(basic_modNm)
+# }
 
-# writeDABOM(basic_modNm,
-#            pc,
-#            configuration)
+writeDABOM(basic_modNm,
+           pc,
+           configuration)
 
 #------------------------------------------------------------------------------
 # Alter default model code for species and year of
@@ -142,36 +155,50 @@ fixNoFishNodes(basic_modNm,
                parent_child = pc,
                configuration = configuration)
 
+# # Creates a function to spit out initial values for MCMC chains
+# if(root_site == "GRA") {
+#   init_fnc = setInitialValues_LGD(dabom_list)
+# } else if(root_site == "PRA") {
+#   init_fnc = setInitialValues_PRA(dabom_list)
+# } else if(root_site == "TUM") {
+#   init_fnc = setInitialValues_TUM(dabom_list,
+#                                   mod_path,
+#                                   pc)
+# } else if(root_site == "PRO") {
+#   init_fnc = setInitialValues_PRO(dabom_list,
+#                                   mod_path,
+#                                   pc)
+# }
+#
+# # Create all the input data for the JAGS model
+# if(root_site == "GRA") {
+#   jags_data = c(createJAGSinputs_LGD(dabom_list),
+#                 addTimeVaryData(filter_ch))
+# } else if(root_site == "PRA") {
+#   jags_data = createJAGSinputs_PRA(dabom_list)
+# } else if(root_site == "TUM") {
+#   jags_data = createJAGSinputs_TUM(dabom_list,
+#                                    mod_path,
+#                                    pc)
+# } else if(root_site == "PRO") {
+#   jags_data = createJAGSinputs_PRO(dabom_list,
+#                                    mod_path,
+#                                    pc)
+# }
+
 # Creates a function to spit out initial values for MCMC chains
-if(root_site == "GRA") {
-  init_fnc = setInitialValues_LGD(dabom_list)
-} else if(root_site == "PRA") {
-  init_fnc = setInitialValues_PRA(dabom_list)
-} else if(root_site == "TUM") {
-  init_fnc = setInitialValues_TUM(dabom_list,
-                                  mod_path,
-                                  pc)
-} else if(root_site == "PRO") {
-  init_fnc = setInitialValues_PRO(dabom_list,
-                                  mod_path,
-                                  pc)
-}
+init_fnc = setInitialValues(filter_ch,
+                            pc,
+                            configuration)
 
 # Create all the input data for the JAGS model
-if(root_site == "GRA") {
-  jags_data = c(createJAGSinputs_LGD(dabom_list),
-                addTimeVaryData(filter_ch))
-} else if(root_site == "PRA") {
-  jags_data = createJAGSinputs_PRA(dabom_list)
-} else if(root_site == "TUM") {
-  jags_data = createJAGSinputs_TUM(dabom_list,
-                                   mod_path,
-                                   pc)
-} else if(root_site == "PRO") {
-  jags_data = createJAGSinputs_PRO(dabom_list,
-                                   mod_path,
-                                   pc)
-}
+jags_data = createJAGSinputs(filter_ch = filter_ch,
+                             parent_child = pc,
+                             configuration = configuration,
+                             fish_origin = tag_summ %>%
+                               select(tag_code, origin) %>%
+                               distinct())
+
 
 # Tell JAGS which parameters in the model that it should save.
 jags_params = setSavedParams(model_file = mod_path,
