@@ -4,7 +4,7 @@
 \alias{setInitialValues_PRA}
 \title{PRA DABOM Initial Values}
 \usage{
-setInitialValues_PRA(dabom_list = NULL)
+setInitialValues_PRA(dabom_list = NULL, model_file = NULL, parent_child = NULL)
 }
 \arguments{
 \item{dabom_list}{output of \code{createDABOMcapHist} with parameter split_matrics set to \code{TRUE}.}

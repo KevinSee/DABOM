@@ -15,7 +15,7 @@ createJAGSinputs_TUM(dabom_list = NULL, model_file = NULL, parent_child = NULL)
 Can be created with `buildParentChild()` function in the `PITcleanr` package.}
 }
 \description{
-Construct all the necessary inputs to the DABOM JAGS model for TUM. Returns a named list that can be passed directly to JAGS.
+Construct all the necessary inputs to the DABOM JAGS model for TUM Returns a named list that can be passed directly to JAGS.
 }
 \examples{
 createJAGSinputs_TUM()

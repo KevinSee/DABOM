@@ -4,7 +4,7 @@
 \alias{compileTransProbs_TUM}
 \title{Compile Transition Probabilities - TUM}
 \usage{
-compileTransProbs_TUM(dabom_mod = NULL)
+compileTransProbs_TUM(dabom_mod = NULL, parent_child = NULL)
 }
 \arguments{
 \item{dabom_mod}{An MCMC.list}
