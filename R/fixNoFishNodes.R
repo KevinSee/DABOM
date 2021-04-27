@@ -90,7 +90,7 @@ fixNoFishNodes = function(init_file = NULL,
   mod_conn_new = file(file_name, open = 'w')
 
   for(node in unseenNodes) {
-    mod_file[grep(paste0(node, '_p'), mod_file)[1]] = paste0('  ', node, '_p <- 0 # no detections / not in operation')
+    mod_file[grep(paste0(node, '_p'), mod_file)[1]] = paste0('\t', node, '_p <- 0; # no detections / not in operation')
   }
 
   if(length(unseenNodes) > 0) {
@@ -130,7 +130,7 @@ fixNoFishNodes = function(init_file = NULL,
               grepl(site, node)) %>%
        nrow() > 0) {
 
-      mod_file[grep(paste0(seenNodes[grepl(paste0("^", site), seenNodes)], '_p'), mod_file)[1]] = paste0('  ', seenNodes[grepl(paste0("^", site), seenNodes)], '_p <- 1 # Single array, no upstream detections')
+      mod_file[grep(paste0(seenNodes[grepl(paste0("^", site), seenNodes)], '_p'), mod_file)[1]] = paste0('\t', seenNodes[grepl(paste0("^", site), seenNodes)], '_p <- 1; # Single array, no upstream detections')
 
       cat(paste('\nFixed', site, 'at 100% detection probability, because it is a single array with no upstream detections.\n'))
 
