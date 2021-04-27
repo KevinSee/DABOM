@@ -11,11 +11,29 @@
 #' @return NULL
 #' @examples setInitialValues_PRA()
 
-setInitialValues_PRA = function(dabom_list = NULL) {
+setInitialValues_PRA = function(dabom_list = NULL,
+                                model_file = NULL,
+                                parent_child = NULL) {
 
-  stopifnot(!is.null(dabom_list))
+  stopifnot(exprs = {
+    !is.null(dabom_list)
+    !is.null(model_file)
+    !is.null(parent_child)
+  })
 
+  # how many tags?
   n_fish = nrow(dabom_list[[1]])
+
+  # what node does model start with?
+  root_node = parent_child %>%
+    PITcleanr::buildNodeOrder() %>%
+    filter(node_order == 1) %>%
+    pull(node)
+
+  n_branch_list = setBranchNums(parent_child) %>%
+    # add a black box
+    map(.f = function(x) x + 1)
+
   n_branch_list = setBranchNums_PRA()
 
   # first lets create inits matrices
