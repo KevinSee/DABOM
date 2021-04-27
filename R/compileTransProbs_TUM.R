@@ -30,6 +30,7 @@ compileTransProbs_TUM = function(dabom_mod = NULL,
     # pull out movement parameters
     select(CHAIN, ITER,
            starts_with("p_pop_"),
+           starts_with("psi_"),
            starts_with("phi_"))
 
   trans_df = trans_mat %>%
@@ -40,6 +41,7 @@ compileTransProbs_TUM = function(dabom_mod = NULL,
            origin = stringr::str_sub(origin, 1, 1)) %>%
     mutate(parent = stringr::str_split(param, '\\[', simplify = T)[,1],
            parent = stringr::str_remove(parent, '^p_pop_'),
+           parent = stringr::str_remove(parent, '^psi_'),
            parent = stringr::str_remove(parent, '^phi_'),
            brnch_num = stringr::str_split(param, '\\,', simplify = T)[,2],
            brnch_num = stringr::str_remove(brnch_num, '\\]')) %>%
