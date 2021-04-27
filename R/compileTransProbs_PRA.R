@@ -1,18 +1,24 @@
 #' @title Compile Transition Probabilities - PRA
 #'
-#' @description Extracts the MCMC posteriors of transition probabilities for a DABOM model, and multiplies them appropriately. This function is specific to the Lower Granite version of DABOM.
+#' @description Extracts the MCMC posteriors of transition probabilities for a DABOM model, and multiplies them appropriately. This function is specific to the Priest Rapids version of DABOM.
 #'
 #' @author Kevin See
 #'
 #' @param dabom_mod An MCMC.list
+#' @inheritParams createDABOMcapHist
 #'
 #' @import dplyr tidyr purrr
 #' @export
 #' @return NULL
 #' @examples compileTransProbs_PRA()
 
-compileTransProbs_PRA = function(dabom_mod = NULL) {
+compileTransProbs_PRA = function(dabom_mod = NULL,
+                                 parent_child = NULL) {
 
+  stopifnot(!is.null(dabom_mod),
+            !is.null(parent_child))
+
+  # make sure dabom_mod is mcmc.list
   if(class(dabom_mod) == 'jagsUI') dabom_mod = dabom_mod$samples
 
   stopifnot(!is.null(dabom_mod),
@@ -21,81 +27,93 @@ compileTransProbs_PRA = function(dabom_mod = NULL) {
   trans_mat = as.matrix(dabom_mod,
                         iters = T,
                         chains = T) %>%
-    as.data.frame() %>%
-    tbl_df() %>%
-    # remove detection parameters
-    select(-matches('_p$'))
+    as_tibble() %>%
+    # pull out movement parameters
+    select(CHAIN, ITER,
+           starts_with("p_pop_"),
+           starts_with("psi_"),
+           starts_with("phi_"))
 
-  trans_w = trans_mat %>%
-    select(CHAIN, ITER, matches('\\[1'))
-  trans_h = trans_mat %>%
-    select(CHAIN, ITER, matches('\\[2'))
-  # change names of paramters
-  names(trans_w) = renameTransParams_PRA(names(trans_w))
-  names(trans_h) = renameTransParams_PRA(names(trans_h))
-
-
-  # multiply some probabilities together
-  trans_list = list('Natural' = trans_w,
-                    'Hatchery' = trans_h) %>%
-    purrr::map(.f = function(x) {
-      x %>%
-        rowwise() %>%
-        mutate_at(vars(RIA_bb, past_CLK, past_LWE, past_RRF),
-                  funs(. * past_RIA)) %>%
-        mutate_at(vars(LWE_bb, past_MCL, past_PES, past_CHM, past_ICL, past_TUM),
-                  funs(. * past_LWE)) %>%
-        mutate(past_PEU = past_PEU * past_PES) %>%
-        mutate_at(vars(ICL_bb, past_LNF, past_ICM),
-                  funs(. * past_ICL)) %>%
-        mutate(past_ICU = past_ICU * past_ICM) %>%
-        mutate_at(vars(TUM_bb, past_CHW, past_CHL, past_UWE),
-                  funs(. * past_TUM)) %>%
-        mutate(past_CHU = past_CHU * past_CHL) %>%
-        mutate_at(vars(UWE_bb, past_NAL, past_LWN, past_WTL),
-                  funs(. * past_UWE)) %>%
-        mutate(past_NAU = past_NAU * past_NAL) %>%
-        mutate_at(vars(RRF_bb, past_ENL, past_WEA, past_WEH),
-                  funs(. * past_RRF)) %>%
-        mutate_at(vars(ENL_bb, past_RCT, past_EHL, past_MAD, past_ENA),
-                  funs(. * past_ENL)) %>%
-        mutate(past_ENF = past_ENF * past_ENA) %>%
-        mutate_at(vars(WEA_bb, past_LMR, past_OKL, past_FST),
-                  funs(. * past_WEA)) %>%
-        mutate_at(vars(LMR_bb, past_GLC, past_LBC, past_MRC),
-                  funs(. * past_LMR)) %>%
-        mutate_at(vars(MRC_bb, past_TWR, past_BVC, past_SCP, past_MSH, past_MRW, past_CRW),
-                  funs(. * past_MRC)) %>%
-        mutate(past_WFC = past_WFC * past_MRW,
-               past_CRU = past_CRU * past_CRW,
-               past_METH = past_MSH * past_METH,
-               past_TWISPW = past_TWR * past_TWISPW) %>%
-        mutate_at(vars(OKL_bb, past_LLC, past_SA1, past_JOH, past_AEN, past_OMK, past_WAN, past_TNK, past_BPC, past_ANT, past_WHS, past_ZSL),
-                  funs(. * past_OKL)) %>%
-        mutate(past_OBF = past_OBF * past_OMK,
-               past_SA0 = past_SA0 * past_SA1) %>%
-        mutate_at(vars(ZSL_bb, past_TON, past_NMC, past_OKI, past_OKC),
-                  funs(. * past_ZSL)) %>%
-        mutate(past_OKV = past_OKV * past_OKC) %>%
-        mutate_at(vars(JDA, past_JD1, past_TMF, past_PRV, past_ICH, past_PRO, past_RSH, past_PRH),
-                  funs(. * dwnStrm)) %>%
-        mutate_at(vars(PRV_bb, past_HST, past_MDR),
-                  funs(. * past_PRV)) %>%
-        ungroup()
-    })
-
-  trans_df = trans_list %>%
-    purrr::map_df(.id = 'Origin',
-                  .f = function(x) {
-                    x %>%
-                      mutate(iter = 1:n()) %>%
-                      tidyr::gather(param, value, -CHAIN, -ITER, -iter) %>%
-                      select(chain = CHAIN,
-                             iter,
-                             param,
-                             value)
-                  })
-
+  trans_df = trans_mat %>%
+    tidyr::pivot_longer(cols = -c(CHAIN, ITER),
+                        names_to = "param",
+                        values_to = "value") %>%
+    mutate(origin = stringr::str_split(param, '\\[', simplify = T)[,2],
+           origin = stringr::str_sub(origin, 1, 1)) %>%
+    mutate(parent = stringr::str_split(param, '\\[', simplify = T)[,1],
+           parent = stringr::str_remove(parent, '^p_pop_'),
+           parent = stringr::str_remove(parent, '^psi_'),
+           parent = stringr::str_remove(parent, '^phi_'),
+           brnch_num = stringr::str_split(param, '\\,', simplify = T)[,2],
+           brnch_num = stringr::str_remove(brnch_num, '\\]')) %>%
+    mutate_at(vars(brnch_num),
+              list(as.numeric)) %>%
+    mutate(across(brnch_num,
+                  replace_na,
+                  1)) %>%
+    left_join(parent_child %>%
+                group_by(parent) %>%
+                arrange(child_rkm) %>%
+                mutate(brnch_num = 1:n()) %>%
+                select(parent, child, brnch_num),
+              by = c("parent", "brnch_num")) %>%
+    mutate(child = if_else(is.na(child),
+                           paste0(parent, '_bb'),
+                           child)) %>%
+    select(CHAIN, ITER, origin, child, value) %>%
+    tidyr::pivot_wider(names_from = "child",
+                       values_from = "value") %>%
+    # multiply some probabilities together
+    rowwise() %>%
+    mutate(across(c(RIA_bb, CLK, LWE, RRF),
+              ~ . * RIA)) %>%
+    mutate(across(c(LWE_bb, MCL, PES, CHM, ICL, TUM),
+              ~ . * LWE)) %>%
+    mutate(PEU = PEU * PES) %>%
+    mutate(across(c(ICL_bb, LNF, ICM),
+              ~ . * ICL)) %>%
+    mutate(ICU = ICU * ICM) %>%
+    mutate(across(c(TUM_bb, CHW, CHL, UWE),
+              ~ . * TUM)) %>%
+    mutate(CHU = CHU * CHL) %>%
+    mutate(across(c(UWE_bb, NAL, LWN, WTL),
+              ~ . * UWE)) %>%
+    mutate(NAU = NAU * NAL) %>%
+    mutate(across(c(RRF_bb, ENL, WEA, WEH),
+              ~ . * RRF)) %>%
+    mutate(across(c(ENL_bb, RCT, EHL, MAD, ENA),
+              ~ . * ENL)) %>%
+    mutate(ENF = ENF * ENA) %>%
+    mutate(across(c(WEA_bb, LMR, OKL, FST),
+              ~ . * WEA)) %>%
+    mutate(across(c(LMR_bb, GLC, LBC, MRC),
+              ~ . * LMR)) %>%
+    mutate(across(c(MRC_bb, TWR, BVC, SCP, MSH, MRW, CRW),
+              ~ . * MRC)) %>%
+    mutate(WFC = WFC * MRW,
+           CRU = CRU * CRW,
+           METH = MSH * METH,
+           TWISPW = TWR * TWISPW) %>%
+    mutate(across(c(OKL_bb, LLC, SA1, JOH, AEN, OMK, WAN, TNK, BPC, ANT, WHS, ZSL),
+              ~ . * OKL)) %>%
+    mutate(OBF = OBF * OMK,
+           SA0 = SA0 * SA1) %>%
+    mutate(across(c(ZSL_bb, TON, NMC, OKI, OKC),
+              ~ . * ZSL)) %>%
+    mutate(OKV = OKV * OKC) %>%
+    mutate(across(c(PRV_bb, HST, MDR),
+              ~ . * PRV)) %>%
+    ungroup() %>%
+    mutate(iter = 1:n()) %>%
+    tidyr::pivot_longer(cols = -c(CHAIN, ITER,
+                                  iter, origin),
+                        names_to = "param",
+                        values_to = "value") %>%
+    select(chain = CHAIN,
+           iter,
+           origin,
+           param,
+           value)
 
   return(trans_df)
 }
