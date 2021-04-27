@@ -16,7 +16,7 @@ devtools::load_all()
 
 #-----------------------------------------------------------------
 # pick a DABOM version to test
-root_site = c("GRA", 'PRA', "TUM", "PRO")[3]
+root_site = c("GRA", 'PRA', "TUM", "PRO")[2]
 
 # determine where various test files are located
 ptagis_file_list = list(GRA = "LGR_Chinook_2014.csv",
@@ -230,6 +230,9 @@ if(root_site == "PRO") {
                                    pc)
 } else if(root_site == "TUM") {
   trans_df = compileTransProbs_TUM(dabom_mod,
+                                   pc)
+} else if(root_site == "PRA") {
+  trans_df = compileTransProbs_PRA(dabom_mod,
                                    pc)
 }
 
