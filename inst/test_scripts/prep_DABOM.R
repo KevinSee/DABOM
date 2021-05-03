@@ -1,7 +1,7 @@
 # Author: Kevin See
 # Purpose: Test functions for preparing PTAGIS data for DABOM
 # Created: 4/8/2021
-# Last Modified: 4/27/2021
+# Last Modified: 5/3/2021
 # Notes:
 
 #-----------------------------------------------------------------
@@ -47,6 +47,14 @@ spwn_yr = ptagis_file %>%
   str_extract("[:digit:]+") %>%
   as.numeric()
 
+# set minimum observation date
+min_obs_date = if_else(root_site %in% c("TUM", 'GRA'),
+                       paste0(spwn_yr, "0301"),
+                       if_else(root_site %in% c("PRA", 'PRO'),
+                               paste0(spwn_yr-1, "0701"),
+                               NA_character_))
+
+# set maximum observation date
 max_obs_date = if_else(root_site %in% c("TUM", 'GRA'),
                        paste0(spwn_yr, "0930"),
                        if_else(root_site %in% c("PRA", 'PRO'),
@@ -67,6 +75,7 @@ prepped_df = compress(ptagis_file,
                       configuration = configuration) %>%
   prepWrapper(parent_child = pc_nodes,
               start_node = root_site,
+              min_obs_date = min_obs_date,
               max_obs_date = max_obs_date)
 
 # determine which obs to keep
@@ -74,29 +83,41 @@ filter_ch = prepped_df %>%
   mutate(user_keep_obs = auto_keep_obs) %>%
   filter(user_keep_obs)
 
-tag_summ = summarizeTagData(filter_ch,
-                            bio_data = read_csv(ptagis_file) %>%
-                              select(tag_code = `Tag Code`,
-                                     species = `Mark Species Name`,
-                                     origin = `Mark Rear Type Name`) %>%
-                              distinct()) %>%
+# for sampling portion of tags
+n_fish = 500
+set.seed(5)
+filter_ch %<>%
+  select(tag_code) %>%
+  distinct() %>%
+  sample_n(n_fish) %>%
+  left_join(filter_ch)
+
+fish_origin = read_csv(ptagis_file) %>%
+  select(tag_code = `Tag Code`,
+         origin = `Mark Rear Type Name`) %>%
+  distinct() %>%
   mutate(origin = str_sub(origin, 1, 1),
          origin = recode(origin,
                          "U" = "W"))
 
-# for Prosser, mark all fish as wild
-if(root_site == "PRO") {
-  tag_summ %<>%
+if(root_site %in% c("GRA", "PRO")) {
+  fish_origin %<>%
     mutate(origin = "W")
 }
 
-spawn_site = estimateSpawnLoc(filter_ch, spawn_site = T, ptagis_file) %>%
-  select(-event_type_name) %>%
-  distinct() %>%
-  left_join(pc %>%
-              buildNodeOrder() %>%
-              select(spawn_site = node,
-                     spawn_path = path))
+
+# summarize data for each tag, including origin
+tag_summ = summarizeTagData(filter_ch,
+                            bio_data = fish_origin)
+
+# spawn_site = estimateSpawnLoc(filter_ch, spawn_site = T, ptagis_file) %>%
+#   select(-event_type_name) %>%
+#   distinct() %>%
+#   left_join(pc %>%
+#               buildNodeOrder() %>%
+#               select(spawn_site = node,
+#                      spawn_path = path),
+#             by = "spawn_site")
 
 # # construct DABOM matrices
 # dabom_df = createDABOMcapHist(filter_ch,
@@ -126,7 +147,7 @@ spawn_site = estimateSpawnLoc(filter_ch, spawn_site = T, ptagis_file) %>%
 basic_modNm = paste0('~/Desktop/', root_site, '_DABOM.txt')
 
 # if(root_site == "GRA") {
-#   writeDABOM_LGD(basic_modNm)
+#   writeDABOM_LGD(basic_modNm, T)
 # } else if(root_site == "PRA") {
 #   writeDABOM_PRA(basic_modNm)
 # } else if(root_site == "TUM") {
@@ -137,7 +158,8 @@ basic_modNm = paste0('~/Desktop/', root_site, '_DABOM.txt')
 
 writeDABOM(basic_modNm,
            pc,
-           configuration)
+           configuration,
+           time_varying = if_else(root_site == "GRA", T, F))
 
 #------------------------------------------------------------------------------
 # Alter default model code for species and year of
@@ -149,11 +171,12 @@ writeDABOM(basic_modNm,
 mod_path = paste0('~/Desktop/Test_DABOM_', root_site, '.txt')
 
 # writes species and year specific jags code
-fixNoFishNodes(basic_modNm,
-               mod_path,
+fixNoFishNodes(init_file = basic_modNm,
+               file_name = mod_path,
                filter_ch = filter_ch,
                parent_child = pc,
-               configuration = configuration)
+               configuration = configuration,
+               fish_origin = fish_origin)
 
 # # Creates a function to spit out initial values for MCMC chains
 # if(root_site == "GRA") {
@@ -195,10 +218,13 @@ init_fnc = setInitialValues(filter_ch,
 jags_data = createJAGSinputs(filter_ch = filter_ch,
                              parent_child = pc,
                              configuration = configuration,
-                             fish_origin = tag_summ %>%
-                               select(tag_code, origin) %>%
-                               distinct())
-
+                             fish_origin = fish_origin)
+if(root_site == "GRA") {
+  jags_data = c(jags_data,
+                addTimeVaryData(filter_ch,
+                                start_date = paste0(spwn_yr, "0301"),
+                                end_date = paste0(spwn_yr, "0817")))
+}
 
 # Tell JAGS which parameters in the model that it should save.
 jags_params = setSavedParams(model_file = mod_path,
@@ -210,7 +236,7 @@ jags = jags.model(mod_path,
                   data = jags_data,
                   inits = init_fnc,
                   n.chains = 1,
-                  n.adapt = 10)
+                  n.adapt = 5)
 
 
 #--------------------------------------
