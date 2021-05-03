@@ -5,6 +5,7 @@
 #' @author Kevin See
 #'
 #' @param dabom_mod An MCMC.list
+#' @inheritParams createDABOMcapHist
 #'
 #' @import dplyr tidyr purrr
 #' @export
