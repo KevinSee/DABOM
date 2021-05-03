@@ -4,7 +4,12 @@
 \alias{createJAGSinputs}
 \title{Prep DABOM JAGS inputs}
 \usage{
-createJAGSinputs(filter_ch, parent_child, configuration, fish_origin)
+createJAGSinputs(
+  filter_ch = NULL,
+  parent_child = NULL,
+  configuration = NULL,
+  fish_origin = NULL
+)
 }
 \arguments{
 \item{filter_ch}{filtered capture history as returned by the `filterDetections()`

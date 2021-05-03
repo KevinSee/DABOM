@@ -4,7 +4,12 @@
 \alias{writeDABOM}
 \title{Write DABOM JAGS model}
 \usage{
-writeDABOM(file_name = NULL, parent_child = NULL, configuration = NULL)
+writeDABOM(
+  file_name = NULL,
+  parent_child = NULL,
+  configuration = NULL,
+  time_varying = FALSE
+)
 }
 \arguments{
 \item{file_name}{name (with file path) to save the model as}
@@ -14,6 +19,8 @@ Can be created with `buildParentChild()` function in the `PITcleanr` package.}
 
 \item{configuration}{is a data frame which assigns node names to unique SiteID, AntennaID, and
 site configuration ID combinations. One example can be built with the function `buildConfig`}
+
+\item{time_varying}{Should the initial movement probabilities be time-varying? Default value is `FALSE`}
 }
 \description{
 This writes the overall JAGS model for a generic DABOM as a text file. It can then be modified depending on the observations for a particular valid tag list.

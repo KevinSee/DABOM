@@ -9,7 +9,8 @@ fixNoFishNodes(
   file_name = NULL,
   filter_ch = NULL,
   parent_child = NULL,
-  configuration = NULL
+  configuration = NULL,
+  fish_origin = NULL
 )
 }
 \arguments{
@@ -26,6 +27,9 @@ Can be created with `buildParentChild()` function in the `PITcleanr` package.}
 
 \item{configuration}{is a data frame which assigns node names to unique SiteID, AntennaID, and
 site configuration ID combinations. One example can be built with the function `buildConfig`}
+
+\item{fish_origin}{tibble containing `tag_code` and origin ("W" or "H")
+of every tag. If not supplied, every tag will be assigned "W".}
 }
 \description{
 Takes the basic JAGS model and modifies it based on particular observations. Specifically, it fixes the detection probability of all nodes that had no observations to 0.
