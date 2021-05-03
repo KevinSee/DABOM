@@ -185,12 +185,12 @@ fixNoFishNodes = function(init_file = NULL,
 
     # str_which(mod_file, mod_str)
 
-    # for(mod_str in phi_0_nodes$mod_str) {
-    for(i in 1:nrow(phi_0_nodes)) {
-      mod_file[str_which(mod_file, paste0(phi_0_nodes$mod_str[i], " ~"))] = paste0('\t ', phi_0_nodes$param[i], ' <- 0 # no upstream detections')
-    }
-
     if(nrow(phi_0_nodes) > 0) {
+
+      for(i in 1:nrow(phi_0_nodes)) {
+        mod_file[str_which(mod_file, paste0(phi_0_nodes$mod_str[i], " ~"))] = paste0('\t ', phi_0_nodes$param[i], ' <- 0 # no upstream detections')
+      }
+
       cat(paste('\nFixed movement upstream of the following sites to 0 for at least one fish type because no detections upstream:\n\t', paste(unique(phi_0_nodes$site_code), collapse = ', '), '.\n\n'))
     }
 
