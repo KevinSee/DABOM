@@ -10,7 +10,7 @@ compileTransProbs_TUM(dabom_mod = NULL, parent_child = NULL)
 \item{dabom_mod}{An MCMC.list}
 }
 \description{
-Extracts the MCMC posteriors of transition probabilities for a DABOM model, and multiplies them appropriately. This function is specific to the Lower Granite version of DABOM.
+Extracts the MCMC posteriors of transition probabilities for a DABOM model, and multiplies them appropriately. This function is specific to the Tumwater version of DABOM.
 }
 \examples{
 compileTransProbs_TUM()
