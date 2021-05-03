@@ -25,7 +25,7 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
                               bootstrap_samp = 2000,
                               node_order = NULL,
                               summ_results = T,
-                              pt_est_nm = NULL,
+                              pt_est_nm = c('mean', 'median', 'mode'),
                               time_varying = TRUE,
                               cred_int_prob = 0.95) {
 
@@ -33,7 +33,7 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
             !is.null(stadem_mod),
             !is.null(node_order))
 
-  stopifnot(pt_est_nm %in% c('mean', 'median', 'mode') | is.null(pt_est_nm))
+  pt_est_name = match.arg(pt_est_name)
 
   if(class(stadem_mod) == 'jagsUI') {
     stadem_mod = stadem_mod$samples
@@ -47,13 +47,23 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
     group_by(CHAIN) %>%
     mutate(ITER = 1:n()) %>%
     ungroup() %>%
-    tidyr::gather(param, value, -CHAIN, -ITER) %>%
-    mutate(week = stringr::str_extract(param, '[:digit:]+'),
-           week = as.integer(week)) %>%
+    tidyr::pivot_longer(cols = -c(CHAIN, ITER),
+                        names_to = "param",
+                        values_to = "value") %>%
+    mutate(strata_num = stringr::str_extract(param, '[:digit:]+'),
+           strata_num = as.integer(strata_num)) %>%
     group_by(param) %>%
     mutate(iter = 1:n()) %>%
     ungroup() %>%
-    select(iter, week, tot_escape = value)
+    select(iter, strata_num, tot_escape = value)
+
+
+  move_prob = compileTimeVaryTransProbs(dabom_mod,
+                                        parent_child)
+
+
+
+
 
   stadem_summ = stadem_df %>%
     group_by(week) %>%
