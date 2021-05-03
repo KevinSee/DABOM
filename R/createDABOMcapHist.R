@@ -73,7 +73,8 @@ createDABOMcapHist = function(filter_ch = NULL,
                 distinct(),
               by = "tag_code") %>%
     select(tag_code, start_date,
-           everything())
+           everything()) %>%
+    arrange(tag_code)
 
   if(sum(!node_order$node[!(node_order$node %in% root_site)] %in% names(dabom_df)) > 0) {
     dabom_df[,node_order$node[!node_order$node %in% names(dabom_df)]] = NA
