@@ -1,6 +1,6 @@
 #' @title Compile Time-Varying Transition Probabilities
 #'
-#' @description Extracts the MCMC posteriors of time-varying transition probabilities for a DABOM model. The time-varying parameters should be set up so that they are organized as an array with the first dimension corresponding to the fish origin, the second to the model branch, and the third the model strata.
+#' @description Extracts the MCMC posteriors of time-varying transition probabilities for a DABOM model. The time-varying parameters should be set up so that they are organized as an array with the first dimension corresponding to the fish origin, the second to the model branch, and the third the model time strata.
 #'
 #' @author Kevin See
 #'
@@ -10,9 +10,9 @@
 #' @import dplyr tidyr stringr
 #' @export
 #' @return NULL
-#' @examples compileWeekTransProbs()
+#' @examples compileTimeVaryTransProbs()
 
-compileWeekTransProbs = function(dabom_mod = NULL,
+compileTimeVaryTransProbs = function(dabom_mod = NULL,
                                  parent_child = NULL) {
 
   stopifnot(!is.null(dabom_mod),
@@ -34,7 +34,7 @@ compileWeekTransProbs = function(dabom_mod = NULL,
                         iters = T,
                         chains = T) %>%
     as_tibble() %>%
-    # pull out movement parameters
+    # pull out movement parameters from root_node
     select(CHAIN, ITER,
            matches(root_node)) %>%
     tidyr::pivot_longer(cols = -c(CHAIN, ITER),
