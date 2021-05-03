@@ -91,6 +91,7 @@ defineDabomColNms = function(root_site = c("GRA", 'PRA', "TUM", "PRO"),
         rename(child = node) %>%
         left_join(parent_child,
                   by = "child") %>%
+        distinct() %>%
         PITcleanr::addParentChildNodes(configuration) %>%
         select(node = child,
                node_hydro = child_hydro,
