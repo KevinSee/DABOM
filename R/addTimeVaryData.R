@@ -49,7 +49,7 @@ addTimeVaryData = function(filter_ch = NULL,
     dam_week[which(proc_trap_date$start_date %within% week_strata[[i]])] = i
   }
 
-  tv_list = list(n.weeks = length(week_strata),
+  tv_list = list(n_weeks = length(week_strata),
                  dam_week = dam_week)
 
   return(tv_list)
