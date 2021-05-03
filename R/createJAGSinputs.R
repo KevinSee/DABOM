@@ -12,16 +12,24 @@
 #' @return NULL
 #' @examples createJAGSinputs_PRA()
 
-createJAGSinputs = function(filter_ch,
-                            parent_child,
-                            configuration,
-                            fish_origin) {
+createJAGSinputs = function(filter_ch = NULL,
+                            parent_child = NULL,
+                            configuration = NULL,
+                            fish_origin = NULL) {
 
   stopifnot(exprs = {
     !is.null(filter_ch)
     !is.null(parent_child)
     !is.null(configuration)
   })
+
+  if(is.null(fish_origin)) {
+    fish_origin = filter_ch %>%
+      select(tag_code) %>%
+      distinct() %>%
+      mutate(origin = "W")
+  }
+
 
   # determine starting point (root_site)
   root_site = PITcleanr::buildNodeOrder(parent_child) %>%
