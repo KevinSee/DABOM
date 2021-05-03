@@ -2,6 +2,7 @@
 
 export(addTimeVaryData)
 export(calcTribEscape_LGD)
+export(compileTransProbs_GRA)
 export(compileTransProbs_LGD)
 export(compileTransProbs_PRA)
 export(compileTransProbs_PRO)
