@@ -4,36 +4,27 @@
 #'
 #' @author Kevin See
 #'
-#' @param dabom_mod The result of DABOM. An MCMC.list, where the detection parameter names all end with "\code{_p}".
-#' @param stadem_mod The result of STADEM. An MCMC.list, or \code{jagsUI} object that can be coerced to an MCMC.list.
-#' @param stadem_param_nm Character vector of length one, with the name of the parameter corresponding to total escapement past Lower Granite Dam.
-#' @param bootstrap_samp The number of samples to be drawn from the posteriors of the STADEM model and the DABOM model.
-#' @param node_order output of function \code{createNodeOrder}.
-#' @param summ_results Should the resulting posteriors be summarised or returned as posterior samples? Default value is \code{TRUE}.
-#' @param pt_est_nm Determines whether to use the mean, median of mode of posterior samples as the point estimate. Returns all 3 if \code{NULL}, which is default.
-#' @param cred_int_prob A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95\%.
-#' @inheritParams compileTransProbs_LGD
+#' @inheritParams calcBranchEscape_GRA
+#' @inheritParams createDABOMcapHist
+#' @param summ_results Should the resulting posteriors be summarized or returned as posterior samples? Default value is \code{TRUE}.
+#' @param cred_int_prob A numeric scalar in the interval (0,1) giving what highest posterior density portion of the posterior the credible interval should cover. The default value is 95\%.
 #'
 #' @import dplyr tidyr stringr
 #' @export
 #' @return NULL
-#' @examples #calcTribEscape_LGD()
+#' @examples #calcTribEscape_GRA()
 
-calcTribEscape_LGD = function(dabom_mod = NULL,
+calcTribEscape_GRA = function(dabom_mod = NULL,
                               stadem_mod = NULL,
                               stadem_param_nm = 'X.new.wild',
                               bootstrap_samp = 2000,
-                              node_order = NULL,
+                              parent_child = NULL,
                               summ_results = T,
-                              pt_est_nm = c('mean', 'median', 'mode'),
-                              time_varying = TRUE,
                               cred_int_prob = 0.95) {
 
   stopifnot(!is.null(dabom_mod) ,
             !is.null(stadem_mod),
-            !is.null(node_order))
-
-  pt_est_name = match.arg(pt_est_name)
+            !is.null(parent_child))
 
   if(class(stadem_mod) == 'jagsUI') {
     stadem_mod = stadem_mod$samples
@@ -57,185 +48,173 @@ calcTribEscape_LGD = function(dabom_mod = NULL,
     ungroup() %>%
     select(iter, strata_num, tot_escape = value)
 
+  # get movement probabilities of time-varying branches
+  trans_df = compileTransProbs_GRA(dabom_mod,
+                                   parent_child)
 
-  move_prob = compileTimeVaryTransProbs(dabom_mod,
-                                        parent_child)
+  # what is the starting point?
+  root_site = parent_child %>%
+    PITcleanr::buildNodeOrder() %>%
+    filter(node_order == 1) %>%
+    pull(node)
+
+  # is initial branch time-varying?
+  tv = dabom_mod %>%
+    as.matrix() %>%
+    as_tibble() %>%
+    select(matches(root_site)) %>%
+    names() %>%
+    enframe(value = "param") %>%
+    mutate(n_comma = stringr::str_count(param, "\\,"),
+           n_comma = as.integer(n_comma)) %>%
+    select(n_comma) %>%
+    distinct() %>%
+    mutate(tv = if_else(n_comma > 1, T, F)) %>%
+    pull(tv)
+
+  if(tv) {
+    # figure out which initial branch each site (parameter) is part of
+    param_branch = parent_child %>%
+      buildNodeOrder() %>%
+      rename(site_code = node) %>%
+      add_column(brnch_num = NA_integer_)
+
+    branch_site = parent_child %>%
+      filter(parent == root_site) %>%
+      group_by(parent) %>%
+      arrange(child_rkm) %>%
+      mutate(brnch_num = 1:n()) %>%
+      ungroup() %>%
+      select(bottom_site = child,
+             brnch_num)
 
 
+    for(i in 1:nrow(branch_site)) {
+      param_branch %<>%
+        mutate(brnch_num = if_else(stringr::str_detect(path, branch_site$bottom_site[i]),
+                                   branch_site$brnch_num[i],
+                                   brnch_num))
+    }
+    param_branch %<>%
+      mutate(brnch_num = if_else(node_order == 1,
+                                 max(branch_site$brnch_num) + as.integer(1),
+                                 brnch_num)) %>%
+      rename(in_path = path) %>%
+      separate_rows(in_path, sep = " ") %>%
+      mutate(site_code = if_else(site_code == in_path,
+                                 paste0(site_code, "_bb"),
+                                 site_code)) %>%
+      select(param = site_code, node_order, brnch_num) %>%
+      distinct() %>%
+      arrange(brnch_num, node_order, param)
 
-
-
-  stadem_summ = stadem_df %>%
-    group_by(week) %>%
-    summarise(mean = mean(tot_escape),
-              median = median(tot_escape),
-              mode = estMode(tot_escape),
-              sd = sd(tot_escape)) %>%
-    mutate_at(vars(mean, median, mode, sd),
-              list(~if_else(. < 0, 0, .))) %>%
-    mutate(var = sd^2)
-
-
-  if(time_varying) {
-    init_trans = compileWeekTransProbs(dabom_mod,
-                                       'p_pop_main')
-
-    tmp = init_trans %>%
-      mutate(param = paste(param, branch, sep = '_')) %>%
-      mutate(param = forcats::fct_reorder(param, branch)) %>%
-      select(-branch) %>%
-      tidyr::spread(param, prob)
-    names(tmp) = renameTransParams_LGD(names(tmp))
-    init_trans = tmp %>%
-      tidyr::gather(branch, prob, -(CHAIN:week))
-    rm(tmp)
-
-    # get total escapement posteriors to each initial branch
-    branch_escape_list = stadem_df %>%
-      group_by(week) %>%
-      sample_n(size = bootstrap_samp,
-               replace = T) %>%
+    # calculate posterior samples of escapement
+    set.seed(5)
+    branch_post = trans_df %>%
+      filter(stringr::str_detect(param, paste0("psi_", root_site), negate = T)) %>%
+      select(-chain) %>%
+      group_by(param, origin) %>%
+      dplyr::sample_n(size = bootstrap_samp,
+                      replace = T) %>%
       mutate(iter = 1:n()) %>%
       ungroup() %>%
-      left_join(init_trans %>%
-                  select(week, branch, prob) %>%
-                  group_by(week, branch) %>%
-                  sample_n(size = bootstrap_samp,
-                           replace = T) %>%
+      left_join(param_branch,
+                by = "param") %>%
+      inner_join(calcBranchEscape_GRA(dabom_mod,
+                                      stadem_mod,
+                                      stadem_param_nm = stadem_param_nm,
+                                      bootstrap_samp = bootstrap_samp) %>%
+                   left_join(parent_child %>%
+                               filter(parent == root_site) %>%
+                               group_by(parent) %>%
+                               arrange(child_rkm) %>%
+                               mutate(brnch_num = 1:n()) %>%
+                               ungroup() %>%
+                               select(child, brnch_num) %>%
+                               rename(bottom_site = child),
+                             by = "brnch_num") %>%
+                   mutate(across(bottom_site,
+                                 replace_na,
+                                 paste0(root_site, "_bb"))),
+                 by = c("iter", "origin", "brnch_num")) %>%
+      mutate(escp = brnch_escp * value) %>%
+      arrange(origin,
+              brnch_num,
+              node_order,
+              param,
+              iter)
+
+  } else if(!tv) {
+
+    my_origin = if_else(stringr::str_detect(stadem_param_nm, "hatch"), 2, 1)
+    set.seed(5)
+
+    branch_post = stadem_df %>%
+      add_column(origin = my_origin) %>%
+      group_by(iter, origin) %>%
+      summarize(across(tot_escape,
+                       sum),
+                .groups = "drop") %>%
+      dplyr::sample_n(size = bootstrap_samp,
+                      replace = T) %>%
+      mutate(iter = 1:n()) %>%
+      left_join(trans_df %>%
+                  select(-chain) %>%
+                  group_by(origin, param) %>%
+                  dplyr::sample_n(size = bootstrap_samp,
+                                  replace = T) %>%
                   mutate(iter = 1:n()) %>%
                   ungroup(),
-                by = c('iter', 'week')) %>%
-      mutate(branch_escape = tot_escape * prob) %>%
-      group_by(iter, branch) %>%
-      summarise_at(vars(branch_escape),
-                   list(sum)) %>%
-      ungroup() %>%
-      split(list(.$branch))
-  }
+                by = c("iter", "origin")) %>%
+      mutate(escp = tot_escape * value) %>%
+      arrange(origin,
+              param,
+              iter)
 
-  # get rest of transition probabilities
-  trans_df = compileTransProbs_LGD(dabom_mod,
-                                   time_varying = time_varying) %>%
-    select(-chain) %>%
-    group_by(param) %>%
-    mutate(iter = 1:n()) %>%
-    ungroup() %>%
-    arrange(param, iter) %>%
-    tidyr::spread(param, value) %>%
-    sample_n(size = bootstrap_samp,
-             replace = T) %>%
-    mutate(iter = 1:n()) %>%
-    ungroup()
-
-
-  if(time_varying) {
-    site_list = createNodeList(node_order) %>%
-      purrr::map(.f = function(x) {
-        x = gsub('B0$', '', x)
-        x = gsub('A0$', '', x)
-        x = gsub('^X', '', x)
-        return(unique(x))
-      })
-    # add name of tributary to site_list
-    for(i in 1:length(site_list)) {
-      names(site_list)[i] <- site_list[[i]][1]
-      #site_list[[i]] = c(names(site_list)[i],
-      #                   site_list[[i]])
-    }
-
-    names(site_list)[5] <- 'ACM'
-    names(site_list)[9] <- 'JOC'
-    site_list$Main_bb = 'Main_bb'
-
-    # this functionality relies on specific format of naming in the compileTransProbs_LGD() function
-    trib_list = site_list %>%
-      purrr::map(.f = function(x) {
-        y = trans_df %>%
-          select(iter,
-                 one_of(x),
-                 #one_of(paste0('past_', x)),
-                 one_of(paste0(x, '_bb')))
-      })
-
-
-    # add total escapement to transition probabilities and calculate escapement within each main branch
-    escape_post <- map_df(.x = trib_list,
-                          .id = 'branch',
-                          .f = function(x){
-                            pivot_longer(x, names_to = 'site', values_to = 'phi', -iter)
-                          }) %>%
-      left_join(bind_rows(branch_escape_list), by = c('iter', 'branch')) %>%
-      mutate(escape = phi * branch_escape) %>%
-      select(-phi, -branch_escape)
-  }
-
-  if(!time_varying) {
-    escape_post = stadem_df %>%
-      select(-week) %>%
-      sample_n(size = bootstrap_samp,
-               replace = T) %>%
-      mutate(iter = 1:n()) %>%
-      left_join(trans_df) %>%
-      mutate_at(vars(-iter, -tot_escape),
-                list(~ . * tot_escape)) %>%
-      select(-tot_escape) %>%
-      tidyr::gather(site, escape, -iter)
   }
 
 
   if(!summ_results) {
-    return(escape_post)
+    return(branch_post)
   }
 
   if(summ_results) {
 
-    if("branch" %in% names(escape_post)) {
-      escape_post = escape_post %>%
-        select(-branch)
-    }
-
     # estimate the credible interval for each parameter
-    credInt = escape_post %>%
-      # select(-branch) %>%
-      spread(site, escape) %>%
-      select(-iter) %>%
+    cred_int = branch_post %>%
+      select(iter, origin, param, escp) %>%
+      tidyr::pivot_wider(names_from = "param",
+                  values_from = "escp") %>%
+      select(-iter, -origin) %>%
       coda::as.mcmc() %>%
       coda::HPDinterval(prob = cred_int_prob) %>%
       as.data.frame() %>%
-      mutate(site = rownames(.)) %>%
+      as_tibble(rownames = "param") %>%
       rename(lowerCI = lower,
-             upperCI = upper) %>%
-      tbl_df() %>%
-      select(site, everything())
+             upperCI = upper)
 
-    escape_summ = escape_post %>%
-      group_by(site) %>%
-      summarise(mean = mean(escape),
-                median = median(escape),
-                mode = estMode(escape),
-                sd = sd(escape),
-                cv = sd / mean) %>%
-      mutate_at(vars(mean, median, mode, sd),
-                list(~ ifelse(. < 0, 0, .))) %>%
-      left_join(credInt,
-                by = 'site') %>%
-      mutate_at(vars(mean, median, mode),
-                list(round)) %>%
-      mutate_at(vars(sd, lowerCI, upperCI),
-                list(round),
-                digits = 1) %>%
-      mutate_at(vars(cv),
-                list(round),
-                digits = 3)
-
-    if(!is.null(pt_est_nm)) {
-      names(escape_summ)[match(pt_est_nm, names(escape_summ))] = 'estimate'
-      escape_summ = escape_summ %>%
-        select(site, estimate, sd:upperCI)
-    }
+    escape_summ = branch_post %>%
+      group_by(param) %>%
+      summarise(mean = mean(escp),
+                median = median(escp),
+                mode = estMode(escp),
+                sd = sd(escp),
+                cv = sd / mean,
+                .groups = "drop") %>%
+      mutate(across(c(mean, median, mode, sd),
+                    ~ if_else(. < 0, 0, .))) %>%
+      left_join(cred_int,
+                by = 'param') %>%
+      mutate(across(c(mean, median, mode),
+                    round)) %>%
+      mutate(across(c(sd, lowerCI, upperCI),
+                    round,
+                    digits = 1)) %>%
+      mutate(across(cv,
+                    round,
+                    digits = 3))
 
     return(escape_summ)
   }
-
 
 }

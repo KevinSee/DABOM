@@ -15,9 +15,9 @@
 #' @examples #calcBranchEscape_GRA()
 
 calcBranchEscape_GRA = function(dabom_mod = NULL,
-                              stadem_mod = NULL,
-                              stadem_param_nm = 'X.new.wild',
-                              bootstrap_samp = 2000) {
+                                stadem_mod = NULL,
+                                stadem_param_nm = 'X.new.wild',
+                                bootstrap_samp = 2000) {
 
   stopifnot(!is.null(dabom_mod) ,
             !is.null(stadem_mod))
@@ -46,20 +46,21 @@ calcBranchEscape_GRA = function(dabom_mod = NULL,
     select(iter, strata_num, tot_escape = value)
 
 
+  my_origin = if_else(str_detect(stadem_param_nm, "hatch"), 2, 1)
   move_prob = compileTimeVaryTransProbs(dabom_mod,
                                         parent_child) %>%
-    filter(origin == 1)
+    filter(origin == my_origin)
 
   escape_post = move_prob %>%
     group_by(param) %>%
-    sample_n(size = bootstrap_samp,
-             replace = T) %>%
+    dplyr::sample_n(size = bootstrap_samp,
+                    replace = T) %>%
     mutate(iter = 1:n()) %>%
     ungroup() %>%
     left_join(stadem_df %>%
                 group_by(strata_num) %>%
-                sample_n(size = bootstrap_samp,
-                         replace = T) %>%
+                dplyr::sample_n(size = bootstrap_samp,
+                                replace = T) %>%
                 mutate(iter = 1:n()) %>%
                 ungroup(),
               by = c("strata_num", "iter")) %>%

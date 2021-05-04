@@ -46,7 +46,7 @@ compileTimeVaryTransProbs = function(dabom_mod = NULL,
            strata_num = stringr::str_split(param, '\\,', simplify = T)[,3]) %>%
     mutate(across(c(brnch_num, strata_num),
                   ~ stringr::str_remove(., "\\]")),
-           across(c(brnch_num, strata_num),
+           across(c(brnch_num, strata_num, origin),
                   as.integer)) %>%
     filter(!is.na(strata_num))
 

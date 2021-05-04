@@ -46,7 +46,7 @@ compileTransProbs_GRA = function(dabom_mod = NULL,
            parent = stringr::str_remove(parent, '^phi_'),
            brnch_num = stringr::str_split(param, '\\,', simplify = T)[,2],
            brnch_num = stringr::str_remove(brnch_num, '\\]')) %>%
-    mutate_at(vars(brnch_num),
+    mutate_at(vars(brnch_num, origin),
               list(as.numeric)) %>%
     mutate(across(brnch_num,
                   replace_na,
@@ -63,7 +63,7 @@ compileTransProbs_GRA = function(dabom_mod = NULL,
   # if time-varying, fix all initial transition probabilities > 0 to 1 for multiplication purposes
   tv = trans_df %>%
     filter(parent == 'GRA') %>%
-    mutate(n_comma = str_count(param, "\\,"),
+    mutate(n_comma = stringr::str_count(param, "\\,"),
            n_comma = as.integer(n_comma)) %>%
     select(n_comma) %>%
     distinct() %>%
