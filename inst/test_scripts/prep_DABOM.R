@@ -16,7 +16,7 @@ devtools::load_all()
 
 #-----------------------------------------------------------------
 # pick a DABOM version to test
-root_site = c("GRA", 'PRA', "TUM", "PRO")[2]
+root_site = c("GRA", 'PRA', "TUM", "PRO")[1]
 
 # determine where various test files are located
 ptagis_file_list = list(GRA = "LGR_Chinook_2014.csv",
@@ -110,51 +110,8 @@ if(root_site %in% c("GRA", "PRO")) {
 tag_summ = summarizeTagData(filter_ch,
                             bio_data = fish_origin)
 
-# spawn_site = estimateSpawnLoc(filter_ch, spawn_site = T, ptagis_file) %>%
-#   select(-event_type_name) %>%
-#   distinct() %>%
-#   left_join(pc %>%
-#               buildNodeOrder() %>%
-#               select(spawn_site = node,
-#                      spawn_path = path),
-#             by = "spawn_site")
-
-# # construct DABOM matrices
-# dabom_df = createDABOMcapHist(filter_ch,
-#                               parent_child = pc,
-#                               configuration = configuration,
-#                               split_matrices = F)
-#
-# dabom_list = createDABOMcapHist(filter_ch,
-#                                 parent_child = pc,
-#                                 configuration = configuration,
-#                                 split_matrices = T)
-#
-# if(root_site %in% c("PRA", 'TUM')) {
-#   dabom_list$fishOrigin = dabom_df %>%
-#     left_join(tag_summ %>%
-#                 select(tag_code, origin) %>%
-#                 distinct() %>%
-#                 mutate(origin = recode(origin,
-#                                        "W" = 1,
-#                                        "H" = 2))) %>%
-#     pull(origin)
-# } else if(root_site == "PRO") {
-#   dabom_list$fishOrigin = rep(1, nrow(dabom_df))
-# }
-
 # file path to the default and initial model
 basic_modNm = paste0('~/Desktop/', root_site, '_DABOM.txt')
-
-# if(root_site == "GRA") {
-#   writeDABOM_LGD(basic_modNm, T)
-# } else if(root_site == "PRA") {
-#   writeDABOM_PRA(basic_modNm)
-# } else if(root_site == "TUM") {
-#   writeDABOM_TUM(basic_modNm)
-# } else if(root_site == "PRO") {
-#   writeDABOM_PRO(basic_modNm)
-# }
 
 writeDABOM(basic_modNm,
            pc,
@@ -178,37 +135,6 @@ fixNoFishNodes(init_file = basic_modNm,
                configuration = configuration,
                fish_origin = fish_origin)
 
-# # Creates a function to spit out initial values for MCMC chains
-# if(root_site == "GRA") {
-#   init_fnc = setInitialValues_LGD(dabom_list)
-# } else if(root_site == "PRA") {
-#   init_fnc = setInitialValues_PRA(dabom_list)
-# } else if(root_site == "TUM") {
-#   init_fnc = setInitialValues_TUM(dabom_list,
-#                                   mod_path,
-#                                   pc)
-# } else if(root_site == "PRO") {
-#   init_fnc = setInitialValues_PRO(dabom_list,
-#                                   mod_path,
-#                                   pc)
-# }
-#
-# # Create all the input data for the JAGS model
-# if(root_site == "GRA") {
-#   jags_data = c(createJAGSinputs_LGD(dabom_list),
-#                 addTimeVaryData(filter_ch))
-# } else if(root_site == "PRA") {
-#   jags_data = createJAGSinputs_PRA(dabom_list)
-# } else if(root_site == "TUM") {
-#   jags_data = createJAGSinputs_TUM(dabom_list,
-#                                    mod_path,
-#                                    pc)
-# } else if(root_site == "PRO") {
-#   jags_data = createJAGSinputs_PRO(dabom_list,
-#                                    mod_path,
-#                                    pc)
-# }
-
 # Creates a function to spit out initial values for MCMC chains
 init_fnc = setInitialValues(filter_ch,
                             pc,
@@ -224,6 +150,9 @@ if(root_site == "GRA") {
                 addTimeVaryData(filter_ch,
                                 start_date = paste0(spwn_yr, "0301"),
                                 end_date = paste0(spwn_yr, "0817")))
+
+  time_strata = STADEM::weeklyStrata(start_date = paste0(spwn_yr, "0301"),
+                                     end_date = paste0(spwn_yr, "0817"))
 }
 
 # Tell JAGS which parameters in the model that it should save.
@@ -260,6 +189,54 @@ if(root_site == "PRO") {
 } else if(root_site == "PRA") {
   trans_df = compileTransProbs_PRA(dabom_mod,
                                    pc)
+} else if(root_site == "GRA") {
+  # trans_df = compileTransProbs_GRA(dabom_mod,
+  #                                  pc)
+
+  # run STADEM model to get weekly escapement estimates
+  # of wild fish at Lower Granite
+  trap_db = system.file("extdata",
+                       "Chnk2014_TrapDatabase.csv",
+                       package = "PITcleanr",
+                       mustWork = TRUE) %>%
+    STADEM::readLGRtrapDB()
+
+  stadem_data = STADEM::compileGRAdata(yr = spwn_yr,
+                                       spp = ptagis_file %>%
+                                         str_split("/") %>%
+                                         unlist() %>%
+                                         last() %>%
+                                         str_split("_") %>%
+                                         unlist() %>%
+                                         magrittr::extract(2),
+                                       dam = "LWG",
+                                       start_date = paste0(spwn_yr, "0301"),
+                                       end_date = paste0(spwn_yr, "0817"),
+                                       damPIT = "GRA",
+                                       trap_dbase = trap_db)
+
+  # compile everything into a list to pass to JAGS
+  jags_data_list = STADEM::prepJAGS(stadem_data[['weeklyData']])
+
+  model_file_nm = '~/Desktop/STADEM_JAGS_model.txt'
+
+  stadem_mod = STADEM::runSTADEMmodel(file_name = model_file_nm,
+                                      mcmc_chainLength = 40000,
+                                      mcmc_burn = 10000,
+                                      mcmc_thin = 30,
+                                      mcmc_chains = 4,
+                                      jags_data = jags_data_list,
+                                      seed = 5,
+                                      weekly_params = T,
+                                      win_model = "neg_bin",
+                                      trap_est = T)
+
+
+  # combine weekly escapement with other transition probabilities
+  calcTribEscape_GRA(dabom_mod,
+                     stadem_mod,
+                     parent_child = pc)
+
 }
 
 
