@@ -87,7 +87,7 @@ writeDABOM = function(file_name = NULL,
     write(move_prior_text,
           file = mod_conn,
           append = T)
-    rm(n_branch)
+    suppressWarnings(rm(n_branch))
   }
 
   # Where is each fish?
@@ -155,12 +155,12 @@ writeDABOM = function(file_name = NULL,
           file = mod_conn,
           append = T)
 
-    rm(n_branch,
-       parent_site,
-       child_num,
-       parent_n_child,
-       a_line,
-       fish_pos_text)
+    suppressWarnings(rm(n_branch,
+                        parent_site,
+                        child_num,
+                        parent_n_child,
+                        a_line,
+                        fish_pos_text))
   }
 
   write("\t} # end the n_fish loop \n",
@@ -207,10 +207,10 @@ writeDABOM = function(file_name = NULL,
       }
 
     }
-    rm(node_df,
-       parent_site,
-       dwn_site_pc,
-       child_num)
+    suppressWarnings(rm(node_df,
+                        parent_site,
+                        dwn_site_pc,
+                        child_num))
   }
 
   write(paste0("\t}  # end the n_fish loop \n",
