@@ -43,7 +43,7 @@ getNodeInfo = function(parent_child = NULL,
     # filter(node %in% unique(c(pc_nodes$parent, pc_nodes$child))) %>%
     filter(node %in% pc_nodes$child) %>%
     mutate(node_site = if_else(nchar(node) >= 5 & (grepl("A0$", node) | grepl("B0$", node)),
-                               str_remove(str_remove(node, "A0$"), "B0$"),
+                               stringr::str_remove(stringr::str_remove(node, "A0$"), "B0$"),
                                node)) %>%
     group_by(site_code = node_site) %>%
     summarise(n_nodes = n_distinct(node),
@@ -52,7 +52,7 @@ getNodeInfo = function(parent_child = NULL,
     unnest(cols = node) %>%
     rowwise() %>%
     mutate(matrix_col = if_else(node %in% col_nms,
-                                str_which(col_nms, paste0("^", node)),
+                                stringr::str_which(col_nms, paste0("^", node)),
                                 NA_integer_)) %>%
     ungroup() %>%
     arrange(matrix_col) %>%
