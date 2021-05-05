@@ -1,7 +1,7 @@
 # Author: Kevin See
 # Purpose: Test functions for preparing PTAGIS data for DABOM
 # Created: 4/8/2021
-# Last Modified: 5/3/2021
+# Last Modified: 5/5/2021
 # Notes:
 
 #-----------------------------------------------------------------
@@ -16,7 +16,7 @@ devtools::load_all()
 
 #-----------------------------------------------------------------
 # pick a DABOM version to test
-root_site = c("GRA", 'PRA', "TUM", "PRO")[1]
+root_site = c("GRA", 'PRA', "TUM", "PRO")[3]
 
 # determine where various test files are located
 ptagis_file_list = list(GRA = "LGR_Chinook_2014.csv",
@@ -83,14 +83,14 @@ filter_ch = prepped_df %>%
   mutate(user_keep_obs = auto_keep_obs) %>%
   filter(user_keep_obs)
 
-# for sampling portion of tags
-n_fish = 500
-set.seed(5)
-filter_ch %<>%
-  select(tag_code) %>%
-  distinct() %>%
-  sample_n(n_fish) %>%
-  left_join(filter_ch)
+# # for sampling portion of tags
+# n_fish = 500
+# set.seed(5)
+# filter_ch %<>%
+#   select(tag_code) %>%
+#   distinct() %>%
+#   sample_n(n_fish) %>%
+#   left_join(filter_ch)
 
 fish_origin = read_csv(ptagis_file) %>%
   select(tag_code = `Tag Code`,
@@ -180,15 +180,26 @@ detect_summ = summariseDetectProbs(dabom_mod = dabom_mod,
   filter(!is.na(mean))
 
 # compile all movement probabilities, and multiply them appropriately
+# compile all movement probabilities, and multiply them appropriately
 if(root_site == "PRO") {
   trans_df = compileTransProbs_PRO(dabom_mod,
                                    pc)
+
+  tot_escp = tibble(origin = c(1,2),
+                    tot_escp = c(1132, 0))
+
 } else if(root_site == "TUM") {
   trans_df = compileTransProbs_TUM(dabom_mod,
                                    pc)
+
+  tot_escp = tibble(origin = c(1,2),
+                    tot_escp = c(1086, 1378))
+
+
 } else if(root_site == "PRA") {
   trans_df = compileTransProbs_PRA(dabom_mod,
                                    pc)
+
 } else if(root_site == "GRA") {
   # trans_df = compileTransProbs_GRA(dabom_mod,
   #                                  pc)
@@ -246,7 +257,30 @@ if(root_site == "PRO") {
 
 }
 
-
+if(root_site %in% c("PRO", 'TUM')) {
+  trans_df %>%
+    left_join(tot_escp,
+              by = "origin") %>%
+    mutate(escp = tot_escp * value) %>%
+    group_by(location = param,
+             origin) %>%
+    summarise(mean = mean(escp),
+              median = median(escp),
+              mode = estMode(escp),
+              sd = sd(escp),
+              skew = moments::skewness(escp),
+              kurtosis = moments::kurtosis(escp),
+              lowerCI = coda::HPDinterval(coda::as.mcmc(escp))[,1],
+              upperCI = coda::HPDinterval(coda::as.mcmc(escp))[,2],
+              .groups = "drop") %>%
+    mutate(across(c(mean, median, mode, sd, matches('CI$')),
+                  ~ if_else(. < 0, 0, .))) %>%
+    mutate(across(c(mean, median, mode, sd, skew, kurtosis, matches('CI$')),
+                  round,
+                  digits = 2)) %>%
+    arrange(desc(origin), location) %>%
+    as.data.frame()
+}
 
 #--------------------------------------
 # issues
