@@ -1,6 +1,6 @@
 #' @title Define Report Groups - GRA
 #'
-#' @description Define which detection sites fall into which report groups, and what the lowest array is. These reporting groups differ by species.
+#' @description Define which detection sites fall into which report groups, and what the lowest array is. These reporting groups differ by species. These are specific to the Lower Granite version of DABOM.
 #'
 #' @author Kevin See
 #'
@@ -9,9 +9,9 @@
 #' @import dplyr stringr
 #' @export
 #' @return NULL
-#' @examples defineRepGrps()
+#' @examples defineRepGrps_GRA("Chinook")
 
-defineRepGrps = function(spp = c('Chinook', 'Steelhead')) {
+defineRepGrps_GRA = function(spp = c('Chinook', 'Steelhead')) {
 
   stopifnot(!is.null(node_order))
 
