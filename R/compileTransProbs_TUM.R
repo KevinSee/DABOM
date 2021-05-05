@@ -46,7 +46,7 @@ compileTransProbs_TUM = function(dabom_mod = NULL,
            parent = stringr::str_remove(parent, '^phi_'),
            brnch_num = stringr::str_split(param, '\\,', simplify = T)[,2],
            brnch_num = stringr::str_remove(brnch_num, '\\]')) %>%
-    mutate_at(vars(brnch_num),
+    mutate_at(vars(brnch_num, origin),
               list(as.numeric)) %>%
     mutate(across(brnch_num,
                   replace_na,
