@@ -1,19 +1,17 @@
-#' @title Define Report Groups - LGD
+#' @title Define Report Groups - GRA
 #'
-#' @description Define which detection sites fall into which report groups, and what the lowest array is. These reporting gropus differ by species.
+#' @description Define which detection sites fall into which report groups, and what the lowest array is. These reporting groups differ by species.
 #'
 #' @author Kevin See
 #'
 #' @param spp Species, either "Chinook" or "Steelhead"
-#' @param node_order output of function \code{createNodeOrder}.
 #'
 #' @import dplyr stringr
 #' @export
 #' @return NULL
 #' @examples defineRepGrps()
 
-defineRepGrps = function(spp = c('Chinook', 'Steelhead'),
-                         node_order = NULL) {
+defineRepGrps = function(spp = c('Chinook', 'Steelhead')) {
 
   stopifnot(!is.null(node_order))
 
@@ -21,9 +19,9 @@ defineRepGrps = function(spp = c('Chinook', 'Steelhead'),
 
   if(spp == 'Chinook') {
 
-    report_df = list('Upper Salmon River' = 'USE',
+    grp_list = list('Upper Salmon River' = 'USE',
                      'Sawtooth Hatchery Weir' = 'STL',
-                     'Valley Creek' = 'VC2',
+                     'Valley Creek' = 'VC1B0',
                      'Yankee Fork Salmon River' = 'YFKB0',
                      'East Fork Salmon River' = 'SALEFT',
                      'Pahsimeroi River' = 'PAHH',
@@ -38,10 +36,10 @@ defineRepGrps = function(spp = c('Chinook', 'Steelhead'),
                      'EFSF Salmon River' = 'ESSB0',
                      'Secesh River' = 'ZENB0',
                      'Rapid River' = 'RAPH',
-                     'Lolo River' = 'LC1',
-                     'South Fork Clearwater' = 'SC1',
-                     'Clear Creek' = 'CLC',
-                     'Imnaha River' = 'IR1',
+                     'Lolo River' = 'LC1B0',
+                     'South Fork Clearwater' = 'SC1B0',
+                     'Clear Creek' = 'CLCB0',
+                     'Imnaha River' = 'IR1B0',
                      'Cow Creek' = 'COCB0',
                      'Big Sheep Creek' = c('BSCB0', 'LSHEEF'),
                      'Grande Ronde River upper mainstem' = 'UGR',
@@ -50,20 +48,15 @@ defineRepGrps = function(spp = c('Chinook', 'Steelhead'),
                      'Lookingglass Creek' = 'LOOKGC',
                      'Asotin Creek' = 'ACMB0',
                      'Tucannon River' = 'LTR',
-                     'Tucannon Hatchery Weir' = 'TUCH_TFH') %>%
-      stack() %>%
-      tbl_df() %>%
-      select(ReportGrp = ind,
-             lowNode = values)
-
+                     'Tucannon Hatchery Weir' = 'TFHB0')
   }
 
   if(spp == 'Steelhead') {
 
-    report_df = list('Upper Salmon River' = 'USE',
+    grp_list = list('Upper Salmon River' = 'USE',
                      'Sawtooth Hatchery Weir' = 'STL',
-                     'Upper Salmon River mainstem' = c('YFKB0', 'VC2', 'STL'),
-                     'Valley Creek' = 'VC2',
+                     'Upper Salmon River mainstem' = c('YFKB0', 'VC1B0', 'STL'),
+                     'Valley Creek' = 'VC1B0',
                      'Yankee Fork Salmon River' = 'YFKB0',
                      'East Fork Salmon River' = 'SALEFT',
                      'Pahsimeroi River' = 'PAHH',
@@ -75,14 +68,14 @@ defineRepGrps = function(spp = c('Chinook', 'Steelhead'),
                      'Secesh River' = 'ZENB0',
                      'Rapid River' = 'RAPH',
                      'Fish Creek' = 'FISTRP',
-                     'Lolo Creek' = 'LC1',
-                     'South Fork Clearwater' = 'SC1',
-                     'Clear Creek' = 'CLC',
+                     'Lolo Creek' = 'LC1B0',
+                     'South Fork Clearwater' = 'SC1B0',
+                     'Clear Creek' = 'CLCB0',
                      'Potlatch River' = 'JUL',
                      'Potlatch above HLM' = 'HLMB0',
                      'Potlatch above KHS' = 'KHSB0',
                      'Lapwai Creek' = 'LAPB0',
-                     'Imnaha River' = 'IR1',
+                     'Imnaha River' = 'IR1B0',
                      'Cow Creek' = 'COCB0',
                      'Big Sheep Creek' = 'BSCB0',
                      'Grande Ronde River upper mainstem' = 'UGR',
@@ -93,17 +86,21 @@ defineRepGrps = function(spp = c('Chinook', 'Steelhead'),
                      'Tenmile Creek' = 'TENMC2',
                      'Alpowa Creek' = 'ALPOWC',
                      'Tucannon River' = 'LTR',
-                     'Tucannon Hatchery Weir' = 'TUCH_TFH') %>%
-      stack() %>%
-      tbl_df() %>%
-      select(ReportGrp = ind,
-             lowNode = values)
-
+                     'Tucannon Hatchery Weir' = 'TFHB0')
   }
 
-  report_df = report_df %>%
-    left_join(node_order,
-              by = c('lowNode' = 'Node'))
+  report_df = grp_list %>%
+    map_df(.id = "report_grp",
+           .f = function(x) tibble(low_node = x)) %>%
+    mutate(low_site = if_else(stringr::str_count(low_node) >= 5 &
+                                (stringr::str_detect(low_node, "B0$") | stringr::str_detect(low_node, "A0$")),
+                              stringr::str_remove(stringr::str_remove(low_node, "A0$"), "B0$"),
+                              low_node))
+
+
+  # report_df = report_df %>%
+  #   left_join(node_order,
+  #             by = c('lowNode' = 'Node'))
 
   return(report_df)
 

@@ -2,17 +2,15 @@
 % Please edit documentation in R/defineRepGrps.R
 \name{defineRepGrps}
 \alias{defineRepGrps}
-\title{Define Report Groups - LGD}
+\title{Define Report Groups - GRA}
 \usage{
-defineRepGrps(spp = c("Chinook", "Steelhead"), node_order = NULL)
+defineRepGrps(spp = c("Chinook", "Steelhead"))
 }
 \arguments{
 \item{spp}{Species, either "Chinook" or "Steelhead"}
-
-\item{node_order}{output of function \code{createNodeOrder}.}
 }
 \description{
-Define which detection sites fall into which report groups, and what the lowest array is. These reporting gropus differ by species.
+Define which detection sites fall into which report groups, and what the lowest array is. These reporting groups differ by species.
 }
 \examples{
 defineRepGrps()
