@@ -233,9 +233,16 @@ if(root_site == "PRO") {
 
 
   # combine weekly escapement with other transition probabilities
-  calcTribEscape_GRA(dabom_mod,
-                     stadem_mod,
-                     parent_child = pc)
+  escp_summ = calcTribEscape_GRA(dabom_mod,
+                               stadem_mod,
+                               parent_child = pc,
+                               summ_results = T)
+
+  # get estimates for reporting groups
+  rep_grp = calcRepGrpEscape_GRA(dabom_mod,
+                       stadem_mod,
+                       parent_child = pc,
+                       spp = "Chinook")
 
 }
 
