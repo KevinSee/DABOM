@@ -1,0 +1,251 @@
+---
+title: "Run-DABOM"
+author: Kevin See
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{Run-DABOM}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+references:
+- id: Waterhouse2020
+  title: A Bayesian nested patch occupancy model to estimate steelhead movement and abundance
+  author:
+  - family: Waterhouse
+    given: Lynn
+  - family: White
+    given: Jody
+  - family: See 
+    given: Kevin
+  - family: Murdoch
+    given: Andrew
+  container-title: Ecological Applications
+  volume: 30
+  URL: 'https://doi.org/10.1002/eap.2202'
+  DOI: 10.1002/eap.2202
+  issue: 8
+  publisher: Ecological Society of America
+  type: article-journal
+  issued:
+    year: 2020
+    month: 12
+---
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE, results = "hide"}
+library(knitr)
+# library(kableExtra)
+# knitr options
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  echo = TRUE,
+  eval = FALSE,
+  comment = "#>"
+)
+# turn off one check
+options(rmarkdown.html_vignette.check_title = FALSE) 
+```
+
+
+# Introduction
+
+This manual describes how to run the **D**am **A**dult **B**ranch **O**ccupancy **M**odel ([DABOM](https://github.com/BiomarkABS/DABOM)) for adult salmon returning to a watershed. The overview consists of PIT tagging a representative sample of the returning fish, and using the subsequent detections of those tags at various sites upstream (or possibly downstream) of the starting location to estimate escapement or abundance past each detection site. The DABOM model estimates transition (or movement) probabilities past various detection sites while accounting for imperfect detection at those sites, essentially a multi-state variation of a spatial Cormack-Jolly-Seber model. The DABOM package implements this kind of model in a Bayesian framework. Further mathematical details of the model can be found in @Waterhouse2020. 
+
+For this vignette, we will show a DABOM example for spring Chinook crossing over Tumwater Dam and in the upper Wenatchee River. We start by describing how to query [PTAGIS](https://www.ptagis.org/) to get all detections of adults at relevant observation sites (e.g., weirs, PIT tag arrays, etc.) for a particular spawning run from a list of "valid" PIT tags. Observation data are then "cleaned up" using the `PITcleanr` R package to determine a final destination or spawning location for each individual and detection data are prepared for use in the `DABOM` R package and model. Next, we describe how to write a JAGS model for use in `DABOM`, and finally, run `DABOM` to estimate detection and movement probabilities within the stream network. Movement probabilities can then be multiplied by an estimate of adult escapement at Tumwater Dam to estimate escapement, with uncertainty, at any observation site (or tributary) within the Wenatchee River.
+
+We estimate escapement (or abundance) for both hatchery and natural origin fish by using both types together to estimate detection probabilities, but allow movement probabilities to vary by origin, because hatchery fish are likely moving to different areas at different rates compared to natural origin fish. 
+
+# Set-up
+
+## Software
+
+The first step is to ensure that all appropriate software and R packages are installed on your computer. ([R](https://cran.r-project.org/)) is a language and environment for statistical computing and graphics and is the workhorse for running all of the code and models described here. R packages are collections of functions and data sets developed by the R community for particular tasks. Some R packages used here are available from the general R community ([Available CRAN Packages](https://cran.r-project.org/web/packages/available_packages_by_name.html)) whereas others (e.g., `PITcleanr`, `DABOM`) are developed by ([Kevin See](https://github.com/BiomarkABS)) and contain functions written for cleaning and analysis of PIT tag detection site and observation data.
+
+First, you will need to have [R](https://cran.r-project.org/) downloaded and installed. Use the "base" distribution and all default installation settings should work just fine. Additionally, although not necessary, we find it very useful to use [RStudio](https://rstudio.com/) as an interface for R. Download the Desktop version of RStudio, and again, default installation settings should work just fine. RStudio provides a graphical user interface (GUI) for R with a text/code editor and allows for direct code execution, management of R packages, a viewing of R objects (e.g., data) in the environment.
+
+Next, you will also need the [JAGS](http://mcmc-jags.sourceforge.net/) software to run DABOM. You can download that from [SourceForge](https://sourceforge.net/projects/mcmc-jags/files/). JAGS (Just Another Gibbs Sampler) software is used by `DABOM` for Bayesian inference.
+
+## R Packages
+
+After installing R and Studio, you will also need to install `tidyverse`, a series of R packages that work together for data science (i.e. data cleaning and manipulation), as well as the `rjags` package to interface with JAGS. To save some results to Excel files, we use the `writexl` pacakge. The `tidyverse`, `rjags` and `writexl` packages are all available from the R community and can be installed by typing the following into your R console:
+
+```{r install-cran, eval = F}
+install.packages("tidyverse")
+install.packages("rjags")
+install.packages('writexl')
+```
+
+Next, install `PITcleanr` and `DABOM` from the Biomark ABS [GitHub](https://github.com/) page [here](https://github.com/BiomarkABS). `PITcleanr` was written primarily to build a "river network" describing the relationships among detection sites in a system, to clean PIT tag detection data to establish capture histories for individuals, and to determine the final destination or spawning location for each fish. `DABOM` is used for writing and running the `DABOM` model and estimating detection and movement probabilities. You can use `devtools` to install both of these packages from [GitHub](https://github.com/) using the following: 
+
+```{r install-github, eval = F}
+install.packages("devtools")
+remotes::install_github("BiomarkABS/PITcleanr")
+remotes::install_github("BiomarkABS/DABOM")
+```
+
+Hint: We have experienced errors installing the `PITcleanr` and `DABOM` packages related to *"Error: (converted from warning) package 'packagenamehere' was built under R version x.x.x"*. Setting the following environment variable typically suppresses the error and allows you to successfully install the packages.
+
+```{r, eval = F}
+Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS = TRUE)
+```
+
+When attempting to install `PITcleanr` or `DABOM` you may receive an error message similar to *"there is no package called 'ggraph'"*. In that case, try to install the given package using the following and then attempt to install `PITclean` or `DABOM`, again.
+
+```{r install-load-example, eval = F}
+install.package("ggraph") # to install package from R cran
+# replace ggraph with the appropriate package name as needed
+```
+
+We are always trying to improve the `PITcleanr` and `DABOM` R packages to minimize these types of errors.
+
+## `devtools` Note
+
+***IF THE devtools PACKAGE WORKS FINE ABOVE, SKIP THIS SECTION.*** To use `devtools`, you may have to download and install [Rtools](https://cran.r-project.org/bin/windows/Rtools/). You can try to use `devtools` without Rtools, initially, and if `PITcleanr` and `DABOM` fail to install correctly, installing Rtools may remedy the situation. We have had mixed results with this in the past.
+
+# PITcleanr output
+
+Briefly, the steps to process the data for a given run or spawn year, before being ready to run DABOM, include:
+
+1. Generate valid PIT tag list
+1. Query PTAGIS for detections
+1. Develop the "river network" describing the relationship among detection sites
+1. Use PITcleanr to "clean up" detection data
+1. Review PITcleanr output to determine final capture histories
+
+Once those steps are complete, the following lead to escapement estimates:
+
+1. Run DABOM to estimate detection and movement probabilities
+1. Summarize DABOM results
+1. Combine DABOM movement probabilities with an estimate of adult escapement at the starting node
+
+More details about the initial preparation steps can be found in the vignettes contained in the `PITcleanr` package. We'll briefly describe some of the outputs needed for DABOM.
+
+## Configuration File
+
+The configuration file contains all the information from PTAGIS to map a particular detection record to a "node". This mapping must include the site code, the antenna code and the antenna configuration, all of which appear in the PTAGIS query defined above. `PITcleanr` provides a function to query all the metadata associated with PTAGIS sites, and maps each array (i.e. row of antennas) at a site onto a node. The upstream arrays are labeled with the site code plus `A0` and the downstream arrays are assigned `B0`. For sites with three arrays, the middle array is grouped with the upstream array. For sites with four arrays, the upper two arrays are mapped to `A0` and the lower two arrays are mapped to `B0`. However, the user can start with the `ptagis_meta` file and construct this mapping any way they choose. 
+
+The key columns in a configuration file include the PTAGIS site code, the configuration ID (related to how the various antennas are laid out at a site), the antenna ID and the DABOM node that antenna is assigned to. The first three are included with PTAGIS queries of capture histories, and the inclusion of the node column allows `PITcleanr` to map every detection to a node. 
+
+## Parent-Child Table
+
+The parent-child table describes the stream network in terms of which detection locations are connected to each other. A parent-child table defines the closest previous detection location (parent) for each detection location (child). If a tag is seen at a child location, it must have moved past the parent location. For adult salmonid movement, the parent location is downstream of the child location. Each child location may only have a single parent, but a parent location may have multiple child locations due to the branching nature of the stream network. 
+
+To run DABOM, a parent-child table must include the following columns:
+
+- `parent`: generally the PTAGIS site code of the parent location
+- `child`: generally the PTAGIS site code of the child location
+- `parent_hydro`: the hydrosequence of the NHDPlus layer where the parent location is
+- `child_hydro`: the hydrosequence of the NHDPlus layer where the child location is
+- `parent_rkm`: the river kilometer of the parent location (generally queried from PTAGIS)
+- `child_rkm`: the river kilometer of the child location (generally queried from PTAGIS)
+
+## Filtered Capture History
+
+One of the assumptions in the DABOM model is that fish are making a one-way upstream migration, which ends in their spawning location. At every branching site (with multiple possible upstream paths), the fish can only move up one of those paths. So if a fish is detected moving past one site and later seen moving past a different site that implies the fish swam back downstream, then turned up a different tributary, both of those observations cannot be kept in the model. Before running DABOM, a user will need to "clean" the detection histories of the tags and decide if there are multiple detections like those described above which one to keep. 
+
+`PITcleanr` can take the raw detections from PTAGIS, assign each to a node (based on the configuration file), compress them, add directionality (based on the parent-child table), and flag those tags with detections in multiple branches. For each detection, `PITcleanr` adds two columns to indicate whether each detection should be retained for DABOM. For tags with straightforward detections (i.e. all detections appear to have one-way directional movement), the added columns `auto_keep_obs` and `user_keep_obs` will be marked `TRUE`. For tags with less straightforward movement patterns, `PITcleanr` assumes that the last detection with movement noted as "forward" or "unknown" (or "start") is the spawning location, and attempts to mark the `auto_keep_obs` column as `TRUE` for the last detections along that movement path. For these tags, `filterDetections` returns `NA`'s in the `user_keep_obs` column. 
+
+The `PITcleanr` package provides an example dataset we can use to demonstrate these results. The example datasets (PTAGIS query, configuration file and parent-child table) are installed on your computer when you install `PITcleanr`. We can determine where they are, and read them into R using the following code:
+
+```{r examp-files}
+library(PITcleanr)
+
+ptagis_file = system.file("extdata",
+                          "TUM_Chinook_2015.csv",
+                          package = "PITcleanr",
+                          mustWork = TRUE)
+
+config_file = system.file("extdata",
+                          "configuration_TUM.csv",
+                          package = "PITcleanr",
+                          mustWork = TRUE)
+
+parent_child_file = system.file("extdata",
+                                "parent_child_TUM.csv",
+                                package = "PITcleanr",
+                                mustWork = TRUE)
+
+
+# read in parent-child table
+parent_child = read_csv(parent_child_file)
+# read in configuration file
+configuration = read_csv(config_file)
+
+```
+
+Then we can compress them and prepare them for DABOM.
+
+```{r dabom-prep}
+prepped_ch = compress(ptagis_file = ptagis_file,
+                      configuration = configuration) %>%
+  prepWrapper(parent_child = parent_child,
+              min_obs_date = "20150301",
+              max_obs_date = "20150930")
+```
+
+The first 10 rows of the `prepped_ch` file look like:
+
+```{r examp-prep, echo=F}
+prepped_ch %>%
+  head(10) %>%
+  kable()
+```
+
+
+The next step would be for a user to filter the prepared data for all rows with `user_keep_obs == NA`, and then fill in the `user_keep_obs` column by hand for each detection node. These decisions could be guided by the `auto_keep_obs` column (`PITcleanr`'s best guess), but could also be informed by the date of detections and the user's biological knowledge of the system. Before sending the data along to DABOM, all the missing `user_keep_obs` rows should be filled out as either `TRUE` or `FALSE`. The user can then remove all the rows where `user_keep_obs == FALSE`. For our example, we'll accept all the `auto_keep_obs` recommendations.
+
+```{r}
+filter_ch = prepped_ch %>%
+  mutate(user_keep_obs = auto_keep_obs) %>%
+  filter(user_keep_obs)
+```
+
+Now our data is ready for DABOM.
+
+# Write JAGS Model
+
+The DABOM model is implemented in a Bayesian framework, using JAGS software. JAGS requires a model file (.txt format) with specific types of syntax. See the JAGS user manual for more detail about JAGS models. The `DABOM` package contains a function to write this model file, based on the relationships defined in the parent-child table, and how nodes are mapped to sites in the configuration file. 
+
+```{r}
+# file path to the default and initial model
+basic_modNm = paste0('~/Desktop/DABOM_main.txt')
+
+writeDABOM(basic_modNm,
+           pc,
+           configuration)
+
+```
+
+If the user would like the initial transition parameters (chances of moving along one of the initial branches from the starting point) to be time-varying, meaning they will shift as the season goes on, `writeDABOM` has an arguement, `time_varying` which can be set to `TRUE`. 
+
+
+## Modify JAGS Model
+
+# Run JAGS Model
+
+## Set Initial Values
+
+
+## Create JAGS Input
+
+
+## Set Parameters to Save
+
+
+## Run MCMC
+
+# Results
+
+## Detection Probability Estimates
+
+## Estimate Escapement
+
+### Compile Transition Probabilities
+
+### Total Escapement
+
+
+
+# References
