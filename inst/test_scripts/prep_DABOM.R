@@ -1,7 +1,7 @@
 # Author: Kevin See
 # Purpose: Test functions for preparing PTAGIS data for DABOM
 # Created: 4/8/2021
-# Last Modified: 5/5/2021
+# Last Modified: 5/10/2021
 # Notes:
 
 #-----------------------------------------------------------------
@@ -9,6 +9,7 @@
 library(tidyverse)
 library(lubridate)
 library(magrittr)
+library(usethis)
 library(PITcleanr)
 # library(DABOM)
 library(rjags)
@@ -164,15 +165,26 @@ jags_params = setSavedParams(model_file = mod_path,
 jags = jags.model(mod_path,
                   data = jags_data,
                   inits = init_fnc,
-                  n.chains = 1,
-                  n.adapt = 5)
+                  # n.chains = 1,
+                  # n.adapt = 5)
+                  n.chains = 4,
+                  n.adapt = 5000)
 
 
 #--------------------------------------
 # test the MCMC outcome and summary functions
 dabom_mod = coda.samples(jags,
                          jags_params,
-                         n.iter = 10)
+                         # n.iter = 10)
+                         n.iter = 5000,
+                         thin = 10)
+
+
+if(root_site == "TUM") {
+  dabom_mod_tum = dabom_mod
+  use_data(dabom_mod_tum,
+           version = 3)
+}
 
 
 detect_summ = summariseDetectProbs(dabom_mod = dabom_mod,
