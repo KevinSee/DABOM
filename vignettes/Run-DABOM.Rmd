@@ -394,10 +394,10 @@ To estimate escapement past each detection point, DABOM requires two things: an 
 
 Compiling the transition probabilities is both a matter of ensuring that the parameters from JAGS match the site codes of each detection point (so that movement past CHL is named as such), but also multiplying some transition probabilities together when appropriate. For instance, the ultimate probability that a tag moves past CHU is the probability of moving from TUM past CHL, and then from CHL past CHU. At this time, these multiplication steps are hard-coded into a few functions, one for each version of DABOM that currently exists:
 
-* `compileTransProbs_GRA`
-* `compileTransProbs_PRA`
-* `compileTransProbs_TUM`
-* `compileTransProbs_PRO`
+* Lower Granite Dam: `compileTransProbs_GRA()`
+* Priest Rapids Dam: `compileTransProbs_PRA()`
+* Tumwater Dam: `compileTransProbs_TUM()`
+* Prosser Dam: `compileTransProbs_PRO()`
 
 ```{r}
 trans_df = compileTransProbs_TUM(dabom_mod = dabom_samp_tum,
