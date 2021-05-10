@@ -44,13 +44,13 @@ addTimeVaryData = function(filter_ch = NULL,
     stop('Multiple trap dates for some tags')
   }
 
-  dam_week = vector('integer', nrow(proc_trap_date))
+  dam_strata = vector('integer', nrow(proc_trap_date))
   for(i in 1:length(week_strata)) {
-    dam_week[which(proc_trap_date$start_date %within% week_strata[[i]])] = i
+    dam_strata[which(proc_trap_date$start_date %within% week_strata[[i]])] = i
   }
 
-  tv_list = list(n_weeks = length(week_strata),
-                 dam_week = dam_week)
+  tv_list = list(n_strata = length(week_strata),
+                 dam_strata = dam_strata)
 
   return(tv_list)
 

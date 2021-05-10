@@ -239,7 +239,7 @@ writeDABOM = function(file_name = NULL,
                             "\t\t\t exp_lambda[i,j,1] <- exp(lambda[i,j,1]) * ", root_site, "_dirch_vec[i,j];\n",
                             "\t\t }\n",
                             "\t\t # set black box as baseline \n",
-                            "\t\t for(t in 1:(n_weeks)) { \n",
+                            "\t\t for(t in 1:(n_strata)) { \n",
                             "\t\t\t lambda[i,n_branch_", root_site, ", t] <- 0; \n",
                             "\t\t\t exp_lambda[i,n_branch_", root_site, ", t] <- exp(lambda[i,n_branch_", root_site, ", t]) * ", root_site, "_dirch_vec[i,n_branch_", root_site, "]; \n",
                             "\t\t\t # get sum of all lambda's \n",
@@ -258,7 +258,7 @@ writeDABOM = function(file_name = NULL,
                             "\t tau_rw <- pow(sigma_rw, -2); \n",
                             "\n",
                             "\t for(i in 1:2) { \n",
-                            "\t\t for(t in 2:(n_weeks)) { \n",
+                            "\t\t for(t in 2:(n_strata)) { \n",
                             "\t\t\t for(j in 1:(n_branch_", root_site, " - 1)) { \n",
                             "\t\t\t\t epsilon[i,j,t] ~ dnorm(0, tau_rw); \n",
                             "\t\t\t\t # set lambda to any main bin that saw NO fish to 0 \n",
@@ -271,7 +271,7 @@ writeDABOM = function(file_name = NULL,
                             "\t\t }\n",
                             "\t }\n",
                             "\n",
-                            "\t for(t in 1:n_weeks) { \n",
+                            "\t for(t in 1:n_strata) { \n",
                             "\t\t omega_", root_site, "[1, 1:n_branch_", root_site, ", t] <- zero_vec[1:(n_branch_", root_site, ")]; \n",
                             "\t\t omega_", root_site, "[1, (n_branch_", root_site, " + 1), t] <- 1; \n",
                             "\n",
@@ -289,8 +289,8 @@ writeDABOM = function(file_name = NULL,
     # replace first line with new text
     mod_file[line_range[1]] = new_prior_text
 
-    # in the "where are the fish" section, be sure to index the dam_week
-    mod_file[str_which(mod_file, paste0("a_", root_site, "\\[i\\] ~ dcat"))] = paste0("\t\t a_", root_site, "[i] ~ dcat( omega_", root_site, "[fish_type[i] + 1, 1:(n_branch_", root_site, "+1), dam_week[i]] )")
+    # in the "where are the fish" section, be sure to index the dam_strata
+    mod_file[str_which(mod_file, paste0("a_", root_site, "\\[i\\] ~ dcat"))] = paste0("\t\t a_", root_site, "[i] ~ dcat( omega_", root_site, "[fish_type[i] + 1, 1:(n_branch_", root_site, "+1), dam_strata[i]] )")
 
     # overwrite text file
     writeLines(mod_file, mod_conn_init)
