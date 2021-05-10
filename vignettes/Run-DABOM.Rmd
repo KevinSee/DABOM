@@ -41,7 +41,7 @@ knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE,
   echo = TRUE,
-  eval = FALSE,
+  # eval = FALSE,
   comment = "#>"
 )
 # turn off one check
@@ -120,37 +120,17 @@ Once those steps are complete, the following lead to escapement estimates:
 1. Summarize DABOM results
 1. Combine DABOM movement probabilities with an estimate of adult escapement at the starting node
 
-More details about the initial preparation steps can be found in the vignettes contained in the `PITcleanr` package. We'll briefly describe some of the outputs needed for DABOM.
+More details about the initial preparation steps can be found in the vignettes contained in the `PITcleanr` package. For `DABOM`, the user will need
 
-## Configuration File
-
-The configuration file contains all the information from PTAGIS to map a particular detection record to a "node". This mapping must include the site code, the antenna code and the antenna configuration, all of which appear in the PTAGIS query defined above. `PITcleanr` provides a function to query all the metadata associated with PTAGIS sites, and maps each array (i.e. row of antennas) at a site onto a node. The upstream arrays are labeled with the site code plus `A0` and the downstream arrays are assigned `B0`. For sites with three arrays, the middle array is grouped with the upstream array. For sites with four arrays, the upper two arrays are mapped to `A0` and the lower two arrays are mapped to `B0`. However, the user can start with the `ptagis_meta` file and construct this mapping any way they choose. 
-
-The key columns in a configuration file include the PTAGIS site code, the configuration ID (related to how the various antennas are laid out at a site), the antenna ID and the DABOM node that antenna is assigned to. The first three are included with PTAGIS queries of capture histories, and the inclusion of the node column allows `PITcleanr` to map every detection to a node. 
-
-## Parent-Child Table
-
-The parent-child table describes the stream network in terms of which detection locations are connected to each other. A parent-child table defines the closest previous detection location (parent) for each detection location (child). If a tag is seen at a child location, it must have moved past the parent location. For adult salmonid movement, the parent location is downstream of the child location. Each child location may only have a single parent, but a parent location may have multiple child locations due to the branching nature of the stream network. 
-
-To run DABOM, a parent-child table must include the following columns:
-
-- `parent`: generally the PTAGIS site code of the parent location
-- `child`: generally the PTAGIS site code of the child location
-- `parent_hydro`: the hydrosequence of the NHDPlus layer where the parent location is
-- `child_hydro`: the hydrosequence of the NHDPlus layer where the child location is
-- `parent_rkm`: the river kilometer of the parent location (generally queried from PTAGIS)
-- `child_rkm`: the river kilometer of the child location (generally queried from PTAGIS)
-
-## Filtered Capture History
-
-One of the assumptions in the DABOM model is that fish are making a one-way upstream migration, which ends in their spawning location. At every branching site (with multiple possible upstream paths), the fish can only move up one of those paths. So if a fish is detected moving past one site and later seen moving past a different site that implies the fish swam back downstream, then turned up a different tributary, both of those observations cannot be kept in the model. Before running DABOM, a user will need to "clean" the detection histories of the tags and decide if there are multiple detections like those described above which one to keep. 
-
-`PITcleanr` can take the raw detections from PTAGIS, assign each to a node (based on the configuration file), compress them, add directionality (based on the parent-child table), and flag those tags with detections in multiple branches. For each detection, `PITcleanr` adds two columns to indicate whether each detection should be retained for DABOM. For tags with straightforward detections (i.e. all detections appear to have one-way directional movement), the added columns `auto_keep_obs` and `user_keep_obs` will be marked `TRUE`. For tags with less straightforward movement patterns, `PITcleanr` assumes that the last detection with movement noted as "forward" or "unknown" (or "start") is the spawning location, and attempts to mark the `auto_keep_obs` column as `TRUE` for the last detections along that movement path. For these tags, `filterDetections` returns `NA`'s in the `user_keep_obs` column. 
+* a configuration file
+* a parent-child table
+* a filtered detection history (based on a PTAGIS query)
 
 The `PITcleanr` package provides an example dataset we can use to demonstrate these results. The example datasets (PTAGIS query, configuration file and parent-child table) are installed on your computer when you install `PITcleanr`. We can determine where they are, and read them into R using the following code:
 
 ```{r examp-files}
 library(PITcleanr)
+library(tidyverse)
 
 ptagis_file = system.file("extdata",
                           "TUM_Chinook_2015.csv",
@@ -175,12 +155,47 @@ configuration = read_csv(config_file)
 
 ```
 
-Then we can compress them and prepare them for DABOM.
+We will now describe these components in more detail.
+
+## Configuration File
+
+The configuration file contains all the information from PTAGIS to map a particular detection record to a "node". This mapping must include the site code, the antenna code and the antenna configuration, all of which appear in the PTAGIS query defined above. `PITcleanr` provides a function to query all the metadata associated with PTAGIS sites, and maps each array (i.e. row of antennas) at a site onto a node. The upstream arrays are labeled with the site code plus `A0` and the downstream arrays are assigned `B0`. For sites with three arrays, the middle array is grouped with the upstream array. For sites with four arrays, the upper two arrays are mapped to `A0` and the lower two arrays are mapped to `B0`. However, the user can start with the `ptagis_meta` file and construct this mapping any way they choose. 
+
+The key columns in a configuration file include the PTAGIS site code, the configuration ID (related to how the various antennas are laid out at a site), the antenna ID and the DABOM node that antenna is assigned to. The first three are included with PTAGIS queries of capture histories, and the inclusion of the node column allows `PITcleanr` to map every detection to a node. 
+
+## Parent-Child Table
+
+The parent-child table describes the stream network in terms of which detection locations are connected to each other. A parent-child table defines the closest previous detection location (parent) for each detection location (child). If a tag is seen at a child location, it must have moved past the parent location. For adult salmonid movement, the parent location is downstream of the child location. Each child location may only have a single parent, but a parent location may have multiple child locations due to the branching nature of the stream network. 
+
+To run DABOM, a parent-child table must include the following columns:
+
+- `parent`: generally the PTAGIS site code of the parent location
+- `child`: generally the PTAGIS site code of the child location
+- `parent_hydro`: the hydrosequence of the NHDPlus layer where the parent location is
+- `child_hydro`: the hydrosequence of the NHDPlus layer where the child location is
+- `parent_rkm`: the river kilometer of the parent location (generally queried from PTAGIS)
+- `child_rkm`: the river kilometer of the child location (generally queried from PTAGIS)
+
+Graphically, these relationships are shown in the figure below.
+
+```{r parent-child-fig, echo = F, results = "hide", fig.align = "center", fig.cap="Graphical representation of the parent-child table, showing which sites are upstream of others. Tags start at TUM, and move down the figure."}
+plotNodes(parent_child,
+          layout = "tree")
+```
+
+## Filtered Capture History
+
+One of the assumptions in the DABOM model is that fish are making a one-way upstream migration, which ends in their spawning location. At every branching site (with multiple possible upstream paths), the fish can only move up one of those paths. So if a fish is detected moving past one site and later seen moving past a different site that implies the fish swam back downstream, then turned up a different tributary, both of those observations cannot be kept in the model. Before running DABOM, a user will need to "clean" the detection histories of the tags and decide if there are multiple detections like those described above which one to keep. 
+
+`PITcleanr` can take the raw detections from PTAGIS, assign each to a node (based on the configuration file), compress them, add directionality (based on the parent-child table), and flag those tags with detections in multiple branches. For each detection, `PITcleanr` adds two columns to indicate whether each detection should be retained for DABOM. For tags with straightforward detections (i.e. all detections appear to have one-way directional movement), the added columns `auto_keep_obs` and `user_keep_obs` will be marked `TRUE`. For tags with less straightforward movement patterns, `PITcleanr` assumes that the last detection with movement noted as "forward" or "unknown" (or "start") is the spawning location, and attempts to mark the `auto_keep_obs` column as `TRUE` for the last detections along that movement path. For these tags, `filterDetections` returns `NA`'s in the `user_keep_obs` column. 
+
+We've identified the output from PTAGIS provided by `PITcleanr` (`ptagis_file`). Now we can compress those observations and prepare them for DABOM. Note that in the `prepWrapper` function, we have added the detection nodes (not just site codes) to the parent-child table, using the `addParentChildNodes` function from `PITcleanr`. This function also includes a minimum and maximum observed date (`min_obs_date` and `max_obs_date`, in `YYYYMMDD` format) so the user can filter out observations before a certain date (e.g. detections of fish marked as juveniles, detections at mainstem dams prior to reaching the release point, etc.) and after a certain date (e.g. detections of kelts swimming downstream after spawning, carcasses drifting downstream after spawning, ghost detections in subsequent years, etc.). 
 
 ```{r dabom-prep}
 prepped_ch = compress(ptagis_file = ptagis_file,
                       configuration = configuration) %>%
-  prepWrapper(parent_child = parent_child,
+  prepWrapper(parent_child = parent_child %>%
+                addParentChildNodes(configuration = configuration),
               min_obs_date = "20150301",
               max_obs_date = "20150930")
 ```
@@ -193,13 +208,26 @@ prepped_ch %>%
   kable()
 ```
 
-
 The next step would be for a user to filter the prepared data for all rows with `user_keep_obs == NA`, and then fill in the `user_keep_obs` column by hand for each detection node. These decisions could be guided by the `auto_keep_obs` column (`PITcleanr`'s best guess), but could also be informed by the date of detections and the user's biological knowledge of the system. Before sending the data along to DABOM, all the missing `user_keep_obs` rows should be filled out as either `TRUE` or `FALSE`. The user can then remove all the rows where `user_keep_obs == FALSE`. For our example, we'll accept all the `auto_keep_obs` recommendations.
 
 ```{r}
 filter_ch = prepped_ch %>%
   mutate(user_keep_obs = auto_keep_obs) %>%
   filter(user_keep_obs)
+```
+
+Finally, we'll need to know the origin (hatchery or wild/naturally produced) of each tag. This involves constructing a data.frame with two columns: `tag_code` and `origin`.  The user might be able to do this based on data taken when tagging the fish, or it could be constructed from the PTAGIS file:
+
+```{r}
+fish_origin = suppressMessages(read_csv(ptagis_file)) %>%
+  select(tag_code = `Tag Code`,
+         origin = `Mark Rear Type Name`) %>%
+  distinct() %>%
+  mutate(origin = str_sub(origin, 1, 1),
+         origin = recode(origin,
+                         "U" = "W"))
+
+fish_origin
 ```
 
 Now our data is ready for DABOM.
@@ -209,42 +237,218 @@ Now our data is ready for DABOM.
 The DABOM model is implemented in a Bayesian framework, using JAGS software. JAGS requires a model file (.txt format) with specific types of syntax. See the JAGS user manual for more detail about JAGS models. The `DABOM` package contains a function to write this model file, based on the relationships defined in the parent-child table, and how nodes are mapped to sites in the configuration file. 
 
 ```{r}
+library(DABOM)
 # file path to the default and initial model
-basic_modNm = paste0('~/Desktop/DABOM_main.txt')
+basic_mod_file = paste0('~/Desktop/DABOM_initial.txt')
 
-writeDABOM(basic_modNm,
-           pc,
-           configuration)
+writeDABOM(file_name = basic_mod_file,
+           parent_child = parent_child,
+           configuration = configuration)
 
 ```
 
-If the user would like the initial transition parameters (chances of moving along one of the initial branches from the starting point) to be time-varying, meaning they will shift as the season goes on, `writeDABOM` has an arguement, `time_varying` which can be set to `TRUE`. 
-
+If the user would like the initial transition parameters (chances of moving along one of the initial branches from the starting point) to be time-varying, meaning they will shift as the season goes on, `writeDABOM` has an arguement, `time_varying` which can be set to `TRUE`. This can be important when the group of tagged fish may not be representative of the total run, perhaps because the trap rate shifted over the course of the run and there exists differential run timing between fish going to those initial branches. For example, this situation often occurs at Lower Granite dam, so the initial movement parameters are allowed to shift on a weekly basis. This does reduce the bias in the estimates, but will take longer to run, and does require estimates of total escapement for each strata (e.g. week) of the movement parameters. 
 
 ## Modify JAGS Model
 
+Often the user will have a parent-child table based on all the detection sites they are interested in using. However, there may have been no fish detected at some of those sites that year. Rather than let the model churn away on estimating parameters that have no data to inform them, we have devised a function to "turn off" some parameters. Some of these parameters are specific to the origin of the fish, such as turning off movement parameters past a particular site only for hatchery fish, if no hatchery fish were observed there, so the `fish_origin` input is required.
+
+This includes setting the detection probability to 0 for nodes that had no detections (or were not in place during the fishes' migration), setting the detection probability to 100% for nodes that function as single arrays with no upstream detection sites (so no way to estimate detection probability there), and fixing some movement probabilities to 0 if no tags were observed along that branch. Setting the detection probability to 100% may lead to a conservative estimate of escapement past that particular site (i.e. escapement was *at least* this much), but since many terminal sites are further upstream in the watershed, where most detection probabilities are likely close to 100% already, this may not be a bad assumption to make. The function `fixNoFishNodes` updates the initial JAGS file with these improvements, and sends a message to the user about what it has done. 
+
+```{r}
+# filepath for specific JAGS model code for species and year
+final_mod_file = paste0('~/Desktop/DABOM_final.txt')
+
+# writes species and year specific jags code
+fixNoFishNodes(init_file = basic_mod_file,
+               file_name = final_mod_file,
+               filter_ch = filter_ch,
+               parent_child = parent_child,
+               configuration = configuration,
+               fish_origin = fish_origin)
+
+```
+
+
 # Run JAGS Model
+
+To run the JAGS model, we need to set some initial values, create input in a format conducive to JAGS, and set which parameters we would like to track.
 
 ## Set Initial Values
 
+The only initial values we need to set are for where tags are in the system, based on their observed detections. Otherwise, JAGS could randomly assign them an initial value of being in one tributary, when they are actually observed in another, which will cause JAGS to throw an error. 
+
+```{r, eval = F}
+# Creates a function to spit out initial values for MCMC chains
+init_fnc = setInitialValues(filter_ch = filter_ch,
+                            parent_child = parent_child,
+                            configuration = configuration)
+
+```
 
 ## Create JAGS Input
 
+JAGS requires the data to be input in the form of a list. The `writeDABOM` function has also assumed a particular format for the data inputs. So `DABOM` has a function to transform the data into the right format expected by JAGS:
+
+```{r, eval = F}
+# Create all the input data for the JAGS model
+jags_data = createJAGSinputs(filter_ch = filter_ch,
+                             parent_child = parent_child,
+                             configuration = configuration,
+                             fish_origin = fish_origin)
+```
+
+If the user is running a time-varying version of DABOM, they will need to add some additional data as input, namely the number of temporal strata (i.e. weeks) and which strata each tag falls into (i.e. which week did they cross the initial dam?). This can be done after running `createJAGSinputs`, by using the following:
+
+```{r time-vary-data, eval = F}
+jags_data = c(jags_data,
+                addTimeVaryData(filter_ch = filter_ch,
+                                start_date = "20150301",
+                                end_date = "20150630"))
+```
 
 ## Set Parameters to Save
 
+The user needs to tell JAGS which parameters to track and save posterior samples for. Otherwise, the MCMC algorithms will run, but the output will be blank. Based on the model file, `DABOM` will pull out all the detection and movement parameters to track:
+
+```{r, eval = F}
+# Tell JAGS which parameters in the model that it should save.
+jags_params = setSavedParams(model_file = final_mod_file)
+```
+
+If the user is running a time-varying version of DABOM, the function `setSavedParams` does have an input, `time_varying` which can be set to `TRUE`. This will add the variance parameter related to the random walk of those time-varying movement parameters, in case the user is interested.
 
 ## Run MCMC
 
+R users have developed several different packages that can be used to connect to the JAGS software and run the MCMC algorithm. Here, we will present example code that uses the `rjags` package, which was written by the author of the JAGS software. First, the user runs an adaptation or burn-in phase, which requires the path to the JAGS model file, the input data, any initial values function, the number of MCMC chains to run and the number of adaptation iterations to run. To test that the model is working, a user may set `n.chains = 1` and `n.adapt` to a small number like 5, but to actually run the model we recommend:
+
+* `n.chains = 4`
+* `n.adapt = 5000`
+
+To make the results fully reproducible, we recommend setting the random number generator seed in R, using the `set.seed()` function. This will ensure the same MCMC results on a particular computer, but the results may still differ on different machines.
+
+```{r, eval = F}
+library(rjags)
+set.seed(5)
+
+jags = jags.model(file = final_mod_file,
+                  data = jags_data,
+                  inits = init_fnc,
+                  n.chains = 4,
+                  n.adapt = 5000)
+```
+
+If this code returns a message `Warning message: Adaptation incomplete`, this indicates further burn-in iterations should be run, which the user can do by using this code (and setting the `n.iter` parameter to something large enough):
+
+```{r, eval = F}
+update(jags, 
+       n.iter = 1000)
+```
+
+Finally, once the adaptation or burn-in phase is complete, the user can take MCMC samples of the posteriors by using the `coda.samples` function. This is where the user tells JAGS which parameters to track. Again, we would recommend the following settings:
+
+* `n.iter = 5000`
+* `thin = 10`
+
+Across four chains, this results in (5000 / 10 * 4) 2000 samples of the posteriors.
+
+```{r, eval = F}
+dabom_samp_tum = coda.samples(model = jags,
+                              variable.names = jags_params,
+                              n.iter = 5000,
+                              thin = 10)
+
+```
+
 # Results
+
+We have included an example of posterior samples with the `DABOM` package, to save the user time when testing the package. It can be accessed by running:
+
+```{r}
+data("dabom_samp_tum")
+```
+
 
 ## Detection Probability Estimates
 
+If a user is interested in the estimates of detection probability, estimated at every node in the DABOM model, the `DABOM` package provides a simple function to extract these, `summariseDetectProbs()`. The output includes the number of distinct tags observed at each node, as well as the mean, median, mode and standard deviation of the posterior distribution. It also includes the highest posterior density interval (HPDI) of whatever $\alpha$-level the user desires (using the `cred_int_prob` argument), the default value of which is 95\%. The HPDI is the narrowest interval of the posterior distribution that contains the $\alpha$-level mass, and is the Bayesian equivalent of a confidence interval. 
+
+```{r}
+# summarize detection probability estimates
+detect_summ = summariseDetectProbs(dabom_mod = dabom_samp_tum,
+                                   filter_ch = filter_ch,
+                                   cred_int_prob = 0.95)
+```
+
+```{r, echo = F}
+detect_summ %>%
+  kable(digits = 3)
+```
+
+
 ## Estimate Escapement
+
+To estimate escapement past each detection point, DABOM requires two things: an estimate of the movement or transition probability past that point, and an estimate of the total escapement somewhere in the stream network. Most of the time, that estimate of total escapement is provided at the tagging or release site (e.g. Tumwater Dam), and we'll assume that's what is available for this example. 
 
 ### Compile Transition Probabilities
 
+Compiling the transition probabilities is both a matter of ensuring that the parameters from JAGS match the site codes of each detection point (so that movement past CHL is named as such), but also multiplying some transition probabilities together when appropriate. For instance, the ultimate probability that a tag moves past CHU is the probability of moving from TUM past CHL, and then from CHL past CHU. At this time, these multiplication steps are hard-coded into a few functions, one for each version of DABOM that currently exists:
+
+* `compileTransProbs_GRA`
+* `compileTransProbs_PRA`
+* `compileTransProbs_TUM`
+* `compileTransProbs_PRO`
+
+```{r}
+trans_df = compileTransProbs_TUM(dabom_mod = dabom_samp_tum,
+                                 parent_child = parent_child)
+```
+
+The resulting tibble contains a column describing the MCMC chain that sample is from (`chain`) the overall iteration of that sample (`iter`), the origin, either one or two (`origin`), the parameter (`param`) which is coded such that the site code refers to the probability of moving past that site, and the value of the posterior sample (`value`). Some parameters end in `_bb`, which refers to the tags that moved past a particular branching node, but did not move into one of the subsequent branches. The "bb" stands for "black box", meaning we're not sure exactly what happened to those fish. They have spawned in an area above that branching node, but below upstream detection points, they may have died in that area (due to natural causes or fishing) or they may have moved downstream undetected and were not seen at any other detection sites. 
+
 ### Total Escapement
+
+In our example, at Tumwater Dam, every fish that moves upstream of the dam is physically moved upstream, after being identified as hatchery or wild. Therefore, the total escapement, by origin, at Tumwater is known precisely, with no standard error. 
+
+```{r}
+tot_escp = tibble(origin = c(1,2),
+                    tot_escp = c(1086, 1378))
+```
+
+Each of the transition probabilities can then be multiplied by this total escapement, resulting in posterior samples of escapement or abundance past each detection site. We have included some code to help summarize those posteriors below, but the user could summarize the posterior samples however they wish.
+
+
+```{r}
+escp_summ = trans_df %>%
+    left_join(tot_escp,
+              by = "origin") %>%
+    mutate(escp = tot_escp * value) %>%
+    group_by(location = param,
+             origin) %>%
+    summarise(mean = mean(escp),
+              median = median(escp),
+              mode = estMode(escp),
+              sd = sd(escp),
+              skew = moments::skewness(escp),
+              kurtosis = moments::kurtosis(escp),
+              lowerCI = coda::HPDinterval(coda::as.mcmc(escp))[,1],
+              upperCI = coda::HPDinterval(coda::as.mcmc(escp))[,2],
+              .groups = "drop") %>%
+    mutate(across(c(mean, median, mode, sd, matches('CI$')),
+                  ~ if_else(. < 0, 0, .))) %>%
+    mutate(across(c(mean, median, mode, sd, skew, kurtosis, matches('CI$')),
+                  round,
+                  digits = 2)) %>%
+    arrange(desc(origin), location)
+```
+
+```{r, echo = F}
+escp_summ %>%
+  kable()
+```
+
+
+### Time-Varying Versions (GRA)
 
 
 
