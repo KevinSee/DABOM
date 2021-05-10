@@ -56,7 +56,8 @@ fixNoFishNodes = function(init_file = NULL,
               by = "node")
 
   node_tags_origin = filter_ch %>%
-    left_join(fish_origin) %>%
+    left_join(fish_origin,
+              by = "tag_code") %>%
     group_by(node, origin) %>%
     summarise(n_tags = n_distinct(tag_code),
               .groups = "drop") %>%

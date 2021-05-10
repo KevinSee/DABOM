@@ -68,7 +68,8 @@ summariseDetectProbs = function(dabom_mod = NULL,
   detect_summ = filter_ch %>%
     group_by(node) %>%
     summarise(n_tags = n_distinct(tag_code)) %>%
-    full_join(detect_df) %>%
+    full_join(detect_df,
+              by = "node") %>%
     mutate(n_tags = ifelse(is.na(n_tags), 0, n_tags)) %>%
     mutate(mode = ifelse(mean == 1 & median == 1, 1, mode))
 
