@@ -184,7 +184,7 @@ writeDABOM = function(file_name = NULL,
                 by = "child") %>%
       pull(parent)
 
-    dwn_site_pc = pc %>%
+    dwn_site_pc = parent_child %>%
       filter(parent == parent_site) %>%
       arrange(child_rkm)
 
