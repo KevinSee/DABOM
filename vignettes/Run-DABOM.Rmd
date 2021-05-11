@@ -120,7 +120,14 @@ Once those steps are complete, the following lead to escapement estimates:
 1. Summarize DABOM results
 1. Combine DABOM movement probabilities with an estimate of adult escapement at the starting node
 
-More details about the initial preparation steps can be found in the vignettes contained in the `PITcleanr` package. For `DABOM`, the user will need
+More details about the initial preparation steps can be found in the vignettes contained in the `PITcleanr` package. That vignette can also be accessed using:
+
+```{r, eval = F}
+vignette("DABOM_prep",
+         package = "PITcleanr")
+```
+
+For `DABOM`, the user will need
 
 * a configuration file
 * a parent-child table
@@ -463,5 +470,11 @@ escp_summ = calcTribEscape_GRA(dabom_mod = dabom_samp_gra,
 ```
 
 It is important to note that the user is responsible for ensuring that the strata used in STADEM and that used in DABOM are the same. The `addTimeVaryData()` function uses a function from the `STADEM` package to generate strata on a weekly basis, so as long as the inputs are the same, the strata will be identical. However, if the user wishes to use strata from a different model (not STADEM), that are not set up to be weekly (e.g. uneven lengths, split across known changes in trap rates, etc.), it is fairly easy to generate the `n_strata` and `dam_strata` inputs to JAGS without using the `addTimeVaryData()` function, but then they must also generate estimates of escapement (by origin if necessary) for each strata. Then it is also upon the user to combine those estimates (bootstrapped if necessary due to uncertainty) with the appropriate transition probability posteriors. 
+
+# Updating a DABOM Model
+
+As new detection sites are installed, the current DABOM models may need to change. The user can modify the configuration file and parent-child table by hand, either through R, or in other software like Excel and then read those files back into R. Many of the functions in the `DABOM` package will work, including `writeDABOM`, `fishNoFishNodes`, `setInitialValues`, `createJAGSinputs` and `setSavedParams`. The user can run the JAGS model, and even pull out summaries of the detection probabilities using `summariseDetectProbs`. 
+
+***However***, to generate estimates of escapement, the user will need to modify the appropriate `compileTransProbs_XXX` function to ensure that transition probabilities at the new sites are multiplied appropriately. If the Lower Granite DABOM model is modified, especially if new initial branches are added, particular care should be taken when examining the results of `calcTribEscape_GRA`, in case further adjustments are needed.
 
 # References
