@@ -13,7 +13,7 @@
 #' @examples compileTimeVaryTransProbs()
 
 compileTimeVaryTransProbs = function(dabom_mod = NULL,
-                                 parent_child = NULL) {
+                                     parent_child = NULL) {
 
   stopifnot(!is.null(dabom_mod),
             !is.null(parent_child))
@@ -31,8 +31,8 @@ compileTimeVaryTransProbs = function(dabom_mod = NULL,
     pull(node)
 
   trans_df = as.matrix(dabom_mod,
-                        iters = T,
-                        chains = T) %>%
+                       iters = T,
+                       chains = T) %>%
     as_tibble() %>%
     # pull out movement parameters from root_node
     select(CHAIN, ITER,
