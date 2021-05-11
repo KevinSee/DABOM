@@ -415,15 +415,16 @@ The resulting tibble contains a column describing the MCMC chain that sample is 
 
 ### Total Escapement
 
-In our example, at Tumwater Dam, every fish that moves upstream of the dam is physically moved upstream, after being identified as hatchery or wild. Therefore, the total escapement, by origin, at Tumwater is known precisely, with no standard error. 
+In our example, at Tumwater Dam, every fish that moves upstream of the dam is physically moved upstream, after being identified as hatchery or wild. Therefore, the total escapement, by origin, at Tumwater is known precisely, with no standard error (for 2015, there were 1,086 natural origin Chinook and 1378 hatchery Chinook). The user can input that by setting up a tibble with origin and total escapement.  
 
 ```{r}
 tot_escp = tibble(origin = c(1,2),
                     tot_escp = c(1086, 1378))
 ```
 
-Each of the transition probabilities can then be multiplied by this total escapement, resulting in posterior samples of escapement or abundance past each detection site. We have included some code to help summarize those posteriors below, but the user could summarize the posterior samples however they wish.
+Each of the transition probabilities can then be multiplied by this total escapement, resulting in posterior samples of escapement or abundance past each detection site. If there is any uncertainty in the total escapement, we recommend bootstrapping samples of the total escapement with the appropriate mean and standard error (using the same number of bootstrap samples as they have posterior samples of transition probabilities), labeling those bootstraps with an iteration number `iter` and joining them to the `trans_df` tibble by `iter` and `origin`. 
 
+We have included some code to help summarize those posteriors below, but the user could summarize the posterior samples however they wish.
 
 ```{r}
 escp_summ = trans_df %>%
