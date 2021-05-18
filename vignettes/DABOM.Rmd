@@ -1,6 +1,7 @@
 ---
 title: "Running DABOM"
 author: Kevin See
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: 
   rmarkdown::html_vignette:
     toc: true
@@ -51,19 +52,36 @@ options(rmarkdown.html_vignette.check_title = FALSE)
 
 # Introduction
 
-This manual describes how to run the **D**am **A**dult **B**ranch **O**ccupancy **M**odel ([DABOM](https://github.com/BiomarkABS/DABOM)) for adult salmon returning to a watershed. The overview consists of PIT tagging a representative sample of the returning fish, and using the subsequent detections of those tags at various sites upstream (or possibly downstream) of the starting location to estimate escapement or abundance past each detection site. The DABOM model estimates transition (or movement) probabilities past various detection sites while accounting for imperfect detection at those sites, essentially a multi-state variation of a spatial Cormack-Jolly-Seber model. The DABOM package implements this kind of model in a Bayesian framework. Further mathematical details of the model can be found in @Waterhouse2020. 
+This manual describes how to run the **D**am **A**dult **B**ranch **O**ccupancy **M**odel ([DABOM](https://github.com/BiomarkABS/DABOM)) for adult salmon returning to a watershed. The framework typically consists of PIT tagging a representative sample of the returning adults, and using the subsequent detections of those tags at various sites upstream (or possibly downstream) of the starting location to estimate escapement or abundance past each detection site. The DABOM model estimates transition (or movement) probabilities past various detection sites while accounting for imperfect detection at those sites, essentially a multi-state variation of a spatial Cormack-Jolly-Seber model. The DABOM package implements this kind of model in a Bayesian framework. Further mathematical details of the model can be found in @Waterhouse2020 whic can be found [here](https://esajournals.onlinelibrary.wiley.com/doi/abs/10.1002/eap.2202). 
 
-For this vignette, we will show a DABOM example for spring Chinook crossing over Tumwater Dam and in the upper Wenatchee River. We start by describing how to query [PTAGIS](https://www.ptagis.org/) to get all detections of adults at relevant observation sites (e.g., weirs, PIT tag arrays, etc.) for a particular spawning run from a list of "valid" PIT tags. Observation data are then "cleaned up" using the `PITcleanr` R package to determine a final destination or spawning location for each individual and detection data are prepared for use in the `DABOM` R package and model. Next, we describe how to write a JAGS model for use in `DABOM`, and finally, run `DABOM` to estimate detection and movement probabilities within the stream network. Movement probabilities can then be multiplied by an estimate of adult escapement at Tumwater Dam to estimate escapement, with uncertainty, at any observation site (or tributary) within the Wenatchee River.
+For this vignette, we will show a DABOM example for spring Chinook crossing over Tumwater Dam and in the upper Wenatchee River. We start by directing users how to query [PTAGIS](https://www.ptagis.org/) to get all detections of adults at relevant observation sites (e.g., weirs, PIT tag arrays, etc.) for a particular spawning run from a list of "valid" PIT tags. Observation data are then "cleaned up" using the `PITcleanr` R package and  a final destination or spawning location is determined for each individual. `PITcleanr` can also be used to prepare detection data for use in the `DABOM` R package and model. Next, we describe how to write a JAGS model for use in `DABOM`, and finally, run `DABOM` to estimate detection and movement probabilities within the stream network. Movement probabilities can then be multiplied by an estimate of adult escapement at Tumwater Dam to estimate escapement, with uncertainty, at any observation site (or tributary) within the Wenatchee River. 
 
-We estimate escapement (or abundance) for both hatchery and natural origin fish by using both types together to estimate detection probabilities, but allow movement probabilities to vary by origin, because hatchery fish are likely moving to different areas at different rates compared to natural origin fish. 
+We estimate escapement (or abundance) for both hatchery and natural origin fish by using both types together to estimate detection probabilities, but allow movement probabilities to vary by origin, because hatchery fish are likely moving to different areas at different rates compared to natural origin fish.
+
+
+## Companion R packages
+
+`DABOM` has two companion R packages, [PITcleanr](https://github.com/BiomarkABS/PITcleanr) and [STADEM](https://github.com/BiomarkABS/STADEM). `PITcleanr` can assist the user in "cleaning" sometimes unwieldy amounts of detection data from [PTAGIS](https://ptagis.org/) and preparing that detecion data for `DABOM`. `STADEM` can be used to estimate adult escapement at a dam that, when combined with movement probabilities from `DABOM`, provide an estimate of abundance or escapement at locations of interest.
+
 
 # Set-up
 
+<<<<<<< HEAD:vignettes/DABOM.Rmd
 The first step is to ensure that all appropriate software and R packages are installed on your computer. ([R](https://cran.r-project.org/)) is a language and environment for statistical computing and graphics and is the workhorse for running all of the code and models described here. R packages are collections of functions and data sets developed by the R community for particular tasks. Some R packages used here are available from the general R community ([Available CRAN Packages](https://cran.r-project.org/web/packages/available_packages_by_name.html)) whereas others (e.g., `PITcleanr`, `DABOM`) are developed by ([Kevin See](https://github.com/BiomarkABS)) and contain functions written for cleaning and analysis of PIT tag detection site and observation data.
+=======
+## Software
 
-First, you will need to have [R](https://cran.r-project.org/) downloaded and installed. Use the "base" distribution and all default installation settings should work just fine. Additionally, although not necessary, we find it very useful to use [RStudio](https://rstudio.com/) as an interface for R. Download the Desktop version of RStudio, and again, default installation settings should work just fine. RStudio provides a graphical user interface (GUI) for R with a text/code editor and allows for direct code execution, management of R packages, a viewing of R objects (e.g., data) in the environment.
+The first step is to ensure that all appropriate software and R packages are installed on your computer. [R](https://cran.r-project.org/) is a language and environment for statistical computing and graphics and is the workhorse for running all of the code and models described here. R packages are collections of functions and data sets developed by the R community for particular tasks. Some R packages used here are available from the general R community and available [here](https://cran.r-project.org/web/packages/available_packages_by_name.html)) whereas others (`PITcleanr`, `DABOM`) are developed by the package author and available on [GitHub here](https://github.com/BiomarkABS).
+>>>>>>> update_2.0:vignettes/Run-DABOM.Rmd
 
+`DABOM` requires the [JAGS](http://mcmc-jags.sourceforge.net/) software for Bayesian inference, which can be downloaded from [here](https://sourceforge.net/projects/mcmc-jags/files/).
+
+<<<<<<< HEAD:vignettes/DABOM.Rmd
 ```{r child = "../man/fragments/install-inst.Rmd"}
+=======
+
+## R Packages
+>>>>>>> update_2.0:vignettes/Run-DABOM.Rmd
 
 ```
 
@@ -79,7 +97,7 @@ Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS = TRUE)
 When attempting to install `PITcleanr` or `DABOM` you may receive an error message similar to *"there is no package called 'ggraph'"*. In that case, try to install the given package using the following and then attempt to install `PITclean` or `DABOM`, again.
 
 ```{r install-load-example, eval = F}
-install.package("ggraph") # to install package from R cran
+install.packages("ggraph") # to install package from R cran
 # replace ggraph with the appropriate package name as needed
 ```
 
@@ -136,6 +154,7 @@ parent_child_file = system.file("extdata",
 
 # read in parent-child table
 parent_child = read_csv(parent_child_file)
+
 # read in configuration file
 configuration = read_csv(config_file)
 
@@ -243,8 +262,9 @@ The DABOM model is implemented in a Bayesian framework, using JAGS software. JAG
 
 ```{r}
 library(DABOM)
+
 # file path to the default and initial model
-basic_mod_file = paste0('~/Desktop/DABOM_initial.txt')
+basic_mod_file = tempfile("DABOM_init", fileext = ".txt")
 
 writeDABOM(file_name = basic_mod_file,
            parent_child = parent_child,
@@ -262,7 +282,7 @@ This includes setting the detection probability to 0 for nodes that had no detec
 
 ```{r}
 # filepath for specific JAGS model code for species and year
-final_mod_file = paste0('~/Desktop/DABOM_final.txt')
+final_mod_file = tempfile("DABOM_final", fileext = ".txt")
 
 # writes species and year specific jags code
 fixNoFishNodes(init_file = basic_mod_file,
@@ -476,5 +496,10 @@ It is important to note that the user is responsible for ensuring that the strat
 As new detection sites are installed, the current DABOM models may need to change. The user can modify the configuration file and parent-child table through R, or manually in other software like Excel and then read those files back into R. Many of the functions in the `DABOM` package will work correctly with these updated files, including `writeDABOM`, `fishNoFishNodes`, `setInitialValues`, `createJAGSinputs` and `setSavedParams`. The user can run the JAGS model, and even pull out summaries of the detection probabilities using `summariseDetectProbs`. 
 
 ***However***, to generate estimates of escapement, the user will need to modify the appropriate `compileTransProbs_XXX` function to ensure that transition probabilities at the new sites are multiplied appropriately. If the Lower Granite DABOM model is modified, especially if new initial branches are added, particular care should be taken when examining the results of `calcTribEscape_GRA`, in case further adjustments are needed.
+
+```{r, echo = F}
+unlink(basic_mod_file)
+unlink(final_mod_file)
+```
 
 # References
