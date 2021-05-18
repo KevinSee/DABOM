@@ -20,6 +20,10 @@ the tagging site, can be used to estimate abundance at a variety of
 spatial scales. Further mathematical details of the model can be found
 in [Waterhouse, 2020](https://doi.org/10.1002/eap.2202).
 
+The user can find more information related to installation and use of
+this package on the [package
+website](https://biomarkabs.github.io/DABOM/).
+
 ## Installation instructions
 
 The `DABOM` compendium can be downloaded as a zip from from this URL:

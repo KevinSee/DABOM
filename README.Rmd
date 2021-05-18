@@ -22,6 +22,8 @@ knitr::opts_chunk$set(
 
 `DABOM` is an R package for estimating abundance of anadromous fishes using fish tagged at a primary sampling facility (e.g., dam) and later detected in upstream tributaries. It incorporates the branching structure of a stream network, and simultaneously estimates imperfect detection probabilities at all detection locations and movement probabilities past detection locations. The movement probabilities, when multiplied correctly and combined with an estimate of total abundance at the tagging site, can be used to estimate abundance at a variety of spatial scales. Further mathematical details of the model can be found in [Waterhouse, 2020](https://doi.org/10.1002/eap.2202).
 
+The user can find more information related to installation and use of this package on the [package website](https://biomarkabs.github.io/DABOM/).
+
 ## Installation instructions
 
 ```{r child = "man/fragments/install-inst.Rmd"}
