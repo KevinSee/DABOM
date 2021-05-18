@@ -17,49 +17,55 @@ detection probabilities at all detection locations and movement
 probabilities past detection locations. The movement probabilities, when
 multiplied correctly and combined with an estimate of total abundance at
 the tagging site, can be used to estimate abundance at a variety of
-spatial scales.
+spatial scales. Further mathematical details of the model can be found
+in [Waterhouse, 2020](https://doi.org/10.1002/eap.2202).
 
 ## Installation instructions
 
-`DABOM` requires several packages that are available through the
-`tidyverse` package. You can install all the necessary packages by
-using:
-
-``` r
-install.packages("tidyverse", "rjags", "jagsUI")
-```
-
-To install `DABOM` you can use Hadley Wickham’s `devtools` package. To
-install and load the devtools package use:
-
-``` r
-install.packages("devtools")
-library(devtools)
-```
-
-NOTE: To use devtools, you may also have to download and install Rtools
-(although you shouldn’t). The latest version on Rtools can be found at
-<https://cran.r-project.org/bin/windows/Rtools/>
-
-You can download the compendium as a zip from from this URL:
+The `DABOM` compendium can be downloaded as a zip from from this URL:
 <https://github.com/BiomarkABS/DABOM/archive/master.zip>
 
-Or you can install this compendium as an R package, DABOM, from GitHub
-with:
+Or you can install the compendium as an R package from GitHub by using
+Hadley Wickham’s `devtools` package:
 
 ``` r
-# install.packages("devtools")
-remotes::install_github("BiomarkABS/DABOM", build_vignettes = TRUE)
+# install and load remotes, if necessary
+install.packages("devtools")
+devtools::install_github("BiomarkABS/DABOM", 
+                         build_vignettes = TRUE)
 ```
 
-DABOM requires the JAGS software (**J**ust **A**nother **G**ibbs
-**S**ampler). This can be downloaded here:
+`devtools` may require the downloading and installation of Rtools. The
+latest version of Rtools can be found
+[here](https://cran.r-project.org/bin/windows/Rtools/).
 
-<https://sourceforge.net/projects/mcmc-jags/files/>
+For the latest development version:
 
-Please download version \>= 4.0.0
+``` r
+devtools::install_github("BiomarkABS/DABOM@develop")
+```
 
-A vignette describing how to use the DABOM package is in the works.
+### JAGS Software
+
+You will also need the [JAGS](http://mcmc-jags.sourceforge.net/)
+software to run DABOM. You can download that from
+[SourceForge](https://sourceforge.net/projects/mcmc-jags/files/). JAGS
+(**J**ust **A**nother **G**ibbs **S**ampler) software is used by `DABOM`
+for Bayesian inference. Please download version \>= 4.0.0.
+
+### Other R Packages
+
+The user will also need to install `tidyverse`, a series of R packages
+that work together for data science (i.e. data cleaning and
+manipulation), as well as the `rjags` package to interface with JAGS.
+The `tidyverse` and `rjags` packages are all available from the R
+community and can be installed by typing the following into your R
+console:
+
+``` r
+install.packages("tidyverse")
+install.packages("rjags")
+```
 
 ## Authors
 

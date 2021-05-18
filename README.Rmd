@@ -22,41 +22,13 @@ Title <- "Title of your paper goes here"
 
 ## Description
 
-`DABOM` is an R package for estimating abundance of anadromous fishes using fish tagged at a primary sampling facility (e.g., dam) and later detected in upstream tributaries. It incorporates the branching structure of a stream network, and simultaneously estimates imperfect detection probabilities at all detection locations and movement probabilities past detection locations. The movement probabilities, when multiplied correctly and combined with an estimate of total abundance at the tagging site, can be used to estimate abundance at a variety of spatial scales. 
+`DABOM` is an R package for estimating abundance of anadromous fishes using fish tagged at a primary sampling facility (e.g., dam) and later detected in upstream tributaries. It incorporates the branching structure of a stream network, and simultaneously estimates imperfect detection probabilities at all detection locations and movement probabilities past detection locations. The movement probabilities, when multiplied correctly and combined with an estimate of total abundance at the tagging site, can be used to estimate abundance at a variety of spatial scales. Further mathematical details of the model can be found in [Waterhouse, 2020](https://doi.org/10.1002/eap.2202).
 
 ## Installation instructions
 
-`DABOM` requires several packages that are available through the `tidyverse` package. You can install all the necessary packages by using:
-  
-```{r, eval = FALSE}
-install.packages("tidyverse", "rjags", "jagsUI")
+```{r child = "man/fragments/install-inst.Rmd"}
+
 ```
-
-To install `DABOM` you can use Hadley Wickham's `devtools` package. To install and load the devtools package use:
-
-```{r, eval = FALSE}
-install.packages("devtools")
-library(devtools)
-```
-
-NOTE: To use devtools, you may also have to download and install Rtools (although you shouldn't). The latest version on Rtools can be found at https://cran.r-project.org/bin/windows/Rtools/
-  
-You can download the compendium as a zip from from this URL: <https://github.com/BiomarkABS/DABOM/archive/master.zip>
-
-Or you can install this compendium as an R package, DABOM, from GitHub with:
-
-```{r gh-installation, eval = FALSE}
-# install.packages("devtools")
-remotes::install_github("BiomarkABS/DABOM", build_vignettes = TRUE)
-```
-
-DABOM requires the JAGS software (**J**ust **A**nother **G**ibbs **S**ampler). This can be downloaded here:
-  
-[https://sourceforge.net/projects/mcmc-jags/files/](https://sourceforge.net/projects/mcmc-jags/files/)
-  
-Please download version >= 4.0.0
-
-A vignette describing how to use the DABOM package is in the works. 
 
 ## Authors
 
