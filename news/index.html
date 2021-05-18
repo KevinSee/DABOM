@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Define Report Groups - GRA — defineRepGrps_GRA • DABOM</title>
+<title>Changelog • DABOM</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,7 @@
 
 
 
-<meta property="og:title" content="Define Report Groups - GRA — defineRepGrps_GRA" />
-<meta property="og:description" content="Define which detection sites fall into which report groups, and what the lowest array is. These reporting groups differ by species. These are specific to the Lower Granite version of DABOM." />
+<meta property="og:title" content="Changelog" />
 
 
 
@@ -59,7 +58,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-topic">
+    <div class="container template-news">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -114,39 +113,54 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Define Report Groups - GRA</h1>
-    <small class="dont-index">Source: <a href='https://github.com/BiomarkABS/DABOM/blob/master/R/defineRepGrps_GRA.R'><code>R/defineRepGrps_GRA.R</code></a></small>
-    <div class="hidden name"><code>defineRepGrps_GRA.Rd</code></div>
+      <h1 data-toc-skip>Changelog <small></small></h1>
+      <small>Source: <a href='https://github.com/BiomarkABS/DABOM/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
-    <div class="ref-description">
-    <p>Define which detection sites fall into which report groups, and what the lowest array is. These reporting groups differ by species. These are specific to the Lower Granite version of DABOM.</p>
-    </div>
-
-    <pre class="usage"><span class='fu'>defineRepGrps_GRA</span><span class='op'>(</span>spp <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Chinook"</span>, <span class='st'>"Steelhead"</span><span class='op'>)</span><span class='op'>)</span></pre>
-
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>spp</th>
-      <td><p>Species, either "Chinook" or "Steelhead"</p></td>
-    </tr>
-    </table>
-
-    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
-
-    <p>Kevin See</p>
-
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'>defineRepGrps_GRA</span><span class='op'>(</span><span class='st'>"Chinook"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in stopifnot(!is.null(node_order)): object 'node_order' not found</span></div></pre>
+    <div id="dabom-200-unreleased" class="section level1">
+<h1 class="page-header" data-toc-text="2.0.0">
+<a href="#dabom-200-unreleased" class="anchor"></a>DABOM 2.0.0 (unreleased)</h1>
+<div id="major-changes" class="section level2">
+<h2 class="hasAnchor">
+<a href="#major-changes" class="anchor"></a>Major Changes</h2>
+<ul>
+<li>Complete overhaul of most of <code>DABOM</code>’s functions</li>
+<li>New names for many functions</li>
+<li>New functionality</li>
+<li>Improved outputs</li>
+<li>Better documentation, including several vignettes</li>
+<li>
+<strong><em>NOT</em></strong> backward compatible with code that uses older versions of <code>DABOM</code>
+</li>
+</ul>
+</div>
+</div>
+    <div id="dabom-110-2021-01-22" class="section level1">
+<h1 class="page-header" data-toc-text="1.1.0">
+<a href="#dabom-110-2021-01-22" class="anchor"></a>DABOM 1.1.0 (2021-01-22)</h1>
+<div id="minor-changes" class="section level2">
+<h2 class="hasAnchor">
+<a href="#minor-changes" class="anchor"></a>Minor Changes</h2>
+<ul>
+<li>This release includes updated code for the Upper Columbia (and possibly Lower Granite) to make it appropriate to run for spawn year 2020 (and beyond).</li>
+</ul>
+</div>
+</div>
+    <div id="dabom-100-2020-12-17" class="section level1">
+<h1 class="page-header" data-toc-text="1.0.0">
+<a href="#dabom-100-2020-12-17" class="anchor"></a>DABOM 1.0.0 (2020-12-17)</h1>
+<ul>
+<li>Initial release</li>
+</ul>
+</div>
   </div>
+
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>
     </nav>
   </div>
+
 </div>
 
 
