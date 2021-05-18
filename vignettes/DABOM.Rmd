@@ -1,5 +1,5 @@
 ---
-title: "Run-DABOM"
+title: "Running DABOM"
 author: Kevin See
 output: 
   rmarkdown::html_vignette:
@@ -59,31 +59,16 @@ We estimate escapement (or abundance) for both hatchery and natural origin fish 
 
 # Set-up
 
-## Software
-
 The first step is to ensure that all appropriate software and R packages are installed on your computer. ([R](https://cran.r-project.org/)) is a language and environment for statistical computing and graphics and is the workhorse for running all of the code and models described here. R packages are collections of functions and data sets developed by the R community for particular tasks. Some R packages used here are available from the general R community ([Available CRAN Packages](https://cran.r-project.org/web/packages/available_packages_by_name.html)) whereas others (e.g., `PITcleanr`, `DABOM`) are developed by ([Kevin See](https://github.com/BiomarkABS)) and contain functions written for cleaning and analysis of PIT tag detection site and observation data.
 
 First, you will need to have [R](https://cran.r-project.org/) downloaded and installed. Use the "base" distribution and all default installation settings should work just fine. Additionally, although not necessary, we find it very useful to use [RStudio](https://rstudio.com/) as an interface for R. Download the Desktop version of RStudio, and again, default installation settings should work just fine. RStudio provides a graphical user interface (GUI) for R with a text/code editor and allows for direct code execution, management of R packages, a viewing of R objects (e.g., data) in the environment.
 
-Next, you will also need the [JAGS](http://mcmc-jags.sourceforge.net/) software to run DABOM. You can download that from [SourceForge](https://sourceforge.net/projects/mcmc-jags/files/). JAGS (Just Another Gibbs Sampler) software is used by `DABOM` for Bayesian inference.
+```{r child = "../man/fragments/install-inst.Rmd"}
 
-## R Packages
-
-After installing R and Studio, you will also need to install `tidyverse`, a series of R packages that work together for data science (i.e. data cleaning and manipulation), as well as the `rjags` package to interface with JAGS. To save some results to Excel files, we use the `writexl` pacakge. The `tidyverse`, `rjags` and `writexl` packages are all available from the R community and can be installed by typing the following into your R console:
-
-```{r install-cran, eval = F}
-install.packages("tidyverse")
-install.packages("rjags")
-install.packages('writexl')
 ```
 
-Next, install `PITcleanr` and `DABOM` from the Biomark ABS [GitHub](https://github.com/) page [here](https://github.com/BiomarkABS). `PITcleanr` was written primarily to build a "river network" describing the relationships among detection sites in a system, to clean PIT tag detection data to establish capture histories for individuals, and to determine the final destination or spawning location for each fish. `DABOM` is used for writing and running the `DABOM` model and estimating detection and movement probabilities. You can use `devtools` to install both of these packages from [GitHub](https://github.com/) using the following: 
+`DABOM` relies on PIT tag data that has been prepared in a somewhat specific format. The R package `PITcleanr` can help the user move from raw PIT tag detections to the type of output that `DABOM` requires. Instructions for installing and using `PITcleanr` can be found on the [package website](https://biomarkabs.github.io/PITcleanr/).
 
-```{r install-github, eval = F}
-install.packages("devtools")
-remotes::install_github("BiomarkABS/PITcleanr")
-remotes::install_github("BiomarkABS/DABOM")
-```
 
 Hint: We have experienced errors installing the `PITcleanr` and `DABOM` packages related to *"Error: (converted from warning) package 'packagenamehere' was built under R version x.x.x"*. Setting the following environment variable typically suppresses the error and allows you to successfully install the packages.
 
@@ -97,12 +82,6 @@ When attempting to install `PITcleanr` or `DABOM` you may receive an error messa
 install.package("ggraph") # to install package from R cran
 # replace ggraph with the appropriate package name as needed
 ```
-
-We are always trying to improve the `PITcleanr` and `DABOM` R packages to minimize these types of errors.
-
-## `devtools` Note
-
-***IF THE devtools PACKAGE WORKS FINE ABOVE, SKIP THIS SECTION.*** To use `devtools`, you may have to download and install [Rtools](https://cran.r-project.org/bin/windows/Rtools/). You can try to use `devtools` without Rtools, initially, and if `PITcleanr` and `DABOM` fail to install correctly, installing Rtools may remedy the situation. We have had mixed results with this in the past.
 
 # PITcleanr output
 
@@ -192,19 +171,19 @@ plotNodes(parent_child,
 
 ## Filtered Capture History
 
-One of the assumptions in the DABOM model is that fish are making a one-way upstream migration, which ends in their spawning location. At every branching site (with multiple possible upstream paths), the fish can only move up one of those paths. So if a fish is detected moving past one site and later seen moving past a different site that implies the fish swam back downstream, then turned up a different tributary, both of those observations cannot be kept in the model. Before running DABOM, a user will need to "clean" the detection histories of the tags and decide if there are multiple detections like those described above which one to keep. 
+One of the assumptions in the DABOM model is that fish are making a one-way upstream migration, which ends in their spawning location. At every branching site (with multiple possible upstream paths), the fish can only move up one of those paths in the model. So if a fish is detected moving past one site and later seen moving past a different site that implies the fish swam back downstream then turned up a different tributary, both of those observations cannot be kept in the model. Before running DABOM, a user will need to "clean" the detection histories of the tags and decide if there are multiple detections like those described above which one to keep. 
 
-`PITcleanr` can take the raw detections from PTAGIS, assign each to a node (based on the configuration file), compress them, add directionality (based on the parent-child table), and flag those tags with detections in multiple branches. For each detection, `PITcleanr` adds two columns to indicate whether each detection should be retained for DABOM. For tags with straightforward detections (i.e. all detections appear to have one-way directional movement), the added columns `auto_keep_obs` and `user_keep_obs` will be marked `TRUE`. For tags with less straightforward movement patterns, `PITcleanr` assumes that the last detection with movement noted as "forward" or "unknown" (or "start") is the spawning location, and attempts to mark the `auto_keep_obs` column as `TRUE` for the last detections along that movement path. For these tags, `filterDetections` returns `NA`'s in the `user_keep_obs` column. 
+`PITcleanr` can take the raw detections from PTAGIS, assign each to a node (based on the configuration file), compress them, add directionality (based on the parent-child table), and flag those tags with detections in multiple branches. For each detection, `PITcleanr` adds two columns to indicate whether each detection should be retained for DABOM: `auto_keep_obs` and `user_keep_obs`. For tags with straightforward detections (i.e. all detections appear to have one-way directional movement), the added columns `auto_keep_obs` and `user_keep_obs` will be marked `TRUE`. For tags with less straightforward movement patterns, `PITcleanr` assumes that the last detection with movement noted as "forward" or "unknown" (or "start") is the spawning location, and attempts to mark the `auto_keep_obs` column as `TRUE` for the last detections along that movement path. For these tags, `prepWrapper` returns `NA`'s in the `user_keep_obs` column. 
 
-We've identified the output from PTAGIS provided by `PITcleanr` (`ptagis_file`). Now we can compress those observations and prepare them for DABOM. Note that in the `prepWrapper` function, we have added the detection nodes (not just site codes) to the parent-child table, using the `addParentChildNodes` function from `PITcleanr`. This function also includes a minimum and maximum observed date (`min_obs_date` and `max_obs_date`, in `YYYYMMDD` format) so the user can filter out observations before a certain date (e.g. detections of fish marked as juveniles, detections at mainstem dams prior to reaching the release point, etc.) and after a certain date (e.g. detections of kelts swimming downstream after spawning, carcasses drifting downstream after spawning, ghost detections in subsequent years, etc.). 
+We've identified the output from PTAGIS provided by `PITcleanr` (`ptagis_file`). Now we can compress those observations and prepare them for DABOM. Note that in the `prepWrapper` function, we have added the detection nodes (not just site codes) to the parent-child table, using the `addParentChildNodes` function from `PITcleanr`. The `prepWrapper` function also includes a minimum and maximum observed date (`min_obs_date` and `max_obs_date`, in `YYYYMMDD` format) so the user can filter out observations before a certain date (e.g. detections of fish marked as juveniles, detections at mainstem dams prior to reaching the release point, etc.) and after a certain date (e.g. detections of kelts swimming downstream after spawning, carcasses drifting downstream after spawning, ghost detections in subsequent years, etc.). 
 
 ```{r dabom-prep}
-prepped_ch = compress(ptagis_file = ptagis_file,
-                      configuration = configuration) %>%
-  prepWrapper(parent_child = parent_child %>%
-                addParentChildNodes(configuration = configuration),
-              min_obs_date = "20150301",
-              max_obs_date = "20150930")
+prepped_ch = PITcleanr::prepWrapper(ptagis_file = ptagis_file,
+                                    configuration = configuration,
+                                    parent_child = parent_child %>%
+                                      addParentChildNodes(configuration = configuration),
+                                    min_obs_date = "20150301",
+                                    max_obs_date = "20150930")
 ```
 
 The first 10 rows of the `prepped_ch` file look like:
@@ -223,7 +202,24 @@ filter_ch = prepped_ch %>%
   filter(user_keep_obs)
 ```
 
-Finally, we'll need to know the origin (hatchery or wild/naturally produced) of each tag. This involves constructing a data.frame with two columns: `tag_code` and `origin`.  The user might be able to do this based on data taken when tagging the fish, or it could be constructed from the PTAGIS file:
+This step may be easier to perform outside of R. The `prepWrapper` function has the ability to save the output to a .csv or .xlsx file which the user can then open with other software, such as Excel. Once the user has replaced all the `NA`s or blanks in the `user_keep_obs` column with `TRUE` or `FALSE`, they can read that file back into R. The code to do this looks like this:
+
+```{r, eval = F}
+prepped_ch = PITcleanr::prepWrapper(ptagis_file = ptagis_file,
+                                    configuration = configuration,
+                                    parent_child = parent_child %>%
+                                      addParentChildNodes(configuration = configuration),
+                                    min_obs_date = "20150301",
+                                    max_obs_date = "20150930",
+                                    save_file = T,
+                                    file_name = "C:/Users/usernamehere/Desktop/PITcleanr_output.xlsx")
+
+# after the user has ensured all the user_keep_obs rows are TRUE or FALSE
+filter_ch = readxl::read_excel("C:/Users/usernamehere/Desktop/PITcleanr_output.xlsx") %>%
+  filter(user_keep_obs)
+```
+
+Finally, we'll need to know the origin (hatchery or wild/naturally produced) of each tag. This involves constructing a tibble with two columns: `tag_code` and `origin`.  The user might be able to do this based on data taken when tagging the fish, or it could be constructed from the PTAGIS file:
 
 ```{r}
 fish_origin = suppressMessages(read_csv(ptagis_file)) %>%
@@ -236,6 +232,8 @@ fish_origin = suppressMessages(read_csv(ptagis_file)) %>%
 
 fish_origin
 ```
+
+`DABOM` currently has the ability to handle up to two types of fish (e.g. hatchery and wild). Therefore, the `origin` column of `fish_origin` should only contain a maximum of two distinct entries. Note that in the example above, we have marked all the fish with "Unknown" or "U" origin as wild, to conform to this. It is fine if all the fish have the same origin (e.g. all are wild). 
 
 Now our data is ready for DABOM.
 
@@ -254,13 +252,13 @@ writeDABOM(file_name = basic_mod_file,
 
 ```
 
-If the user would like the initial transition parameters (chances of moving along one of the initial branches from the starting point) to be time-varying, meaning they will shift as the season goes on, `writeDABOM` has an arguement, `time_varying` which can be set to `TRUE`. This can be important when the group of tagged fish may not be representative of the total run, perhaps because the trap rate shifted over the course of the run and there exists differential run timing between fish going to those initial branches. For example, this situation often occurs at Lower Granite dam, so the initial movement parameters are allowed to shift on a weekly basis. This does reduce the bias in the estimates, but will take longer to run, and does require estimates of total escapement for each strata (e.g. week) of the movement parameters. 
+If the user would like the initial transition parameters (chances of moving along one of the initial branches from the starting point) to be time-varying, meaning they will shift as the season goes on, `writeDABOM` has an argument, `time_varying` which can be set to `TRUE`. This can be important when the group of tagged fish may not be representative of the total run, perhaps because the trap rate shifted over the course of the run and there exists differential run timing between fish going to those initial branches. For example, this situation often occurs at Lower Granite dam, so the initial movement parameters are allowed to shift on a weekly basis. This reduces the bias in the estimates, but will take longer to run, and does require estimates of total escapement for each strata (e.g. week) of the movement parameters. 
 
 ## Modify JAGS Model
 
 Often the user will have a parent-child table based on all the detection sites they are interested in using. However, there may have been no fish detected at some of those sites that year. Rather than let the model churn away on estimating parameters that have no data to inform them, we have devised a function to "turn off" some parameters. Some of these parameters are specific to the origin of the fish, such as turning off movement parameters past a particular site only for hatchery fish, if no hatchery fish were observed there, so the `fish_origin` input is required.
 
-This includes setting the detection probability to 0 for nodes that had no detections (or were not in place during the fishes' migration), setting the detection probability to 100% for nodes that function as single arrays with no upstream detection sites (so no way to estimate detection probability there), and fixing some movement probabilities to 0 if no tags were observed along that branch. Setting the detection probability to 100% may lead to a conservative estimate of escapement past that particular site (i.e. escapement was *at least* this much), but since many terminal sites are further upstream in the watershed, where most detection probabilities are likely close to 100% already, this may not be a bad assumption to make. The function `fixNoFishNodes` updates the initial JAGS file with these improvements, and sends a message to the user about what it has done. 
+This includes setting the detection probability to 0 for nodes that had no detections (or were not in place during the fishes' migration), setting the detection probability to 100% for nodes that function as single arrays with no upstream detection sites (because there is no way to estimate detection probability there), and fixing some movement probabilities to 0 if no tags were observed along that branch. Setting the detection probability to 100% may lead to a conservative estimate of escapement past that particular site (i.e. escapement was *at least* this much), but since many terminal sites are further upstream in the watershed, where most detection probabilities are likely close to 100% already, this may not be a bad assumption to make. The function `fixNoFishNodes` updates the initial JAGS file with these improvements, writes a new JAGS .txt file, and sends a message to the user about what it has done. 
 
 ```{r}
 # filepath for specific JAGS model code for species and year
@@ -279,11 +277,11 @@ fixNoFishNodes(init_file = basic_mod_file,
 
 # Run JAGS Model
 
-To run the JAGS model, we need to set some initial values, create input in a format conducive to JAGS, and set which parameters we would like to track.
+To run the JAGS model, we need to set some initial values, create inputs in a format conducive to JAGS, and set which parameters we would like to track.
 
 ## Set Initial Values
 
-The only initial values we need to set are for where tags are in the system, based on their observed detections. Otherwise, JAGS could randomly assign them an initial value of being in one tributary, when they are actually observed in another, which will cause JAGS to throw an error. 
+The only initial values we need to set are for where tags are in the system, based on their observed detections. Otherwise, JAGS could randomly assign them an initial value of being in one tributary, when they are actually observed in another, which will cause JAGS to throw an error and crash. 
 
 ```{r, eval = F}
 # Creates a function to spit out initial values for MCMC chains
@@ -295,7 +293,7 @@ init_fnc = setInitialValues(filter_ch = filter_ch,
 
 ## Create JAGS Input
 
-JAGS requires the data to be input in the form of a list. The `writeDABOM` function has also assumed a particular format for the data inputs. So `DABOM` has a function to transform the data into the right format expected by JAGS:
+JAGS requires the data to be input in the form of a list. The `writeDABOM` function has also assumed a particular format and names for the data inputs. So `DABOM` has a function to transform the data into the right format expected by JAGS:
 
 ```{r, eval = F}
 # Create all the input data for the JAGS model
@@ -305,9 +303,10 @@ jags_data = createJAGSinputs(filter_ch = filter_ch,
                              fish_origin = fish_origin)
 ```
 
-If the user is running a time-varying version of DABOM, they will need to add some additional data as input, namely the number of temporal strata (i.e. weeks) and which strata each tag falls into (i.e. which week did they cross the initial dam?). This can be done after running `createJAGSinputs`, by using the following:
+If the user is running a time-varying version of DABOM, they will need to add some additional data as input, namely the number of temporal strata (i.e. weeks) and which strata each tag falls into (i.e. which week did they cross the initial dam?). This can be done after running `createJAGSinputs`, by using the `addTimeVaryData` function:
 
 ```{r time-vary-data, eval = F}
+# add data for time-varying movement 
 jags_data = c(jags_data,
                 addTimeVaryData(filter_ch = filter_ch,
                                 start_date = "20150301",
@@ -323,7 +322,7 @@ The user needs to tell JAGS which parameters to track and save posterior samples
 jags_params = setSavedParams(model_file = final_mod_file)
 ```
 
-If the user is running a time-varying version of DABOM, the function `setSavedParams` does have an input, `time_varying` which can be set to `TRUE`. This will add the variance parameter related to the random walk of those time-varying movement parameters, in case the user is interested.
+If the user is running a time-varying version of DABOM, the function `setSavedParams` does have an input, `time_varying`, which can be set to `TRUE`. This will add the variance parameter related to the random walk of those time-varying movement parameters, in case the user is interested in tracking that.
 
 ## Run MCMC
 
@@ -332,7 +331,7 @@ R users have developed several different packages that can be used to connect to
 * `n.chains = 4`
 * `n.adapt = 5000`
 
-To make the results fully reproducible, we recommend setting the random number generator seed in R, using the `set.seed()` function. This will ensure the same MCMC results on a particular computer, but the results may still differ on different machines.
+To make the results fully reproducible, we recommend setting the random number generator seed in R, using the `set.seed()` function. This will ensure the same MCMC results on a particular computer, although the results may still differ on different machines.
 
 ```{r, eval = F}
 library(rjags)
@@ -345,19 +344,19 @@ jags = jags.model(file = final_mod_file,
                   n.adapt = 5000)
 ```
 
-If this code returns a message `Warning message: Adaptation incomplete`, this indicates further burn-in iterations should be run, which the user can do by using this code (and setting the `n.iter` parameter to something large enough):
+If this code returns a message `Warning message: Adaptation incomplete`, this indicates further burn-in iterations should be run, which the user can do by "updating" the `jags` object using this code (and setting the `n.iter` parameter to something large enough):
 
 ```{r, eval = F}
 update(jags, 
        n.iter = 1000)
 ```
 
-Finally, once the adaptation or burn-in phase is complete, the user can take MCMC samples of the posteriors by using the `coda.samples` function. This is where the user tells JAGS which parameters to track. Again, we would recommend the following settings:
+Finally, once the adaptation or burn-in phase is complete, the user can take MCMC samples of the posteriors by using the `coda.samples` function. This is where the user tells JAGS which parameters to track. The user can also set a thinning paramater, `thin`, which will save every nth sample, instead of all of them. This is useful to avoid autocorrelations in the MCMC output. Again, we would recommend the following settings:
 
 * `n.iter = 5000`
 * `thin = 10`
 
-Across four chains, this results in (5000 / 10 * 4) 2000 samples of the posteriors.
+Across four chains, this results in (5000 samples / 10 (every 10th sample) * 4 chains) 2000 samples of the posteriors.
 
 ```{r, eval = F}
 dabom_samp_tum = coda.samples(model = jags,
@@ -474,7 +473,7 @@ It is important to note that the user is responsible for ensuring that the strat
 
 # Updating a DABOM Model
 
-As new detection sites are installed, the current DABOM models may need to change. The user can modify the configuration file and parent-child table by hand, either through R, or in other software like Excel and then read those files back into R. Many of the functions in the `DABOM` package will work, including `writeDABOM`, `fishNoFishNodes`, `setInitialValues`, `createJAGSinputs` and `setSavedParams`. The user can run the JAGS model, and even pull out summaries of the detection probabilities using `summariseDetectProbs`. 
+As new detection sites are installed, the current DABOM models may need to change. The user can modify the configuration file and parent-child table through R, or manually in other software like Excel and then read those files back into R. Many of the functions in the `DABOM` package will work correctly with these updated files, including `writeDABOM`, `fishNoFishNodes`, `setInitialValues`, `createJAGSinputs` and `setSavedParams`. The user can run the JAGS model, and even pull out summaries of the detection probabilities using `summariseDetectProbs`. 
 
 ***However***, to generate estimates of escapement, the user will need to modify the appropriate `compileTransProbs_XXX` function to ensure that transition probabilities at the new sites are multiplied appropriately. If the Lower Granite DABOM model is modified, especially if new initial branches are added, particular care should be taken when examining the results of `calcTribEscape_GRA`, in case further adjustments are needed.
 
