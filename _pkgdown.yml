@@ -1,0 +1,72 @@
+url: https://biomarkabs.github.io/DABOM/index.html
+
+template:
+  params:
+    bootswatch: sandstone
+
+navbar:
+  title: ~
+  type: default
+  structure:
+    left:
+    - home
+    - intro
+    - reference
+    - articles
+    - tutorials
+    - news
+    right: github
+  components:
+    reference:
+      text: Functions
+      href: reference/index.html
+    # articles:
+    #   text: Vignettes
+    # news:
+    #   text: News
+    #   href: news/index.html
+
+
+
+reference:
+- title: "Writing JAGS Model"
+  desc: >
+    Functions for writing and updating the JAGS .txt model file
+- contents:
+  - writeDABOM
+  - fixNoFishNodes
+- title: "JAGS Inputs"
+  desc: >
+    Functions to prepare JAGS Inputs
+- contents:
+  - setInitialValues
+  - createJAGSinputs
+  - addTimeVaryData
+  - setSavedParams
+- title: "Summarizing Results"
+  desc: >
+    Functions related to summarizing detection, movement and escapement estimates
+- contents:
+  - matches("Escape")
+  - starts_with("compile")
+  - summariseDetectProbs
+- title: "Internal Functions"
+  desc: >
+    These functions are used internally, within other functions
+- contents:
+  - createDABOMcapHist
+  - createDirichletVector
+  - createNodeList
+  - defineDabomColNms
+  - defineRepGrps_GRA
+  - estMode
+  - getNodeInfo
+  - setBranchNums
+- title: "Deprecated functions"
+  desc: >
+    These functions have been superseded
+- contents:
+  - writeDABOM_LGD
+  - writeDABOM_PRA
+  - writeDABOM_PRO
+  - writeDABOM_TUM
