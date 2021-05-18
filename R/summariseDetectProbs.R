@@ -6,7 +6,7 @@
 #'
 #' @param dabom_mod An MCMC.list, where the detection parameter names all end with "\code{_p}".
 #'
-#' @param capHist_proc Dataframe with the same format as that returned by \code{processCapHist_LGD}, under the name \code{ProcCapHist}. This is the data fed into DABOM as observations.
+#' @inheritParams createDABOMcapHist
 #'
 #' @param cred_int_prob A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95\%.
 
@@ -17,29 +17,32 @@
 #' @examples \dontrun{summariseDetectProbs()}
 
 summariseDetectProbs = function(dabom_mod = NULL,
-                                capHist_proc = NULL,
+                                filter_ch = NULL,
                                 cred_int_prob = 0.95) {
 
   stopifnot(!is.null(dabom_mod) |
-              !is.null(capHist_proc))
+              !is.null(filter_ch))
 
   if(class(dabom_mod) != 'mcmc.list') dabom_mod = as.mcmc.list(dabom_mod)
 
-  if (sum(capHist_proc$UserProcStatus == "") > 0) {
-    stop("UserProcStatus must be defined for each observation.")
+  if (sum(filter_ch$user_keep_obs == "") > 0 | sum(is.na(filter_ch$user_keep_obs)) > 0 ) {
+    stop("user_keep_obs must be defined for each observation.")
   }
-  capHist_proc = capHist_proc %>%
-    filter(UserProcStatus)
+  filter_ch = filter_ch %>%
+    filter(user_keep_obs)
 
   # convert mcmc.list to tibble
   dabom_df = as.matrix(dabom_mod,
                        iters = T,
                        chains = T) %>%
-    as.data.frame() %>%
-    tbl_df() %>%
-    tidyr::gather(param, value, -CHAIN, -ITER) %>%
+    as_tibble() %>%
+    tidyr::pivot_longer(-(CHAIN:ITER),
+                        names_to = "param",
+                        values_to = "value") %>%
+    # tidyr::gather(param, value, -CHAIN, -ITER) %>%
     group_by(CHAIN, param) %>%
     mutate(iter = 1:n()) %>%
+    ungroup() %>%
     select(chain = CHAIN,
            iter,
            param,
@@ -54,17 +57,19 @@ summariseDetectProbs = function(dabom_mod = NULL,
               mode = estMode(value),
               sd = sd(value),
               lowerCI = coda::HPDinterval(coda::as.mcmc(value), prob = cred_int_prob)[,1],
-              upperCI = coda::HPDinterval(coda::as.mcmc(value), prob = cred_int_prob)[,2]) %>%
+              upperCI = coda::HPDinterval(coda::as.mcmc(value), prob = cred_int_prob)[,2],
+              .groups = "drop") %>%
     mutate(across(c(mean, median, mode, sd),
               ~ ifelse(. < 0, 0, .))) %>%
-    rename(Node = param) %>%
-    mutate(Node = stringr::str_replace(Node, '_p$', ''))
+    rename(node = param) %>%
+    mutate(node = stringr::str_replace(node, '_p$', ''))
 
   # add number of unique tags sighted at each node
-  detect_summ = capHist_proc %>%
-    group_by(Node) %>%
-    summarise(n_tags = n_distinct(TagID)) %>%
-    full_join(detect_df) %>%
+  detect_summ = filter_ch %>%
+    group_by(node) %>%
+    summarise(n_tags = n_distinct(tag_code)) %>%
+    full_join(detect_df,
+              by = "node") %>%
     mutate(n_tags = ifelse(is.na(n_tags), 0, n_tags)) %>%
     mutate(mode = ifelse(mean == 1 & median == 1, 1, mode))
 

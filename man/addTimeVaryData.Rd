@@ -5,8 +5,7 @@
 \title{Add Time-Varying Data}
 \usage{
 addTimeVaryData(
-  proc_ch = NULL,
-  node_order = NULL,
+  filter_ch = NULL,
   start_date = NULL,
   end_date = NULL,
   strata_beg = "Mon",
@@ -14,9 +13,9 @@ addTimeVaryData(
 )
 }
 \arguments{
-\item{proc_ch}{capture history as returned by one of the \code{processCapHist} family of functions in \code{PITcleanr} package, which has then been verified by a user and all blank UserProcStatus entries have been completed.}
-
-\item{node_order}{output of function \code{createNodeOrder}}
+\item{filter_ch}{filtered capture history as returned by the `filterDetections()`
+function in the `PITcleanr` package, which has then been verified by a user and all
+blank or NA `user_keep_obs` entries have been completed.}
 
 \item{start_date}{character vector of date (\code{YYYYMMDD}) when query should start}
 

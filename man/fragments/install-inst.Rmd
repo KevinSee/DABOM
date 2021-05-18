@@ -1,0 +1,37 @@
+---
+output:
+  rmarkdown::html_vignette: default
+  html_document: default
+---
+
+The `DABOM` compendium can be downloaded as a zip from from this URL: <https://github.com/BiomarkABS/DABOM/archive/master.zip>
+
+Or the user can install the compendium as an R package from GitHub by using Hadley Wickham's `devtools` package:
+
+```{r gh-installation, eval = FALSE}
+# install and load remotes, if necessary
+install.packages("devtools")
+devtools::install_github("BiomarkABS/DABOM", 
+                         build_vignettes = TRUE)
+```
+
+`devtools` may require the downloading and installation of Rtools. The latest version of Rtools can be found [here](https://cran.r-project.org/bin/windows/Rtools/).
+
+For the latest development version:
+
+```{r develop-version, eval = FALSE}
+devtools::install_github("BiomarkABS/DABOM@develop")
+```
+
+### JAGS Software
+
+The user will also need the [JAGS](http://mcmc-jags.sourceforge.net/) software to run DABOM. They can download that from [SourceForge](https://sourceforge.net/projects/mcmc-jags/files/). JAGS (**J**ust **A**nother **G**ibbs **S**ampler) software is used by `DABOM` for Bayesian inference. Please download version >= 4.0.0.
+
+### Other R Packages
+
+The user will also need to install `tidyverse`, a series of R packages that work together for data science (i.e. data cleaning and manipulation), as well as the `rjags` package to interface with JAGS. The `tidyverse` and `rjags` packages are all available from the R community and can be installed by typing the following into your R console:
+
+```{r install-cran, eval = F}
+install.packages("tidyverse")
+install.packages("rjags")
+```

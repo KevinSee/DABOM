@@ -30,6 +30,15 @@ setSavedParams = function(model_file = NULL,
   det_params = paste0(mod_nodes, '_p')
 
   # movement probabilities
+  # newer versions use these types of parameter names
+  psi_params = stringr::str_trim(mod_file[grep('psi_', mod_file)])
+  psi_params = psi_params[grep('^psi_', psi_params)]
+  psi_params = psi_params %>%
+    stringr::str_split('\\[') %>%
+    purrr::map_chr(.f = function(x) x[1]) %>%
+    unique()
+
+  # older versions use these types of parameter names
   branch_params = stringr::str_trim(mod_file[grep('p_pop', mod_file)])
   branch_params = branch_params[grep('^p_pop', branch_params)]
   branch_params = branch_params %>%
@@ -37,6 +46,7 @@ setSavedParams = function(model_file = NULL,
     purrr::map_chr(.f = function(x) x[1]) %>%
     unique()
 
+  # all versions use these types of parameter names
   phi_params = stringr::str_trim(mod_file[grep('phi_', mod_file)])
   phi_params = phi_params[grep('^phi_', phi_params)]
   phi_params = phi_params %>%
@@ -45,6 +55,7 @@ setSavedParams = function(model_file = NULL,
     unique()
 
   my_params = c(branch_params,
+                psi_params,
                 phi_params,
                 det_params)
 

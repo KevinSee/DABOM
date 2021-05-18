@@ -4,38 +4,22 @@
 #'
 #' @author Kevin See
 #'
-#' @param parent_child dataframe with at least \code{ParentNode}, \code{ChildNode} and \code{RKM} columns
+#' @inheritParams createDABOMcapHist
+#'
+#' @import dplyr tidyr
 #' @export
 #' @return NULL
 #' @examples setBranchNums()
 
 setBranchNums = function(parent_child = NULL) {
 
-  rootNode = parent_child %>%
-    filter(ParentNode == ChildNode) %>%
-    select(ParentNode) %>%
-    mutate(ParentNode = str_replace(ParentNode, 'A0$', '')) %>%
-    as.matrix() %>%
-    as.character()
+  parent_child %>%
+    dplyr::count(parent,
+                 name = "n_child") %>%
+    filter(n_child > 1) %>%
+    tidyr::pivot_wider(names_from = "parent",
+                       values_from = "n_child") %>%
+    as.list() %>%
+    return()
 
-  branchNodes = parent_child %>%
-    group_by(ParentNode) %>%
-    summarise(nChild = n_distinct(RKM)) %>%
-    filter(nChild > 1) %>%
-    mutate(ParentNode = str_replace(ParentNode, 'A0$', ''))
-
-  branchNodes = branchNodes %>%
-    filter(ParentNode == rootNode) %>%
-    bind_rows(branchNodes %>%
-                filter(ParentNode != rootNode) %>%
-                mutate(nChild = nChild + 1))
-
-  branchNums_list = branchNodes %>%
-    select(nChild) %>%
-    as.matrix() %>%
-    as.integer() %>%
-    as.list()
-  names(branchNums_list) = paste0('n_pops_', branchNodes$ParentNode)
-
-  return(branchNums_list)
 }
