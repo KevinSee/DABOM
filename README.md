@@ -25,8 +25,8 @@ in [Waterhouse, 2020](https://doi.org/10.1002/eap.2202).
 The `DABOM` compendium can be downloaded as a zip from from this URL:
 <https://github.com/BiomarkABS/DABOM/archive/master.zip>
 
-Or you can install the compendium as an R package from GitHub by using
-Hadley Wickham’s `devtools` package:
+Or the user can install the compendium as an R package from GitHub by
+using Hadley Wickham’s `devtools` package:
 
 ``` r
 # install and load remotes, if necessary
@@ -47,8 +47,8 @@ devtools::install_github("BiomarkABS/DABOM@develop")
 
 ### JAGS Software
 
-You will also need the [JAGS](http://mcmc-jags.sourceforge.net/)
-software to run DABOM. You can download that from
+The user will also need the [JAGS](http://mcmc-jags.sourceforge.net/)
+software to run DABOM. They can download that from
 [SourceForge](https://sourceforge.net/projects/mcmc-jags/files/). JAGS
 (**J**ust **A**nother **G**ibbs **S**ampler) software is used by `DABOM`
 for Bayesian inference. Please download version \>= 4.0.0.
