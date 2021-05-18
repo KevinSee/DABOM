@@ -22,9 +22,9 @@ navbar:
       href: reference/index.html
     # articles:
     #   text: Vignettes
-    # news:
-    #   text: News
-    #   href: news/index.html
+    news:
+      text: News
+      href: news/index.html
 
 
 
