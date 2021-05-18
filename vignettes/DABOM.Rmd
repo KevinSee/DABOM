@@ -52,7 +52,7 @@ options(rmarkdown.html_vignette.check_title = FALSE)
 
 # Introduction
 
-This manual describes how to run the **D**am **A**dult **B**ranch **O**ccupancy **M**odel ([DABOM](https://github.com/BiomarkABS/DABOM)) for adult salmon returning to a watershed. The framework typically consists of PIT tagging a representative sample of the returning adults, and using the subsequent detections of those tags at various sites upstream (or possibly downstream) of the starting location to estimate escapement or abundance past each detection site. The DABOM model estimates transition (or movement) probabilities past various detection sites while accounting for imperfect detection at those sites, essentially a multi-state variation of a spatial Cormack-Jolly-Seber model. The DABOM package implements this kind of model in a Bayesian framework. Further mathematical details of the model can be found in @Waterhouse2020 whic can be found [here](https://esajournals.onlinelibrary.wiley.com/doi/abs/10.1002/eap.2202). 
+This manual describes how to run the **D**am **A**dult **B**ranch **O**ccupancy **M**odel ([DABOM](https://github.com/BiomarkABS/DABOM)) for adult salmon returning to a watershed. The framework typically consists of PIT tagging a representative sample of the returning adults, and using the subsequent detections of those tags at various sites upstream (or possibly downstream) of the starting location to estimate escapement or abundance past each detection site. The DABOM model estimates transition (or movement) probabilities past various detection sites while accounting for imperfect detection at those sites, essentially a multi-state variation of a spatial Cormack-Jolly-Seber model. The DABOM package implements this kind of model in a Bayesian framework. Further mathematical details of the model can be found in @Waterhouse2020 which can be found [here](https://doi.org/10.1002/eap.2202). 
 
 For this vignette, we will show a DABOM example for spring Chinook crossing over Tumwater Dam and in the upper Wenatchee River. We start by directing users how to query [PTAGIS](https://www.ptagis.org/) to get all detections of adults at relevant observation sites (e.g., weirs, PIT tag arrays, etc.) for a particular spawning run from a list of "valid" PIT tags. Observation data are then "cleaned up" using the `PITcleanr` R package and  a final destination or spawning location is determined for each individual. `PITcleanr` can also be used to prepare detection data for use in the `DABOM` R package and model. Next, we describe how to write a JAGS model for use in `DABOM`, and finally, run `DABOM` to estimate detection and movement probabilities within the stream network. Movement probabilities can then be multiplied by an estimate of adult escapement at Tumwater Dam to estimate escapement, with uncertainty, at any observation site (or tributary) within the Wenatchee River. 
 
@@ -61,28 +61,14 @@ We estimate escapement (or abundance) for both hatchery and natural origin fish 
 
 ## Companion R packages
 
-`DABOM` has two companion R packages, [PITcleanr](https://github.com/BiomarkABS/PITcleanr) and [STADEM](https://github.com/BiomarkABS/STADEM). `PITcleanr` can assist the user in "cleaning" sometimes unwieldy amounts of detection data from [PTAGIS](https://ptagis.org/) and preparing that detecion data for `DABOM`. `STADEM` can be used to estimate adult escapement at a dam that, when combined with movement probabilities from `DABOM`, provide an estimate of abundance or escapement at locations of interest.
+`DABOM` has two companion R packages, [PITcleanr](https://github.com/BiomarkABS/PITcleanr) and [STADEM](https://github.com/BiomarkABS/STADEM). `PITcleanr` can assist the user in "cleaning" sometimes unwieldy amounts of detection data from [PTAGIS](https://ptagis.org/) and preparing that detection data for `DABOM`. `STADEM` can be used to estimate adult escapement at a dam that, when combined with movement probabilities from `DABOM`, provide an estimate of abundance or escapement at locations of interest.
 
 
 # Set-up
 
-<<<<<<< HEAD:vignettes/DABOM.Rmd
-The first step is to ensure that all appropriate software and R packages are installed on your computer. ([R](https://cran.r-project.org/)) is a language and environment for statistical computing and graphics and is the workhorse for running all of the code and models described here. R packages are collections of functions and data sets developed by the R community for particular tasks. Some R packages used here are available from the general R community ([Available CRAN Packages](https://cran.r-project.org/web/packages/available_packages_by_name.html)) whereas others (e.g., `PITcleanr`, `DABOM`) are developed by ([Kevin See](https://github.com/BiomarkABS)) and contain functions written for cleaning and analysis of PIT tag detection site and observation data.
-=======
-## Software
+The first step is to ensure that all appropriate software and R packages are installed on your computer. ([R](https://cran.r-project.org/)) is a language and environment for statistical computing and graphics and is the workhorse for running all of the code and models described here. R packages are collections of functions and data sets developed by the R community for particular tasks. Some R packages used here are available from the general R community ([Available CRAN Packages](https://cran.r-project.org/web/packages/available_packages_by_name.html)) whereas others (e.g., `PITcleanr`, `DABOM`, `STADEM`) have been developed by the package author and available on [GitHub here](https://github.com/BiomarkABS).
 
-The first step is to ensure that all appropriate software and R packages are installed on your computer. [R](https://cran.r-project.org/) is a language and environment for statistical computing and graphics and is the workhorse for running all of the code and models described here. R packages are collections of functions and data sets developed by the R community for particular tasks. Some R packages used here are available from the general R community and available [here](https://cran.r-project.org/web/packages/available_packages_by_name.html)) whereas others (`PITcleanr`, `DABOM`) are developed by the package author and available on [GitHub here](https://github.com/BiomarkABS).
->>>>>>> update_2.0:vignettes/Run-DABOM.Rmd
-
-`DABOM` requires the [JAGS](http://mcmc-jags.sourceforge.net/) software for Bayesian inference, which can be downloaded from [here](https://sourceforge.net/projects/mcmc-jags/files/).
-
-<<<<<<< HEAD:vignettes/DABOM.Rmd
 ```{r child = "../man/fragments/install-inst.Rmd"}
-=======
-
-## R Packages
->>>>>>> update_2.0:vignettes/Run-DABOM.Rmd
-
 ```
 
 `DABOM` relies on PIT tag data that has been prepared in a somewhat specific format. The R package `PITcleanr` can help the user move from raw PIT tag detections to the type of output that `DABOM` requires. Instructions for installing and using `PITcleanr` can be found on the [package website](https://biomarkabs.github.io/PITcleanr/).
