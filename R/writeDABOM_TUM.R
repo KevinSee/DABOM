@@ -83,7 +83,7 @@ model{
   # Peshastin
   #---------------------------------------------
   for(j in 1:2) {
-    phi_peu[j] ~ dbeta(1,1) # prob of migrating up past PEU
+    phi_PES[j] ~ dbeta(1,1) # prob of migrating up past PEU
   }
 
   for (i in 1:n_fish) {
@@ -91,9 +91,9 @@ model{
     Peshastin[i,1] ~ dbern( PESB0_p * catexp_TUM[i,1] )
     Peshastin[i,2] ~ dbern( PESA0_p * catexp_TUM[i,1] )
 
-    z_peu[i] ~ dbern(catexp_TUM[i,1] * phi_peu[fishOrigin[i]] ) # did fish go past PEU?
-    Peshastin[i,3] ~ dbern( PEUB0_p * z_peu[i] )
-    Peshastin[i,4] ~ dbern( PEUA0_p * z_peu[i] )
+    z_PES[i] ~ dbern(catexp_TUM[i,1] * phi_PES[fishOrigin[i]] ) # did fish go past PEU?
+    Peshastin[i,3] ~ dbern( PEUB0_p * z_PES[i] )
+    Peshastin[i,4] ~ dbern( PEUA0_p * z_PES[i] )
 
   }
 
@@ -101,7 +101,7 @@ model{
   # Icicle
   #---------------------------------------------
   for(j in 1:2) {
-   phi_icu[j] ~ dbeta(1,1) # probability of making it past ICU
+   phi_ICM[j] ~ dbeta(1,1) # probability of making it past ICU
   }
 
   # first row is wild fish, second row is hatchery fish
@@ -140,10 +140,10 @@ model{
 
    # ICU
    # did it make it?
-   z_icu[i] ~ dbern(phi_icu[fishOrigin[i]] * catexp_ICL[i,2])
+   z_ICM[i] ~ dbern(phi_ICM[fishOrigin[i]] * catexp_ICL[i,2])
    # was it observed?
-   Icicle[i,6] ~ dbern( ICUB0_p * z_icu[i] )
-   Icicle[i,7] ~ dbern( ICUA0_p * z_icu[i] )
+   Icicle[i,6] ~ dbern( ICUB0_p * z_ICM[i] )
+   Icicle[i,7] ~ dbern( ICUA0_p * z_ICM[i] )
 
   }
 
@@ -161,7 +161,7 @@ model{
   # Chiwawa
   #---------------------------------------------
   for(j in 1:2) {
-   phi_chu[j] ~ dbeta(1,1) # probability of making it past CHU
+   phi_CHL[j] ~ dbeta(1,1) # probability of making it past CHU
   }
 
   for (i in 1:n_fish) {
@@ -172,10 +172,10 @@ model{
 
    # CHU
    # did it make it?
-   z_chu[i] ~ dbern(phi_chu[fishOrigin[i]] * catexp_TUM[i,4] )
+   z_CHL[i] ~ dbern(phi_CHL[fishOrigin[i]] * catexp_TUM[i,4] )
    # was it observed?
-   Chiwawa[i,3] ~ dbern( CHUB0_p * z_chu[i] )
-   Chiwawa[i,4] ~ dbern( CHUA0_p * z_chu[i] )
+   Chiwawa[i,3] ~ dbern( CHUB0_p * z_CHL[i] )
+   Chiwawa[i,4] ~ dbern( CHUA0_p * z_CHL[i] )
 
   }
 
@@ -183,7 +183,7 @@ model{
   # Nason
   #---------------------------------------------
   for(j in 1:2) {
-   phi_nau[j] ~ dbeta(1,1)	# probability of making it past NAU
+   phi_NAL[j] ~ dbeta(1,1)	# probability of making it past NAU
   }
 
   # make it past the lower array NAL
@@ -194,10 +194,10 @@ model{
 
   # NAU
   # did it make it?
-   z_nau[i] ~ dbern(phi_nau[fishOrigin[i]] * catexp_TUM[i,5] )
+   z_NAL[i] ~ dbern(phi_NAL[fishOrigin[i]] * catexp_TUM[i,5] )
   # was it observed?
-   Nason[i,3] ~ dbern( NAUB0_p * z_nau[i] )
-   Nason[i,4] ~ dbern( NAUA0_p * z_nau[i] )
+   Nason[i,3] ~ dbern( NAUB0_p * z_NAL[i] )
+   Nason[i,4] ~ dbern( NAUA0_p * z_NAL[i] )
 
   }
 

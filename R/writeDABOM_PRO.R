@@ -18,7 +18,7 @@ writeDABOM_PRO = function(file_name = NULL) {
 model{
 
   # Set up array detection efficiency priors
-  BelowJD1_p ~ dbeta(1,1)
+  JDA_p ~ dbeta(1,1)
   JD1B0_p ~ dbeta(1,1)
   JD1A0_p ~ dbeta(1,1)
   MCN_p ~ dbeta(1,1)
@@ -82,7 +82,7 @@ model{
   # Downstream
   #---------------------------------------------
   for (i in 1:n_fish) {
-    Downstream[i,1] ~ dbern( BelowJD1_p * catexp_PRO[i,1] )
+    Downstream[i,1] ~ dbern( JDA_p * catexp_PRO[i,1] )
 
     Downstream[i,2] ~ dbern( JD1B0_p * catexp_PRO[i,2] )
     Downstream[i,3] ~ dbern( JD1A0_p * catexp_PRO[i,2] )

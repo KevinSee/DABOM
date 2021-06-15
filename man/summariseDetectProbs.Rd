@@ -4,16 +4,14 @@
 \alias{summariseDetectProbs}
 \title{Summarise Detection Probabilities}
 \usage{
-summariseDetectProbs(
-  dabom_mod = NULL,
-  capHist_proc = NULL,
-  cred_int_prob = 0.95
-)
+summariseDetectProbs(dabom_mod = NULL, filter_ch = NULL, cred_int_prob = 0.95)
 }
 \arguments{
 \item{dabom_mod}{An MCMC.list, where the detection parameter names all end with "\code{_p}".}
 
-\item{capHist_proc}{Dataframe with the same format as that returned by \code{processCapHist_LGD}, under the name \code{ProcCapHist}. This is the data fed into DABOM as observations.}
+\item{filter_ch}{filtered capture history as returned by the `filterDetections()`
+function in the `PITcleanr` package, which has then been verified by a user and all
+blank or NA `user_keep_obs` entries have been completed.}
 
 \item{cred_int_prob}{A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95\%.}
 }

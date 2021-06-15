@@ -9,7 +9,8 @@ compileTransProbs_PRO(dabom_mod = NULL, parent_child = NULL)
 \arguments{
 \item{dabom_mod}{An MCMC.list}
 
-\item{parent_child}{dataframe created from \code{PITcleanr::createParentChildDf} or similar that contains at least ParentNode, ChildNode and river kilometer columns}
+\item{parent_child}{data frame with at least `parent` and `child` columns.
+Can be created with `buildParentChild()` function in the `PITcleanr` package.}
 }
 \description{
 Extracts the MCMC posteriors of transition probabilities for a DABOM model, and multiplies them appropriately. This function is specific to the Prosser dam version of DABOM.

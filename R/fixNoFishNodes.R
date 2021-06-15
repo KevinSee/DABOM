@@ -6,62 +6,101 @@
 #'
 #' @param init_file name (with file path) of basic JAGS model.
 #' @param file_name name (with file path) to save the model as.
-#' @param proc_ch capture history as returned by one of the \code{processCapHist} family of functions in \code{PITcleanr} package, which has then been verified by a user and all blank UserProcStatus entries have been completed.
-#' @param node_order output of function \code{createNodeOrder}
+#' @param fish_origin tibble containing `tag_code` and origin ("W" or "H")
+#' of every tag. If not supplied, every tag will be assigned "W".
 #'
-#' @import dplyr stringr
+#' @inheritParams createDABOMcapHist
+#'
+#' @import dplyr stringr PITcleanr
 #' @export
 #' @return NULL
 #' @examples fixNoFishNodes()
 
 fixNoFishNodes = function(init_file = NULL,
                           file_name = NULL,
-                          proc_ch = NULL,
-                          node_order = NULL) {
+                          filter_ch = NULL,
+                          parent_child = NULL,
+                          configuration = NULL,
+                          fish_origin = NULL) {
 
-  stopifnot(!is.null(init_file) |
-              !is.null(file_name) |
-              !is.null(proc_ch) |
-              !is.null(node_order))
+  stopifnot(exprs = {
+    !is.null(init_file)
+    !is.null(file_name)
+    !is.null(filter_ch)
+    !is.null(parent_child)
+    !is.null(configuration)
+  })
 
-  # dataframe of sites and nodes, and which nodes had at least one detection
-  node_detects = node_order %>%
-    select(NodeSite, Node) %>%
-    full_join(proc_ch %>%
-                group_by(Node) %>%
-                summarise(nTags = n_distinct(TagID))) %>%
-    mutate_at(vars(nTags),
-              list(~ if_else(is.na(.), as.integer(0), .))) %>%
-    mutate(seen = if_else(nTags > 0, T, F))
+  if(is.null(fish_origin)) {
+    fish_origin = filter_ch %>%
+      select(tag_code) %>%
+      distinct() %>%
+      mutate(origin = "W")
+  }
+
+  # dataframe with information about each node, including site code, parent site, how many tags were seen
+  node_info = getNodeInfo(parent_child, configuration) %>%
+    full_join(filter_ch %>%
+                group_by(node) %>%
+                summarise(n_tags = n_distinct(tag_code),
+                          .groups = "drop"),
+              by = "node") %>%
+    filter(!is.na(site_code)) %>%
+    mutate(across(starts_with("n_tags"),
+                  tidyr::replace_na,
+                  0)) %>%
+    mutate(tags_det = if_else(n_tags > 0, T, F)) %>%
+    left_join(parent_child %>%
+                PITcleanr::addParentChildNodes(configuration) %>%
+                PITcleanr::buildNodeOrder(),
+              by = "node")
+
+  node_tags_origin = filter_ch %>%
+    left_join(fish_origin,
+              by = "tag_code") %>%
+    group_by(node, origin) %>%
+    summarise(n_tags = n_distinct(tag_code),
+              .groups = "drop") %>%
+    mutate(origin = factor(origin, levels = c("W", 'H'))) %>%
+    complete(expand(., node = node_info$node, origin), fill = list(n_tags = 0))
+
+  # similar info, by site code
+  site_info = filter_ch %>%
+    left_join(node_info %>%
+                select(site_code, node),
+              by = "node") %>%
+    group_by(site_code) %>%
+    summarise(n_tags = n_distinct(tag_code),
+              .groups = "drop") %>%
+    full_join(node_info %>%
+                select(site_code,
+                       n_nodes,
+                       parent_site) %>%
+                distinct(),
+              by = "site_code") %>%
+    mutate(across(n_tags,
+                  tidyr::replace_na,
+                  0)) %>%
+    mutate(tags_det = if_else(n_tags > 0, T, F))
+
 
   # which nodes had observations?
-  seenNodes = node_detects %>%
-    filter(seen) %>%
-    pull(Node)
+  seen_nodes = node_info %>%
+    filter(tags_det) %>%
+    pull(node)
+  unseen_nodes = node_info %>%
+    filter(!tags_det) %>%
+    pull(node)
+  # which sites had observations?
+  seen_sites = site_info %>%
+    filter(tags_det) %>%
+    pull(site_code)
+  unseen_sites = site_info %>%
+    filter(!tags_det) %>%
+    pull(site_code)
 
-  # which nodes had no observations?
-  unseenNodes = node_detects %>%
-    filter(!seen) %>%
-    pull(Node)
 
-  # convert to site codes
-  unseenSites = node_detects %>%
-    group_by(NodeSite) %>%
-    summarise(nNodes = n_distinct(Node),
-              nTags = sum(nTags),
-              nSeen = sum(seen)) %>%
-    filter(nSeen == 0) %>%
-    pull(NodeSite)
-
-  seenSites = node_detects %>%
-    group_by(NodeSite) %>%
-    summarise(nNodes = n_distinct(Node),
-              nSeen = sum(seen)) %>%
-    filter(nSeen > 0) %>%
-    select(NodeSite) %>%
-    as.matrix %>%
-    as.character
-
+  #-----------------------------------
   # read in basic model file
   # open a connection
   mod_conn_init = file(init_file, open = 'r+')
@@ -73,150 +112,89 @@ fixNoFishNodes = function(init_file = NULL,
   # open a connection to new model file
   mod_conn_new = file(file_name, open = 'w')
 
-  for(node in unseenNodes) {
-    mod_file[grep(paste0(node, '_p'), mod_file)[1]] = paste0('  ', node, '_p <- 0 # no detections / not in operation')
+  for(node in unseen_nodes) {
+    mod_file[str_which(mod_file, paste0(node, "_p ~"))] = paste0('\t ', node, '_p <- 0; # no detections / not in operation')
   }
 
-  if(length(unseenNodes) > 0) {
-    cat(paste('Fixed', paste(unseenNodes, collapse = ', '), 'at 0% detection probability, because no tags were observed there.\n'))
+  if(length(unseen_nodes) > 0) {
+    cat(paste('Fixed the following sites at 0% detection probability, because no tags were observed there:\n\t', paste(unseen_nodes, collapse = ', '), '.\n\n'))
   }
 
-  # which sites have multiple nodes but only one had detections?
-  singleSites = node_detects %>%
-    group_by(NodeSite) %>%
-    summarise(nNodes = n_distinct(Node),
-              nSeen = sum(seen)) %>%
-    filter(nSeen == 1,
-           nNodes >= nSeen) %>%
-    pull(NodeSite)
+  #--------------------------
 
-  # SC1, SC2B0 and SC2A0 are treated like a triple array, so we need this fix to avoid fixing SC2A0 or SC2B0 to 100% when it shouldn't be.
-  if('SC2' %in% singleSites &
-     'SC1' %in% seenNodes) {
-    singleSites = singleSites[-match('SC2', singleSites)]
+  # which sites have multiple nodes but only one had detections, or is a single node site, and no upstream sites?
+  single_sites = node_info %>%
+    group_by(site_code, n_nodes) %>%
+    summarize(n_obs_nodes = sum(tags_det),
+              obs_node = paste(node[tags_det], collapse = " "),
+              .groups = "drop") %>%
+    filter(n_obs_nodes > 0,
+           (n_obs_nodes < n_nodes | n_nodes == 1)) %>%
+    left_join(parent_child %>%
+                group_by(site_code = parent) %>%
+                summarize(n_child = n_distinct(child),
+                          .groups = "drop"),
+              by = "site_code") %>%
+    mutate(across(n_child,
+                  replace_na,
+                  0)) %>%
+    filter(n_child == 0,
+           n_obs_nodes < 2)
+
+  for(node in single_sites$obs_node) {
+    mod_file[str_which(mod_file, paste0(node, "_p ~"))] = paste0('\t ', node, '_p <- 1; # Single array, no upstream detections')
   }
 
-  for(site in singleSites) {
-    tmp = node_order %>%
-      filter(grepl(site, Path),
-             Node %in% seenNodes) %>%
-      group_by(Node) %>%
-      summarise(maxNodeOrder = max(NodeOrder))
-
-
-    if(tmp %>%
-       filter(maxNodeOrder == max(maxNodeOrder),
-              grepl(site, Node)) %>%
-       nrow() > 0) {
-
-      mod_file[grep(paste0(seenNodes[grepl(paste0("^", site), seenNodes)], '_p'), mod_file)[1]] = paste0('  ', seenNodes[grepl(paste0("^", site), seenNodes)], '_p <- 1 # Single array, no upstream detections')
-
-      cat(paste('\nFixed', site, 'at 100% detection probability, because it is a single array with no upstream detections.\n'))
-
-    }
-
+  if(nrow(single_sites) > 0) {
+    cat(paste('Fixed the following nodes at 100% detection probability, because it is functioning as a single array with no upstream detections:\n\t', paste(single_sites$obs_node, collapse = ', '), '.\n\n'))
   }
+
+
+
+  #--------------------------
 
   # if no observations at some terminal nodes, fix the movement probability past those nodes to 0
   if(sum(grepl('phi', mod_file)) > 0) {
-    phiNodes = tibble(modLines = str_trim(mod_file[grep('phi_', mod_file)])) %>%
-      mutate(site = str_split(modLines, '\\~', simplify = T)[,1]) %>%
-      select(site) %>%
-      mutate(site = str_trim(site)) %>%
-      filter(grepl('phi', site)) %>%
-      distinct() %>%
-      mutate(site = str_remove(site, '^phi_')) %>%
-      pull(site)
+    phi_0_nodes = tibble(mod_lines = mod_file[intersect(str_which(mod_file, "phi_"), str_which(mod_file, "~ dbeta"))]) %>%
+      mutate(param = str_split(mod_lines, '\\~', simplify = T)[,1]) %>%
+      select(param) %>%
+      mutate(across(param,
+                    str_trim)) %>%
+      mutate(site_code = str_remove(param, "phi_"),
+             site_code = str_split(site_code, "\\[", simplify = T)[,1]) %>%
+      mutate(origin = str_extract(param, "[:digit:]") %>%
+               as.numeric) %>%
+      left_join(node_info %>%
+                  select(node, site_code, path) %>%
+                  separate_rows(path, sep = " ") %>%
+                  rename(path_nodes = path) %>%
+                  filter(node != path_nodes) %>%
+                  rename(upstrm_nodes = node,
+                         node = path_nodes),
+                by = "site_code") %>%
+      left_join(node_tags_origin %>%
+                  mutate(origin = recode(origin,
+                                         "W" = 1,
+                                         "H" = 2)),
+                by = c("node", "origin")) %>%
+      group_by(param, site_code, origin) %>%
+      summarise(upstrm_tags = if_else(sum(n_tags, na.rm = T) > 0, T, F),
+                .groups = 'drop') %>%
+      # filter(node %in% c("ACM", 'ACB', "ASOTIC"))
+      filter(!upstrm_tags) %>%
+      mutate(mod_str = paste0("phi_", site_code, "\\[", origin, "\\]"))
 
-    if(sum(grepl('\\[', phiNodes)) > 0) {
-      phiSites = str_split(phiNodes, '\\[', simplify = T)[,1]
-    } else {
-      phiSites = phiNodes
-    }
+    # str_which(mod_file, mod_str)
 
-    unseenPhiSites = intersect(str_to_upper(phiSites), unseenSites)
-    unseenNodePaths = unseenPhiSites %>%
-      as.list() %>%
-      map_df(.f = function(x) {
-        node_order %>%
-          filter(grepl(x, Path))
-      }) %>%
-      distinct()
+    if(nrow(phi_0_nodes) > 0) {
 
-    if(sum(!unseenNodePaths$NodeSite %in% unseenPhiSites) > 0) {
-      # pathDf = unseenNodePaths %>%
-      #   filter(!NodeSite %in% unseenPhiSites) %>%
-      #   pull(NodeSite) %>%
-      #   unique() %>%
-      #   as.list() %>%
-      #   map_df(.f = function(x) {
-      #     node_order %>%
-      #       filter(grepl(x, Path))
-      #   })
-
-      for(site in unseenPhiSites) {
-        test = node_detects %>%
-          full_join(node_order,
-                    by = c('NodeSite', 'Node')) %>%
-          filter(NodeSite != site) %>%
-          filter(grepl(site, Path)) %>%
-          summarise_at(vars(nTags),
-                       list(sum)) %>%
-          pull(nTags) > 0
-
-        if(test) {
-          unseenPhiSites = unseenPhiSites[-match(site, unseenPhiSites)]
-        }
-        rm(test)
+      for(i in 1:nrow(phi_0_nodes)) {
+        mod_file[str_which(mod_file, paste0(phi_0_nodes$mod_str[i], " ~"))] = paste0('\t ', phi_0_nodes$param[i], ' <- 0 # no upstream detections')
       }
+
+      cat(paste('\nFixed movement upstream of the following sites to 0 for at least one fish type because no detections upstream:\n\t', paste(unique(phi_0_nodes$site_code), collapse = ', '), '.\n\n'))
     }
 
-    phi_df = tibble(node = phiNodes,
-                    site = toupper(phiSites)) %>%
-      inner_join(tibble(site = intersect(unseenPhiSites, unseenSites)))
-
-    if(nrow(phi_df) > 0 ) {
-      for(i in 1:nrow(phi_df)) {
-        # phi_prior = paste0('phi_', phi_df$node[i], ' ~')
-        mod_file[grep(paste0('phi_', tolower(phi_df$site[i])), mod_file)[1]] = paste0('  phi_', phi_df$node[i], ' <- 0 # no upstream detections')
-
-        cat(paste('\nFixed upstream movement past site', phi_df$site[i], 'to 0 because no detections there or upstream.\n'))
-
-      }
-    }
-  }
-
-  if('STR' %in% unseenSites & 'KRS' %in% seenSites) {
-    mod_file[grep('KRS_p ~', mod_file)] = '  KRS_p <- 1 # Single array, no upstream detections'
-  }
-
-  if('LRL' %in% unseenSites & 'FISTRP' %in% seenSites) {
-    mod_file[grep('phi_fistrp ~', mod_file)] = '  phi_fistrp <- 1 # no detections at LRL'
-  }
-
-  if('IR4' %in% unseenSites & sum(c('IML', 'IMNAHW', 'IR5', 'GUMBTC', 'DRY2C') %in% seenSites) > 0) {
-    mod_file[grep('phi_iml ~', mod_file)] = '  phi_iml <- 1 # no detections at IR4'
-  }
-
-  if(sum(c('MTR', 'UTR', 'TUCH') %in% unseenSites) == 3 & 'LTR' %in% seenSites) {
-    mod_file[grep('LTR_p ~', mod_file)] = '  LTR_p <- 1 # Single array, no upstream detections'
-  }
-
-  if('SC2A0' %in% unseenNodes & ('SC1' %in% seenNodes & 'SC2B0' %in% seenNodes)) {
-    mod_file[grep('SC2B0 ~', mod_file)] = '  SC2B0 ~ dbeta(1, 1)'
-  }
-
-  if('KOOS' %in% unseenNodes & ('CLC' %in% seenSites)){
-    mod_file[grep('CLC_p ~', mod_file )] = '  CLC_p <- 1 # Single array, no upstream detections'
-  }
-
-  if('CLC' %in% unseenNodes & ('KOOS' %in% seenSites)){
-    mod_file[grep('KOOS_p ~', mod_file )] = '  KOOS_p <- 1 # Single array, no detections at CLC'
-  }
-
-  if(("ASOTIC" %in% unseenNodes & "ACB" %in% seenSites) |
-     ("ACB" %in% unseenSites & "ASOTIC" %in% seenNodes)) {
-    mod_file[grep('phi_acb ~', mod_file)] = '  phi_acb <- 1 # Either ASOTIC or ACB had no detections, but the other did'
   }
 
   writeLines(mod_file, mod_conn_new)

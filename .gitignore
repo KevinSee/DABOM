@@ -5,4 +5,5 @@
 .DS_Store
 Example
 inst/doc
-vignettes
+
+docs
