@@ -22,8 +22,8 @@ Imports:
     rjags (>= 4-10),
     coda (>= 0.19-3)
 SystemRequirements: JAGS (http://mcmc-jags.sourceforge.net)
-URL: https://github.com/BiomarkABS/DABOM
-BugReports: https://github.com/BiomarkABS/DABOM/issues
+URL: https://github.com/KevinSee/DABOM
+BugReports: https://github.com/KevinSee/DABOM/issues
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
@@ -32,5 +32,5 @@ Suggests:
   rmarkdown
 VignetteBuilder: knitr
 Remotes: 
-    git::https://github.com/BiomarkABS/STADEM.git,
-    git::https://github.com/BiomarkABS/PITcleanr.git
+    git::https://github.com/KevinSee/STADEM.git,
+    git::https://github.com/KevinSee/PITcleanr.git
