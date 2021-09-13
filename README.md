@@ -3,7 +3,7 @@
 
 # DABOM
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/BiomarkABS/DABOM/master?urlpath=rstudio)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/KevinSee/DABOM/master?urlpath=rstudio)
 
 **D**am **A**dult **B**ranch **O**ccupancy **M**odel
 
@@ -22,7 +22,7 @@ in [Waterhouse, 2020](https://doi.org/10.1002/eap.2202).
 
 The user can find more information related to installation and use of
 this package on the [package
-website](https://biomarkabs.github.io/DABOM/).
+website](https://kevinsee.github.io/DABOM/).
 
 ## Installation instructions
 
