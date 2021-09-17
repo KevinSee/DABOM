@@ -3,8 +3,8 @@ pkgdown: 1.6.1
 pkgdown_sha: ~
 articles:
   DABOM: DABOM.html
-last_built: 2021-09-13T17:42Z
+last_built: 2021-09-17T21:30Z
 urls:
-  reference: https://biomarkabs.github.io/DABOM/index.html/reference
-  article: https://biomarkabs.github.io/DABOM/index.html/articles
+  reference: https://kevinsee.github.io/DABOM/index.html/reference
+  article: https://kevinsee.github.io/DABOM/index.html/articles
 
