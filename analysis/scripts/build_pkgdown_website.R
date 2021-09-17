@@ -8,7 +8,6 @@
 # load needed libraries
 library(pkgdown)
 
-
 #-----------------------------------------------------------------
 # Run once to configure your package to use pkgdown
 usethis::use_pkgdown()
