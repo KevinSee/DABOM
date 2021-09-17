@@ -51,7 +51,6 @@ library(hexSticker)
 
 #-----------------------------------------------------------------
 # image to use
-# img_path = "analysis/figures/DABOM_sites.png"
 img_path = "analysis/figures/antenna_icon_orange_bold.png"
 
 nm_color = "#282D46"
