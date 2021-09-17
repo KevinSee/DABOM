@@ -92,7 +92,7 @@ compileTransProbs_PRA = function(dabom_mod = NULL,
               ~ . * MRC)) %>%
     mutate(WFC = WFC * MRW,
            CRU = CRU * CRW,
-           METH = MSH * METH,
+           # METH = MSH * METH,
            TWISPW = TWR * TWISPW) %>%
     mutate(across(c(OKL_bb, LLC, SA1, JOH, AEN, OMK, WAN, TNK, BPC, ANT, WHS, ZSL),
               ~ . * OKL)) %>%

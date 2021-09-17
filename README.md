@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# DABOM
+# DABOM <a href='https://github.com/KevinSee/DABOM'><img src='man/figures/logo.png' align="right" height="139" /></a>
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/KevinSee/DABOM/master?urlpath=rstudio)
 
