@@ -79,7 +79,7 @@ compileTransProbs_PRA = function(dabom_mod = NULL,
     mutate(across(c(UWE_bb, NAL, LWN, WTL),
               ~ . * UWE)) %>%
     mutate(NAU = NAU * NAL) %>%
-    mutate(across(any_of(RRF_bb, ENL, WEA, WEH, EBO),
+    mutate(across(any_of(c("RRF_bb", "ENL", "WEA", "WEH", "EBO")),
               ~ . * RRF)) %>%
     mutate(across(c(ENL_bb, RCT, EHL, MAD, ENA),
               ~ . * ENL)) %>%
