@@ -56,7 +56,7 @@ defineDabomColNms = function(root_site = c("GRA", 'PRA', "TUM", "PRO"),
   } else if(root_site == "PRA") {
     bottom_sites = list(BelowPriest = c("JDA", "ICH", "RSH", "PRH", "JD1", "PRO", "TMF", "PRV"),
                         Wenatchee = "LWE",
-                        Entiat = c("ENL", "WEH"),
+                        Entiat = c("ENL", "WEH", "EBO"),
                         Methow = "LMR",
                         Okanogan = "OKL")
   } else if(root_site == "TUM") {
