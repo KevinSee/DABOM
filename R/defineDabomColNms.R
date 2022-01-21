@@ -15,11 +15,11 @@
 #' @return NULL
 #' @examples defineDabomColNms()
 
-defineDabomColNms = function(root_site = c("GRA", 'PRA', "TUM", "PRO"),
+defineDabomColNms = function(root_site = NA,
                              parent_child,
                              configuration) {
 
-  root_site = match.arg(root_site)
+  # root_site = match.arg(root_site)
 
   site_order = PITcleanr::buildNodeOrder(parent_child)
 
@@ -73,6 +73,8 @@ defineDabomColNms = function(root_site = c("GRA", 'PRA', "TUM", "PRO"),
                         Toppenish = "TOP",
                         Sunnyside = "SUN")
 
+  } else {
+    bottom_sites = list(Start = root_site)
   }
 
 
@@ -92,9 +94,10 @@ defineDabomColNms = function(root_site = c("GRA", 'PRA', "TUM", "PRO"),
         left_join(parent_child,
                   by = "child") %>%
         distinct() %>%
+        filter(!is.na(parent)) %>%
         PITcleanr::addParentChildNodes(configuration) %>%
         select(node = child,
-               node_hydro = child_hydro,
+               # node_hydro = child_hydro,
                node_rkm = child_rkm) %>%
         arrange(node_rkm,
                 desc(node))

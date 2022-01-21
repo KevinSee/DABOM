@@ -112,7 +112,8 @@ tag_summ = summarizeTagData(filter_ch,
                             bio_data = fish_origin)
 
 # file path to the default and initial model
-basic_modNm = paste0('~/Desktop/', root_site, '_DABOM.txt')
+desktop_path = file.path(path.expand('~'),'Desktop')
+basic_modNm = paste0(desktop_path, "/", root_site, '_DABOM.txt')
 
 writeDABOM(basic_modNm,
            pc,
@@ -126,7 +127,7 @@ writeDABOM(basic_modNm,
 #------------------------------------------------------------------------------
 
 # filepath for specific JAGS model code for species and year
-mod_path = paste0('~/Desktop/Test_DABOM_', root_site, '.txt')
+mod_path = paste0(desktop_path, '/Test_DABOM_', root_site, '.txt')
 
 # writes species and year specific jags code
 fixNoFishNodes(init_file = basic_modNm,

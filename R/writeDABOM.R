@@ -122,7 +122,7 @@ writeDABOM = function(file_name = NULL,
         pull(n_child) %>%
         unique()
     } else {
-      parent_n_child = NA_integer_
+      parent_n_child = 0
     }
 
     if(n_branch == 1) {
@@ -130,6 +130,8 @@ writeDABOM = function(file_name = NULL,
         fish_pos_text = paste0("\t\t eta_", site, "[i] ~ dbern(eta_", parent_site, "[i, ", child_num, "] * phi_", site, "[fish_type[i]]) \n")
       } else if(parent_n_child == 1) {
         fish_pos_text = paste0("\t\t eta_", site, "[i] ~ dbern(eta_", parent_site, "[i] * phi_", site, "[fish_type[i]]) \n")
+      } else if(parent_n_child == 0) {
+        fish_pos_text = paste0("\t\t eta_", site, "[i] ~ dbern(phi_", site, "[fish_type[i]]) \n")
       }
     }
 
