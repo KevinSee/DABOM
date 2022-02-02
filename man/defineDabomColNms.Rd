@@ -4,11 +4,7 @@
 \alias{defineDabomColNms}
 \title{Define Column Names for DABOM matrix}
 \usage{
-defineDabomColNms(
-  root_site = c("GRA", "PRA", "TUM", "PRO"),
-  parent_child,
-  configuration
-)
+defineDabomColNms(root_site = NA, parent_child, configuration)
 }
 \arguments{
 \item{root_site}{determines which version of DABOM the user is running.}

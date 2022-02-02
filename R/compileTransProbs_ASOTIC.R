@@ -1,6 +1,6 @@
-#' @title Compile Transition Probabilities - GRA
+#' @title Compile Transition Probabilities - ASOTIC
 #'
-#' @description Extracts the MCMC posteriors of transition probabilities for a DABOM model, and multiplies them appropriately. This function is specific to the Lower Granite version of DABOM.
+#' @description Extracts the MCMC posteriors of transition probabilities for a DABOM model, and multiplies them appropriately. This function is specific to the Asotin version of DABOM.
 #'
 #' @author Kevin See
 #'
@@ -10,10 +10,10 @@
 #' @import dplyr tidyr purrr
 #' @export
 #' @return NULL
-#' @examples compileTransProbs_GRA()
+#' @examples compileTransProbs_ASOTIC()
 
-compileTransProbs_GRA = function(dabom_mod = NULL,
-                                 parent_child = NULL) {
+compileTransProbs_ASOTIC = function(dabom_mod = NULL,
+                                    parent_child = NULL) {
 
   stopifnot(!is.null(dabom_mod),
             !is.null(parent_child))
@@ -62,7 +62,7 @@ compileTransProbs_GRA = function(dabom_mod = NULL,
                            child))
   # if time-varying, fix all initial transition probabilities > 0 to 1 for multiplication purposes
   tv = trans_df %>%
-    filter(parent == 'GRA') %>%
+    filter(parent == 'ASOTIC') %>%
     mutate(n_comma = stringr::str_count(param, "\\,"),
            n_comma = as.integer(n_comma)) %>%
     select(n_comma) %>%
@@ -74,13 +74,13 @@ compileTransProbs_GRA = function(dabom_mod = NULL,
   }
   if(tv) {
     trans_df = trans_df %>%
-      filter(parent == "GRA") %>%
+      filter(parent == "ASOTIC") %>%
       mutate(across(value,
                     ~ if_else(. > 0, 1, .))) %>%
       select(CHAIN, ITER, origin, child, value) %>%
       distinct() %>%
       bind_rows(trans_df %>%
-                  filter(parent != "GRA") %>%
+                  filter(parent != "ASOTIC") %>%
                   select(CHAIN, ITER, origin, child, value))
   } else {
     trans_df = trans_df %>%
@@ -92,68 +92,8 @@ compileTransProbs_GRA = function(dabom_mod = NULL,
                        values_from = "value") %>%
     # multiply some probabilities together
     rowwise() %>%
-    mutate(across(MTR,
-                  ~ . * LTR)) %>%
-    mutate(across(UTR,
-                  ~ . * MTR)) %>%
-    mutate(across(TFH,
-                  ~ . * UTR)) %>%
-    mutate(across(c(ACM_bb, GEORGC, ASOTIC),
-                  ~ . * ACM)) %>%
-    mutate(across(ACB,
-                  ~ . * ASOTIC)) %>%
     mutate(across(c(ACB_bb, CCA, AFC),
                   ~ . * ACB)) %>%
-    mutate(across(c(LAP_bb, MIS, SWT),
-                  ~ . * LAP)) %>%
-    mutate(across(WEB,
-                  ~ . * SWT)) %>%
-    mutate(across(c(JUL_bb, KHS, PCM, HLM),
-                  ~ . * JUL)) %>%
-    mutate(across(c(KHS_bb, BIGBEC, LBEARC),
-                  ~ . * KHS)) %>%
-    mutate(across(c(HLM_bb, POTREF, POTRWF),
-                  ~ . * HLM)) %>%
-    mutate(across(FISTRP,
-                  ~ . * LRL)) %>%
-    mutate(across(JOSEPC,
-                  ~ . * JOC)) %>%
-    mutate(across(c(IR1_bb, HORS3C, CMP, LSHEEF, BSC, IR3),
-                  ~ . * IR1)) %>%
-    mutate(across(c(IR3_bb, FREEZC, CZY, MAHOGC, IR4),
-                  ~ . * IR3)) %>%
-    mutate(across(IML,
-                  ~ . * IR4)) %>%
-    mutate(across(IR5,
-                  ~ . * IML)) %>%
-    mutate(across(c(IR5_bb, GUMBTC, DRY2C),
-                  ~ . * IR5)) %>%
-    mutate(across(c(WR1_bb, BCANF, WR2),
-                  ~ . * WR1)) %>%
-    mutate(across(c(LOSTIW, WALH),
-                  ~ . * WR2)) %>%
-    mutate(across(c(UGR_bb, UGS, CCW),
-                  ~ . * UGR)) %>%
-    mutate(across(c(SFG_bb, ZEN, ESS, KRS),
-                  ~ . * SFG)) %>%
-    mutate(across(c(ESS_bb, JOHNSC, YPP),
-                  ~ . * ESS)) %>%
-    mutate(across(LAKEC,
-                  ~ . * ZEN)) %>%
-    mutate(across(STR,
-                  ~ . * KRS)) %>%
-    mutate(across(c(LLR_bb, KEN, LRW, HYC, AGC, WPC, BHC),
-                  ~ . * LLR)) %>%
-    mutate(across(c(LRW_bb, LLS, LBS, BTL, CAC, HEC, LB8, LCL),
-                  ~ . * LRW)) %>%
-    mutate(across(BTM,
-                  ~ . * BTL)) %>%
-    mutate(across(BTU,
-                  ~ . * BTM)) %>%
-    mutate(across(USI,
-                  ~ . * USE)) %>%
-    mutate(across(c(USI_bb, STL, PAHH, SALEFT, YFK, VC1, RFL),
-                  ~ . * USI)) %>%
     ungroup() %>%
     mutate(iter = 1:n()) %>%
     tidyr::pivot_longer(cols = -c(CHAIN, ITER,

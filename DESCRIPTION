@@ -26,7 +26,7 @@ URL: https://github.com/KevinSee/DABOM
 BugReports: https://github.com/KevinSee/DABOM/issues
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Suggests: 
   knitr, 
   rmarkdown

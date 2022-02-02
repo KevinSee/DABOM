@@ -113,23 +113,34 @@ setInitialValues = function(filter_ch,
     }) %>%
     rlang::set_names(nm = function(x) paste0("a_", x))
 
-  eta_list = parent_child %>%
+  # any eta initial values needed?
+  n_eta <- parent_child %>%
     dplyr::count(parent,
                  name = "n_child") %>%
     filter(n_child == 1) %>%
-    select(parent) %>%
-    split(list(.$parent)) %>%
-    map(.f = function(x) {
-      tag_sites %>%
-        filter(site_code == x$parent) %>%
-        mutate(seen = if_else(!is.na(lead_site),
-                              1, 0)) %>%
-        complete(tag_code = unique(filter_ch$tag_code),
-                 fill = list(seen = 0)) %>%
-        arrange(tag_code) %>%
-        pull(seen)
-    }) %>%
-    rlang::set_names(nm = function(x) paste0("eta_", x))
+    nrow()
+
+  if(n_eta > 0) {
+    eta_list = parent_child %>%
+      dplyr::count(parent,
+                   name = "n_child") %>%
+      filter(n_child == 1) %>%
+      select(parent) %>%
+      split(list(.$parent)) %>%
+      map(.f = function(x) {
+        tag_sites %>%
+          filter(site_code == x$parent) %>%
+          mutate(seen = if_else(!is.na(lead_site),
+                                1, 0)) %>%
+          complete(tag_code = unique(filter_ch$tag_code),
+                   fill = list(seen = 0)) %>%
+          arrange(tag_code) %>%
+          pull(seen)
+      }) %>%
+      rlang::set_names(nm = function(x) paste0("eta_", x))
+  } else {
+    eta_list = NULL
+  }
 
   jags_inits <- function() {
     y = c(a_list,
