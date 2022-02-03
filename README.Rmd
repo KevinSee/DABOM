@@ -34,7 +34,7 @@ The user can find more information related to installation and use of this packa
 
 DABOM is a collaborative project, with the primary contributors being:
   
-* Kevin See (Biomark, Inc.)
+* Kevin See (WDFW)
 * Ryan N. Kinzer (Nez Perce Tribe)
 
 

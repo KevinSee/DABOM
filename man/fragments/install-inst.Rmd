@@ -11,7 +11,7 @@ Or the user can install the compendium as an R package from GitHub by using Hadl
 ```{r gh-installation, eval = FALSE}
 # install and load remotes, if necessary
 install.packages("devtools")
-devtools::install_github("BiomarkABS/DABOM", 
+devtools::install_github("KevinSee/DABOM", 
                          build_vignettes = TRUE)
 ```
 
@@ -20,7 +20,7 @@ devtools::install_github("BiomarkABS/DABOM",
 For the latest development version:
 
 ```{r develop-version, eval = FALSE}
-devtools::install_github("BiomarkABS/DABOM@develop")
+devtools::install_github("KevinSee/DABOM@develop")
 ```
 
 ### JAGS Software

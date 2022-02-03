@@ -69,6 +69,9 @@ compileTransProbs_GRA = function(dabom_mod = NULL,
     distinct() %>%
     mutate(tv = if_else(n_comma > 1, T, F)) %>%
     pull(tv)
+  if(length(tv) == 0) {
+    tv = FALSE
+  }
   if(tv) {
     trans_df = trans_df %>%
       filter(parent == "GRA") %>%

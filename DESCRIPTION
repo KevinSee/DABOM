@@ -1,8 +1,8 @@
 Package: DABOM
 Title: Dam Adult Branch Occupancy Model
 Version: 2.0.0
-Authors@R: person("Kevin", "See", email = "Kevin.See@merck.com", role = c("aut", "cre"))
-Maintainer: Kevin See <Kevin.See@merck.com>
+Authors@R: person("Kevin", "See", email = "Kevin.See@dfw.wa.gov", role = c("aut", "cre"))
+Maintainer: Kevin See <Kevin.See@dfw.wa.gov>
 Description: Takes verified output from PITcleanr package and runs DABOM, a hierarchical patch-occupancy model to estimate adult salmonid escapement past detection locations.
 Depends: 
     R (>= 3.4.1)
@@ -22,11 +22,12 @@ Imports:
     rjags (>= 4-10),
     coda (>= 0.19-3)
 SystemRequirements: JAGS (http://mcmc-jags.sourceforge.net)
-URL: https://github.com/KevinSee/DABOM
+URL: https://github.com/KevinSee/DABOM,
+    https://kevinsee.github.io/DABOM
 BugReports: https://github.com/KevinSee/DABOM/issues
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Suggests: 
   knitr, 
   rmarkdown
