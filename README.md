@@ -35,7 +35,7 @@ using Hadley Wickham’s `devtools` package:
 ``` r
 # install and load remotes, if necessary
 install.packages("devtools")
-devtools::install_github("BiomarkABS/DABOM", 
+devtools::install_github("KevinSee/DABOM", 
                          build_vignettes = TRUE)
 ```
 
@@ -46,7 +46,7 @@ latest version of Rtools can be found
 For the latest development version:
 
 ``` r
-devtools::install_github("BiomarkABS/DABOM@develop")
+devtools::install_github("KevinSee/DABOM@develop")
 ```
 
 ### JAGS Software
