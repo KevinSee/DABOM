@@ -75,8 +75,8 @@ install.packages("rjags")
 
 DABOM is a collaborative project, with the primary contributors being:
 
-  - Kevin See (Biomark, Inc.)
-  - Ryan N. Kinzer (Nez Perce Tribe)
+-   Kevin See (WDFW)
+-   Ryan N. Kinzer (Nez Perce Tribe)
 
 ### Licenses
 
