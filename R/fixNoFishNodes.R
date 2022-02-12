@@ -55,6 +55,36 @@ fixNoFishNodes = function(init_file = NULL,
                 PITcleanr::buildNodeOrder(),
               by = "node")
 
+  # how many tags were seen upstream of each node?
+  upstrm_tags <- NULL
+  for(my_node in node_info$node) {
+    tmp_info <- node_info %>%
+      filter(node == my_node)
+
+    res <- tibble(node = my_node,
+                  site_code = tmp_info$site_code,
+                  upstrm_tags = node_info %>%
+                    filter(str_detect(path, my_node),
+                           site_code != tmp_info$site_code,
+                           node_order > tmp_info$node_order) %>%
+                    summarize(across(n_tags,
+                                     sum)) %>%
+                    pull(n_tags))
+
+    if(is.null(upstrm_tags)) {
+      upstrm_tags <- res
+    } else {
+      upstrm_tags <- upstrm_tags %>%
+        bind_rows(res)
+    }
+    rm(tmp_info, res)
+  }
+
+  node_info <- node_info %>%
+    left_join(upstrm_tags,
+              by = c("node", "site_code"))
+
+
   node_tags_origin = filter_ch %>%
     left_join(fish_origin,
               by = "tag_code") %>%
@@ -156,7 +186,8 @@ fixNoFishNodes = function(init_file = NULL,
   # if no observations at some terminal nodes, fix the movement probability past those nodes to 0
   if(sum(grepl('phi', mod_file)) > 0) {
     phi_0_nodes = tibble(mod_lines = mod_file[intersect(str_which(mod_file, "phi_"), str_which(mod_file, "~ dbeta"))]) %>%
-      mutate(param = str_split(mod_lines, '\\~', simplify = T)[,1]) %>%
+      mutate(param = str_split(mod_lines, '\\~', simplify = T)[,1],
+             param = str_remove(param, "^\\\t")) %>%
       select(param) %>%
       mutate(across(param,
                     str_trim)) %>%
@@ -165,24 +196,12 @@ fixNoFishNodes = function(init_file = NULL,
       mutate(origin = str_extract(param, "[:digit:]") %>%
                as.numeric) %>%
       left_join(node_info %>%
-                  select(node, site_code, path) %>%
-                  separate_rows(path, sep = " ") %>%
-                  rename(path_nodes = path) %>%
-                  filter(node != path_nodes) %>%
-                  rename(upstrm_nodes = node,
-                         node = path_nodes),
+                  select(site_code,
+                         upstrm_tags) %>%
+                  distinct(),
                 by = "site_code") %>%
-      left_join(node_tags_origin %>%
-                  mutate(origin = recode(origin,
-                                         "W" = 1,
-                                         "H" = 2)),
-                by = c("node", "origin")) %>%
-      group_by(param, site_code, origin) %>%
-      summarise(upstrm_tags = if_else(sum(n_tags, na.rm = T) > 0, T, F),
-                .groups = 'drop') %>%
-      # filter(node %in% c("ACM", 'ACB', "ASOTIC"))
-      filter(!upstrm_tags) %>%
-      mutate(mod_str = paste0("phi_", site_code, "\\[", origin, "\\]"))
+      filter(upstrm_tags == 0) %>%
+      mutate(mod_str = paste0("phi_", site_code, "[", origin, "]"))
 
     # str_which(mod_file, mod_str)
 
