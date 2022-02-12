@@ -55,36 +55,31 @@ fixNoFishNodes = function(init_file = NULL,
                 PITcleanr::buildNodeOrder(),
               by = "node")
 
-  # how many tags were seen upstream of each node?
-  upstrm_tags <- NULL
+  # which nodes are upstream of each node?
+  upstrm_nodes <- NULL
   for(my_node in node_info$node) {
     tmp_info <- node_info %>%
       filter(node == my_node)
 
     res <- tibble(node = my_node,
                   site_code = tmp_info$site_code,
-                  upstrm_tags = node_info %>%
+                  upstrm_node = node_info %>%
                     filter(str_detect(path, my_node),
                            site_code != tmp_info$site_code,
                            node_order > tmp_info$node_order) %>%
-                    summarize(across(n_tags,
-                                     sum)) %>%
-                    pull(n_tags))
+                    pull(node))
 
-    if(is.null(upstrm_tags)) {
-      upstrm_tags <- res
+    if(is.null(upstrm_nodes)) {
+      upstrm_nodes <- res
     } else {
-      upstrm_tags <- upstrm_tags %>%
+      upstrm_nodes <- upstrm_nodes %>%
         bind_rows(res)
     }
     rm(tmp_info, res)
   }
 
-  node_info <- node_info %>%
-    left_join(upstrm_tags,
-              by = c("node", "site_code"))
 
-
+  # how many tags by origin were detected at each node
   node_tags_origin = filter_ch %>%
     left_join(fish_origin,
               by = "tag_code") %>%
@@ -195,13 +190,20 @@ fixNoFishNodes = function(init_file = NULL,
              site_code = str_split(site_code, "\\[", simplify = T)[,1]) %>%
       mutate(origin = str_extract(param, "[:digit:]") %>%
                as.numeric) %>%
-      left_join(node_info %>%
-                  select(site_code,
-                         upstrm_tags) %>%
-                  distinct(),
-                by = "site_code") %>%
+      left_join(upstrm_nodes %>%
+                  left_join(node_tags_origin %>%
+                              mutate(origin = recode(origin,
+                                                     "W" = 1,
+                                                     "H" = 2)) %>%
+                              rename(upstrm_node = node),
+                            by = c("upstrm_node")) %>%
+                  group_by(site_code, origin) %>%
+                  summarise(upstrm_tags = sum(n_tags),
+                            .groups = "drop"),
+                by = c("site_code",
+                       "origin")) %>%
       filter(upstrm_tags == 0) %>%
-      mutate(mod_str = paste0("phi_", site_code, "[", origin, "]"))
+      mutate(mod_str = paste0("phi_", site_code, "\\[", origin, "\\]"))
 
     # str_which(mod_file, mod_str)
 
