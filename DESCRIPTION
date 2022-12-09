@@ -23,7 +23,8 @@ Imports:
     coda (>= 0.19-3)
 SystemRequirements: JAGS (http://mcmc-jags.sourceforge.net)
 URL: https://github.com/KevinSee/DABOM,
-    https://kevinsee.github.io/DABOM
+    https://kevinsee.github.io/DABOM,
+    https://kevinsee.github.io/DABOM/
 BugReports: https://github.com/KevinSee/DABOM/issues
 Encoding: UTF-8
 LazyData: true
