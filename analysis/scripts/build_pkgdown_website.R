@@ -13,6 +13,10 @@ library(pkgdown)
 usethis::use_pkgdown_github_pages()
 
 #-----------------------------------------------------------------
+# set up to automatically publish pkgdown site to GitHub
+usethis::use_pkgdown_github_pages()
+
+#-----------------------------------------------------------------
 # Run once to configure your package to use pkgdown
 usethis::use_pkgdown()
 
