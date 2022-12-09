@@ -97,10 +97,17 @@ compileTransProbs_PRA = function(dabom_mod = NULL,
     mutate(across(c(OKL_bb, LLC, SA1, JOH, AEN, OMK, WAN, TNK, BPC, ANT, WHS, ZSL),
               ~ . * OKL)) %>%
     mutate(OBF = OBF * OMK,
+           OMF = OMF * OBF,
+           OMH = OMH * OMF,
            SA0 = SA0 * SA1) %>%
     mutate(across(c(ZSL_bb, TON, NMC, OKI, OKC),
               ~ . * ZSL)) %>%
-    mutate(OKV = OKV * OKC) %>%
+    mutate(across(c(OKV, OKM, OKC_bb),
+                  ~ . * OKC),
+           across(c(OKW, SKA, OKM_bb),
+                  ~ . * OKM),
+           across(c(OKS, OKP, SKA_bb),
+                    ~ . * SKA)) %>%
     mutate(across(c(PRV_bb, HST, MDR),
               ~ . * PRV)) %>%
     ungroup() %>%
