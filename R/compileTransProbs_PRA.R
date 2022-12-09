@@ -66,43 +66,50 @@ compileTransProbs_PRA = function(dabom_mod = NULL,
     # multiply some probabilities together
     rowwise() %>%
     mutate(across(c(RIA_bb, CLK, LWE, RRF),
-              ~ . * RIA)) %>%
+                  ~ . * RIA)) %>%
     mutate(across(c(LWE_bb, MCL, PES, CHM, ICL, TUM),
-              ~ . * LWE)) %>%
+                  ~ . * LWE)) %>%
     mutate(PEU = PEU * PES) %>%
     mutate(across(c(ICL_bb, LNF, ICM),
-              ~ . * ICL)) %>%
+                  ~ . * ICL)) %>%
     mutate(ICU = ICU * ICM) %>%
     mutate(across(c(TUM_bb, CHW, CHL, UWE),
-              ~ . * TUM)) %>%
+                  ~ . * TUM)) %>%
     mutate(CHU = CHU * CHL) %>%
     mutate(across(c(UWE_bb, NAL, LWN, WTL),
-              ~ . * UWE)) %>%
+                  ~ . * UWE)) %>%
     mutate(NAU = NAU * NAL) %>%
-    mutate(across(any_of(c("RRF_bb", "ENL", "WEA", "WEH", "EBO")),
-              ~ . * RRF)) %>%
+    mutate(across(c(RRF_bb, ENL, WEA, WEH),
+                  ~ . * RRF)) %>%
     mutate(across(c(ENL_bb, RCT, EHL, MAD, ENA),
-              ~ . * ENL)) %>%
+                  ~ . * ENL)) %>%
     mutate(ENF = ENF * ENA) %>%
     mutate(across(c(WEA_bb, LMR, OKL, FST),
-              ~ . * WEA)) %>%
+                  ~ . * WEA)) %>%
     mutate(across(c(LMR_bb, GLC, LBC, MRC),
-              ~ . * LMR)) %>%
+                  ~ . * LMR)) %>%
     mutate(across(c(MRC_bb, TWR, BVC, SCP, MSH, MRW, CRW),
-              ~ . * MRC)) %>%
+                  ~ . * MRC)) %>%
     mutate(WFC = WFC * MRW,
            CRU = CRU * CRW,
            # METH = MSH * METH,
            TWISPW = TWR * TWISPW) %>%
     mutate(across(c(OKL_bb, LLC, SA1, JOH, AEN, OMK, WAN, TNK, BPC, ANT, WHS, ZSL),
-              ~ . * OKL)) %>%
+                  ~ . * OKL)) %>%
     mutate(OBF = OBF * OMK,
+           OMF = OMF * OBF,
+           OMH = OMH * OMF,
            SA0 = SA0 * SA1) %>%
     mutate(across(c(ZSL_bb, TON, NMC, OKI, OKC),
-              ~ . * ZSL)) %>%
-    mutate(OKV = OKV * OKC) %>%
+                  ~ . * ZSL)) %>%
+    mutate(across(c(OKV, OKM, OKC_bb),
+                  ~ . * OKC),
+           across(c(OKW, SKA, OKM_bb),
+                  ~ . * OKM),
+           across(c(OKS, OKP, SKA_bb),
+                  ~ . * SKA)) %>%
     mutate(across(c(PRV_bb, HST, MDR),
-              ~ . * PRV)) %>%
+                  ~ . * PRV)) %>%
     ungroup() %>%
     mutate(iter = 1:n()) %>%
     tidyr::pivot_longer(cols = -c(CHAIN, ITER,
