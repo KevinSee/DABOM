@@ -41,8 +41,8 @@ reference:
     Functions related to summarizing detection, movement and escapement estimates
 - contents:
   - matches("Escape")
-  - starts_with("compile")
   - summariseDetectProbs
+  - extractTransProbs
 - title: Internal Functions
   desc: |
     These functions are used internally, within other functions
@@ -59,8 +59,6 @@ reference:
   desc: |
     These functions have been superseded
 - contents:
-  - writeDABOM_LGD
-  - writeDABOM_PRA
-  - writeDABOM_PRO
-  - writeDABOM_TUM
+  - starts_with("writeDABOM_")
+  - starts_with("compile")
 
