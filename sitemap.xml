@@ -1,90 +1,126 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/index.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/404.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/addTimeVaryData.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/articles/DABOM.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/calcBranchEscape_GRA.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/articles/index.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/calcRepGrpEscape_GRA.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/authors.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/calcTribEscape_GRA.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/CONDUCT.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/compileTimeVaryTransProbs.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/CONTRIBUTING.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/compileTransProbs_GRA.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/index.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/compileTransProbs_PRA.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/LICENSE-text.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/compileTransProbs_PRO.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/LICENSE.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/compileTransProbs_TUM.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/news/index.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/createDABOMcapHist.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/reference/addTimeVaryData.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/createDirichletVector.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/reference/calcBranchEscape_GRA.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/createJAGSinputs.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/reference/calcRepGrpEscape_GRA.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/createNodeList.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/reference/calcTribEscape_GRA.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/defineDabomColNms.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/reference/compileTimeVaryTransProbs.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/defineRepGrps_GRA.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/reference/compileTransProbs.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/estMode.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/reference/compileTransProbs_ASOTIC.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/fixNoFishNodes.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/reference/compileTransProbs_GRA.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/getNodeInfo.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/reference/compileTransProbs_PRA.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/setBranchNums.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/reference/compileTransProbs_PRO.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/setInitialValues.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/reference/compileTransProbs_TUM.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/setSavedParams.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/reference/createDABOMcapHist.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/summariseDetectProbs.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/reference/createDirichletVector.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/writeDABOM.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/reference/createJAGSinputs.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/writeDABOM_LGD.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/reference/createNodeList.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/writeDABOM_PRA.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/reference/defineDabomColNms.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/writeDABOM_PRO.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/reference/defineRepGrps_GRA.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/reference/writeDABOM_TUM.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/reference/estMode.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/index.html/articles/DABOM.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/reference/extractTransProbs.html</loc>
+  </url>
+  <url>
+    <loc>https://kevinsee.github.io/DABOM/reference/fixNoFishNodes.html</loc>
+  </url>
+  <url>
+    <loc>https://kevinsee.github.io/DABOM/reference/getNodeInfo.html</loc>
+  </url>
+  <url>
+    <loc>https://kevinsee.github.io/DABOM/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>https://kevinsee.github.io/DABOM/reference/setBranchNums.html</loc>
+  </url>
+  <url>
+    <loc>https://kevinsee.github.io/DABOM/reference/setInitialValues.html</loc>
+  </url>
+  <url>
+    <loc>https://kevinsee.github.io/DABOM/reference/setSavedParams.html</loc>
+  </url>
+  <url>
+    <loc>https://kevinsee.github.io/DABOM/reference/summariseDetectProbs.html</loc>
+  </url>
+  <url>
+    <loc>https://kevinsee.github.io/DABOM/reference/writeDABOM.html</loc>
+  </url>
+  <url>
+    <loc>https://kevinsee.github.io/DABOM/reference/writeDABOM_LGD.html</loc>
+  </url>
+  <url>
+    <loc>https://kevinsee.github.io/DABOM/reference/writeDABOM_PRA.html</loc>
+  </url>
+  <url>
+    <loc>https://kevinsee.github.io/DABOM/reference/writeDABOM_PRO.html</loc>
+  </url>
+  <url>
+    <loc>https://kevinsee.github.io/DABOM/reference/writeDABOM_TUM.html</loc>
   </url>
 </urlset>
