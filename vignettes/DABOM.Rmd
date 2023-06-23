@@ -183,7 +183,8 @@ One of the assumptions in the DABOM model is that fish are making a one-way upst
 We've identified the output from PTAGIS provided by `PITcleanr` (`ptagis_file`). Now we can compress those observations and prepare them for DABOM. Note that in the `prepWrapper` function, we have added the detection nodes (not just site codes) to the parent-child table, using the `addParentChildNodes` function from `PITcleanr`. The `prepWrapper` function also includes a minimum and maximum observed date (`min_obs_date` and `max_obs_date`, in `YYYYMMDD` format) so the user can filter out observations before a certain date (e.g. detections of fish marked as juveniles, detections at mainstem dams prior to reaching the release point, etc.) and after a certain date (e.g. detections of kelts swimming downstream after spawning, carcasses drifting downstream after spawning, ghost detections in subsequent years, etc.). 
 
 ```{r dabom-prep}
-prepped_ch = PITcleanr::prepWrapper(ptagis_file = ptagis_file,
+prepped_ch = PITcleanr::prepWrapper(cth_file = ptagis_file,
+                                    file_type = "PTAGIS",
                                     configuration = configuration,
                                     parent_child = parent_child %>%
                                       addParentChildNodes(configuration = configuration),
@@ -210,17 +211,18 @@ filter_ch = prepped_ch %>%
 This step may be easier to perform outside of R. The `prepWrapper` function has the ability to save the output to a .csv or .xlsx file which the user can then open with other software, such as Excel. Once the user has replaced all the `NA`s or blanks in the `user_keep_obs` column with `TRUE` or `FALSE`, they can read that file back into R. The code to do this looks like this:
 
 ```{r, eval = F}
-prepped_ch = PITcleanr::prepWrapper(ptagis_file = ptagis_file,
+prepped_ch = PITcleanr::prepWrapper(cth_file = ptagis_file,
+                                    file_type = "PTAGIS",
                                     configuration = configuration,
                                     parent_child = parent_child %>%
                                       addParentChildNodes(configuration = configuration),
                                     min_obs_date = "20150301",
                                     max_obs_date = "20150930",
                                     save_file = T,
-                                    file_name = "C:/Users/usernamehere/Desktop/PITcleanr_output.xlsx")
+                                    file_name = "C:/Users/USERNAME/Desktop/PITcleanr_output.xlsx")
 
 # after the user has ensured all the user_keep_obs rows are TRUE or FALSE
-filter_ch = readxl::read_excel("C:/Users/usernamehere/Desktop/PITcleanr_output.xlsx") %>%
+filter_ch = readxl::read_excel("C:/Users/USERNAME/Desktop/PITcleanr_output.xlsx") %>%
   filter(user_keep_obs)
 ```
 
