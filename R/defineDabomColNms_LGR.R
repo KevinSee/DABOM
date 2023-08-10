@@ -24,35 +24,43 @@ defineDabomColNms_LGR = function(root_site = NA,
   site_order = PITcleanr::buildNodeOrder(parent_child)
 
   if(root_site == "GRA") {
-    bottom_sites = list(Tucannon = "LTR",
-                        Penawawa = "PENAWC",
-                        Almota = "ALMOTC",
-                        Alpowa = "ALPOWC",
-                        Asotin = "ACM",
-                        TenMileCreek = "TENMC2",
-                        Lapwai = "LAP",
-                        Potlatch = "JUL",
-                        JosephCreek = c("JOC", "JOSEPC"),
-                        CowCreek = "COC",
-                        ImnahaRiver = "IR1",
-                        Lolo = "LC1",
-                        SFClearwater = "SC1",
-                        Wenaha = "WEN",
-                        ClearCreek = c("CLC", "KOOS"),
-                        Lochsa = "LRL",
-                        Selway = "SW1",
-                        LookingGlass = "LOOKGC",
-                        Wallowa = "WR1",
-                        GrandeRonde = "UGR",
-                        RapidRiver = "RAPH",
-                        SFSalmon = "SFG",
-                        Panther = "PCA",
-                        BigCreek = "TAY",
-                        NFSalmon = "NFS",
-                        CarmenCreek = "CRC",
-                        Lemhi = "LLR",
-                        UpperSalmon = "USE",
-                        BearValley = "BRC")
+
+    tmp = site_order %>%
+      filter(node_order == 2) %>%
+      pull(node)
+
+    bottom_sites = as.list(tmp)
+    names(bottom_sites) = tmp
+
+    # bottom_sites = list(Tucannon = "LTR",
+    #                     Penawawa = "PENAWC",
+    #                     Almota = "ALMOTC",
+    #                     Alpowa = "ALPOWC",
+    #                     Asotin = "ACM",
+    #                     TenMileCreek = "TENMC2",
+    #                     Lapwai = "LAP",
+    #                     Potlatch = "JUL",
+    #                     JosephCreek = c("JOC", "JOSEPC"),
+    #                     CowCreek = "COC",
+    #                     ImnahaRiver = "IR1",
+    #                     Lolo = "LC1",
+    #                     SFClearwater = "SC1",
+    #                     Wenaha = "WEN",
+    #                     ClearCreek = c("CLC", "KOOS"),
+    #                     Lochsa = "LRL",
+    #                     Selway = "SW1",
+    #                     LookingGlass = "LOOKGC",
+    #                     Wallowa = "WR1",
+    #                     GrandeRonde = "UGR",
+    #                     RapidRiver = "RAPH",
+    #                     SFSalmon = "SFG",
+    #                     Panther = "PCA",
+    #                     BigCreek = "TAY",
+    #                     NFSalmon = "NFS",
+    #                     CarmenCreek = "CRC",
+    #                     Lemhi = "LLR",
+    #                     UpperSalmon = "USE",
+    #                     BearValley = "BRC")
   } else if(root_site == "PRA") {
     bottom_sites = list(BelowPriest = c("JDA", "ICH", "RSH", "PRH", "JD1", "PRO", "TMF", "PRV"),
                         Wenatchee = "LWE",
