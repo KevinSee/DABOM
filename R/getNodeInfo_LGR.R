@@ -31,9 +31,9 @@ getNodeInfo_LGR = function(parent_child = NULL,
     mutate(n_child = n_distinct(child))
 
   # get the column names of the capture history matrix
-  col_nms = defineDabomColNms(root_site = root_site,
-                              parent_child = parent_child,
-                              configuration = configuration) %>%
+  col_nms = defineDabomColNms_LGR(root_site = root_site,
+                                  parent_child = parent_child,
+                                  configuration = configuration) %>%
     unlist() %>%
     as.vector()
 
@@ -42,9 +42,10 @@ getNodeInfo_LGR = function(parent_child = NULL,
   node_info = configuration %>%
     # filter(node %in% unique(c(pc_nodes$parent, pc_nodes$child))) %>%
     filter(node %in% pc_nodes$child) %>%
-    mutate(node_site = if_else(nchar(node) >= 5 & (grepl("A0$", node) | grepl("B0$", node)),
-                               stringr::str_remove(stringr::str_remove(node, "A0$"), "B0$"),
-                               node)) %>%
+    # mutate(node_site = if_else(nchar(node) >= 5 & (grepl("A0$", node) | grepl("B0$", node)),
+    #                            stringr::str_remove(stringr::str_remove(node, "A0$"), "B0$"),
+    #                            node)) %>%
+    mutate(node_site = stringr::str_remove(node, '_.')) %>%
     group_by(site_code = node_site) %>%
     summarise(n_nodes = n_distinct(node),
               node = list(unique(node)),
