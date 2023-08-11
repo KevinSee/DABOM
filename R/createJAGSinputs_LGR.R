@@ -44,10 +44,10 @@ createJAGSinputs_LGR = function(filter_ch = NULL,
     as.vector()
 
   # create capture history
-  cap_hist = createDABOMcapHist(filter_ch = filter_ch,
-                                parent_child = parent_child,
-                                configuration = configuration,
-                                split_matrices = F)
+  cap_hist = createDABOMcapHist_LGR(filter_ch = filter_ch,
+                                    parent_child = parent_child,
+                                    configuration = configuration,
+                                    split_matrices = F)
 
   # what kind of fish (wild or hatchery)
   fish_type = cap_hist %>%
