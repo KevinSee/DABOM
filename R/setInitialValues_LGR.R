@@ -6,7 +6,7 @@
 #'
 #' @inheritParams createDABOMcapHist
 #'
-#' @import dplyr stringr tidyr rlang PITcleanr
+#' @import dplyr stringr tidyr rlang PITcleanr tibble
 #' @export
 #' @return function
 #' @examples setInitialValues_LGR()
@@ -43,7 +43,7 @@ setInitialValues_LGR = function(filter_ch,
     map(.f = function(x) x + 1)
 
   # look at estimated spawn location, and the sites tag must have crossed to get there
-  spawn_node = estimateFinalLoc(filter_ch) %>%
+  spawn_node = estimateSpawnLoc_LGR(filter_ch) %>%
     select(tag_code, spawn_node) %>%
     distinct() %>%
     mutate(spawn_site = if_else(grepl("B0$", spawn_node) &
@@ -90,8 +90,8 @@ setInitialValues_LGR = function(filter_ch,
               by = c("site_code", "lead_site")) %>%
     left_join(n_branch_list %>%
                 unlist() %>%
-                enframe(name = "site_code",
-                        value = "max_branch"),
+                tibble::enframe(name = "site_code",
+                                value = "max_branch"),
               by = "site_code") %>%
     mutate(child_num = if_else(is.na(child_num) & !is.na(max_branch),
                                as.integer(max_branch),
