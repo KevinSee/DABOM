@@ -103,7 +103,7 @@ defineDabomColNms_LGR = function(root_site = NA,
                   by = "child") %>%
         distinct() %>%
         filter(!is.na(parent)) %>%
-        PITcleanr::addParentChildNodes_LGR(configuration) %>%
+        PITcleanr::addParentChildNodes(configuration) %>%
         select(node = child,
                # node_hydro = child_hydro,
                node_rkm = child_rkm) %>%

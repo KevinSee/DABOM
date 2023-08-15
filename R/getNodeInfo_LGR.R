@@ -21,8 +21,8 @@ getNodeInfo_LGR = function(parent_child = NULL,
     pull(node)
 
   # add nodes to parent-child table
-  pc_nodes = addParentChildNodes_LGR(parent_child,
-                                     configuration = configuration)
+  pc_nodes = addParentChildNodes(parent_child,
+                                 configuration = configuration)
 
 
   # how many child sites does each parent site have?
@@ -42,9 +42,9 @@ getNodeInfo_LGR = function(parent_child = NULL,
   node_info = configuration %>%
     # filter(node %in% unique(c(pc_nodes$parent, pc_nodes$child))) %>%
     filter(node %in% pc_nodes$child) %>%
-    # mutate(node_site = if_else(nchar(node) >= 5 & (grepl("A0$", node) | grepl("B0$", node)),
-    #                            stringr::str_remove(stringr::str_remove(node, "A0$"), "B0$"),
-    #                            node)) %>%
+    mutate(node_site = if_else(nchar(node) >= 5 & (grepl("A0$", node) | grepl("B0$", node)),
+                               stringr::str_remove(stringr::str_remove(node, "A0$"), "B0$"),
+                               node)) %>%
     mutate(node_site = stringr::str_remove(node, '_.')) %>%
     group_by(site_code = node_site) %>%
     summarise(n_nodes = n_distinct(node),
