@@ -4,7 +4,12 @@
 \alias{defineDabomColNms}
 \title{Define Column Names for DABOM matrix}
 \usage{
-defineDabomColNms(root_site = NA, parent_child, configuration)
+defineDabomColNms(
+  root_site = NA,
+  parent_child,
+  configuration,
+  second_node = TRUE
+)
 }
 \arguments{
 \item{root_site}{determines which version of DABOM the user is running.}
@@ -12,6 +17,10 @@ defineDabomColNms(root_site = NA, parent_child, configuration)
 \item{parent_child}{parent-child table. Could be created from `buildParentChild()` from `PITcleanr` package.}
 
 \item{configuration}{configuration file. Could be created from `buildConfig()` from `PITcleanr` package.}
+
+\item{second_node}{if `root_site =` "GRA", should `bottom_sites` be defined using the second order nodes above GRA
+(i.e., `node_order == 2`). Default is `TRUE`; otherwise `bottom_sites` should be defined within the `defineDabomColNms()`
+function}
 }
 \description{
 based on a parent-child table, this returns a vector of nodes to help create a consistent

@@ -8,6 +8,9 @@
 #' @param root_site determines which version of DABOM the user is running.
 #' @param parent_child parent-child table. Could be created from `buildParentChild()` from `PITcleanr` package.
 #' @param configuration configuration file. Could be created from `buildConfig()` from `PITcleanr` package.
+#' @param second_node if `root_site =` "GRA", should `bottom_sites` be defined using the second order nodes above GRA
+#' (i.e., `node_order == 2`). Default is `TRUE`; otherwise `bottom_sites` should be defined within the `defineDabomColNms()`
+#' function
 #'
 #' @import dplyr purrr PITcleanr
 #' @importFrom magrittr %<>%
@@ -17,42 +20,55 @@
 
 defineDabomColNms = function(root_site = NA,
                              parent_child,
-                             configuration) {
+                             configuration,
+                             second_node = TRUE) {
 
   # root_site = match.arg(root_site)
 
   site_order = PITcleanr::buildNodeOrder(parent_child)
 
   if(root_site == "GRA") {
-    bottom_sites = list(Tucannon = "LTR",
-                        Penawawa = "PENAWC",
-                        Almota = "ALMOTC",
-                        Alpowa = "ALPOWC",
-                        Asotin = "ACM",
-                        TenMileCreek = "TENMC2",
-                        Lapwai = "LAP",
-                        Potlatch = "JUL",
-                        JosephCreek = c("JOC", "JOSEPC"),
-                        CowCreek = "COC",
-                        ImnahaRiver = "IR1",
-                        Lolo = "LC1",
-                        SFClearwater = "SC1",
-                        Wenaha = "WEN",
-                        ClearCreek = c("CLC", "KOOS"),
-                        Lochsa = "LRL",
-                        Selway = "SW1",
-                        LookingGlass = "LOOKGC",
-                        Wallowa = "WR1",
-                        GrandeRonde = "UGR",
-                        RapidRiver = "RAPH",
-                        SFSalmon = "SFG",
-                        Panther = "PCA",
-                        BigCreek = "TAY",
-                        NFSalmon = "NFS",
-                        CarmenCreek = "CRC",
-                        Lemhi = "LLR",
-                        UpperSalmon = "USE",
-                        BearValley = "BRC")
+
+    if(second_node == TRUE) {
+      # use second order nodes
+      tmp = site_order %>%
+        filter(node_order == 2) %>%
+        pull(node)
+
+      bottom_sites = as.list(tmp)
+      names(bottom_sites) = tmp
+    } else if(second_node == FALSE) {
+      # define bottom sites by hand
+      bottom_sites = list(Tucannon = "LTR",
+                          Penawawa = "PENAWC",
+                          Almota = "ALMOTC",
+                          Alpowa = "ALPOWC",
+                          Asotin = "ACM",
+                          TenMileCreek = "TENMC2",
+                          Lapwai = "LAP",
+                          Potlatch = "JUL",
+                          JosephCreek = c("JOC", "JOSEPC"),
+                          CowCreek = "COC",
+                          ImnahaRiver = "IR1",
+                          Lolo = "LC1",
+                          SFClearwater = "SC1",
+                          Wenaha = "WEN",
+                          ClearCreek = c("CLC", "KOOS"),
+                          Lochsa = "LRL",
+                          Selway = "SW1",
+                          LookingGlass = "LOOKGC",
+                          Wallowa = "WR1",
+                          GrandeRonde = "UGR",
+                          RapidRiver = "RAPH",
+                          SFSalmon = "SFG",
+                          Panther = "PCA",
+                          BigCreek = "TAY",
+                          NFSalmon = "NFS",
+                          CarmenCreek = "CRC",
+                          Lemhi = "LLR",
+                          UpperSalmon = "USE",
+                          BearValley = "BRC")
+    } # end if second_node
   } else if(root_site == "PRA") {
     bottom_sites = list(BelowPriest = c("JDA", "ICH", "RSH", "PRH", "JD1", "PRO", "TMF", "PRV"),
                         Wenatchee = "LWE",
