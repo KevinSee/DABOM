@@ -31,9 +31,9 @@ getNodeInfo_LGR = function(parent_child = NULL,
     mutate(n_child = n_distinct(child))
 
   # get the column names of the capture history matrix
-  col_nms = defineDabomColNms_LGR(root_site = root_site,
-                                  parent_child = parent_child,
-                                  configuration = configuration) %>%
+  col_nms = defineDabomColNms(root_site = root_site,
+                              parent_child = parent_child,
+                              configuration = configuration) %>%
     unlist() %>%
     as.vector()
 
