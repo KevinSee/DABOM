@@ -42,8 +42,8 @@ getNodeInfo = function(parent_child = NULL,
   node_info = configuration %>%
     # filter(node %in% unique(c(pc_nodes$parent, pc_nodes$child))) %>%
     filter(node %in% pc_nodes$child) %>%
-    mutate(node_site = if_else(nchar(node) >= 5 & (grepl("U$", node) | grepl("D$", node)),
-                               stringr::str_remove(stringr::str_remove(node, "U$"), "D$"),
+    mutate(node_site = if_else(nchar(node) >= 5 & (grepl("_U$", node) | grepl("_D$", node)),
+                               stringr::str_remove(stringr::str_remove(node, "_U$"), "_D$"),
                                node)) %>%
     group_by(site_code = node_site) %>%
     summarise(n_nodes = n_distinct(node),
