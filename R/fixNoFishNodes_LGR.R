@@ -51,7 +51,7 @@ fixNoFishNodes_LGR = function(init_file = NULL,
                   0)) %>%
     mutate(tags_det = if_else(n_tags > 0, T, F)) %>%
     left_join(parent_child %>%
-                PITcleanr::addParentChildNodes_LGR(configuration) %>%
+                PITcleanr::addParentChildNodes(configuration) %>%
                 PITcleanr::buildNodeOrder(),
               by = "node")
 
