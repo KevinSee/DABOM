@@ -46,13 +46,13 @@ setInitialValues_LGR = function(filter_ch,
   spawn_node = estimateSpawnLoc_LGR(filter_ch) %>%
     select(tag_code, spawn_node) %>%
     distinct() %>%
-    mutate(spawn_site = if_else(grepl("B0$", spawn_node) &
+    mutate(spawn_site = if_else(grepl("D$", spawn_node) &
                                   nchar(spawn_node) >= 5,
-                                str_remove(spawn_node, "B0"),
+                                str_remove(spawn_node, "D"),
                                 spawn_node),
-           spawn_site = if_else(grepl("A0$", spawn_site) &
+           spawn_site = if_else(grepl("U$", spawn_site) &
                                   nchar(spawn_site) >= 5,
-                                str_remove(spawn_site, "A0"),
+                                str_remove(spawn_site, "U"),
                                 spawn_site)) %>%
     left_join(no %>%
                 select(spawn_node = node,
@@ -64,13 +64,13 @@ setInitialValues_LGR = function(filter_ch,
                 select(node,
                        node_order),
               by = "node") %>%
-    mutate(site_code = if_else(grepl("B0$", node) &
+    mutate(site_code = if_else(grepl("D$", node) &
                                  nchar(node) >= 5,
-                               str_remove(node, "B0"),
+                               str_remove(node, "D"),
                                node),
-           site_code = if_else(grepl("A0$", site_code) &
+           site_code = if_else(grepl("U$", site_code) &
                                  nchar(site_code) >= 5,
-                               str_remove(site_code, "A0"),
+                               str_remove(site_code, "U"),
                                site_code)) %>%
     arrange(tag_code, node_order)
 
