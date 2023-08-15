@@ -7,6 +7,7 @@
 #' @inheritParams createDABOMcapHist
 #'
 #' @import dplyr stringr tidyr rlang PITcleanr
+#' @import tibble enframe
 #' @export
 #' @return function
 #' @examples setInitialValues()
@@ -90,8 +91,8 @@ setInitialValues = function(filter_ch,
               by = c("site_code", "lead_site")) %>%
     left_join(n_branch_list %>%
                 unlist() %>%
-                enframe(name = "site_code",
-                        value = "max_branch"),
+                tibble::enframe(name = "site_code",
+                                value = "max_branch"),
               by = "site_code") %>%
     mutate(child_num = if_else(is.na(child_num) & !is.na(max_branch),
                                as.integer(max_branch),
