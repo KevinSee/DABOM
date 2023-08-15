@@ -46,13 +46,13 @@ setInitialValues = function(filter_ch,
   spawn_node = estimateSpawnLoc(filter_ch) %>%
     select(tag_code, spawn_node) %>%
     distinct() %>%
-    mutate(spawn_site = if_else(grepl("D$", spawn_node) &
+    mutate(spawn_site = if_else(grepl("_D$", spawn_node) &
                                   nchar(spawn_node) >= 5,
-                                str_remove(spawn_node, "D"),
+                                str_remove(spawn_node, "_D"),
                                 spawn_node),
-           spawn_site = if_else(grepl("U$", spawn_site) &
+           spawn_site = if_else(grepl("_U$", spawn_site) &
                                   nchar(spawn_site) >= 5,
-                                str_remove(spawn_site, "U"),
+                                str_remove(spawn_site, "_U"),
                                 spawn_site)) %>%
     left_join(no %>%
                 select(spawn_node = node,
@@ -64,13 +64,13 @@ setInitialValues = function(filter_ch,
                 select(node,
                        node_order),
               by = "node") %>%
-    mutate(site_code = if_else(grepl("D$", node) &
+    mutate(site_code = if_else(grepl("_D$", node) &
                                  nchar(node) >= 5,
-                               str_remove(node, "D"),
+                               str_remove(node, "_D"),
                                node),
-           site_code = if_else(grepl("U$", site_code) &
+           site_code = if_else(grepl("_U$", site_code) &
                                  nchar(site_code) >= 5,
-                               str_remove(site_code, "U"),
+                               str_remove(site_code, "_U"),
                                site_code)) %>%
     arrange(tag_code, node_order)
 
