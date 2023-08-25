@@ -43,8 +43,9 @@ setInitialValues = function(filter_ch,
     map(.f = function(x) x + 1)
 
   # look at estimated spawn location, and the sites tag must have crossed to get there
-  spawn_node = estimateSpawnLoc(filter_ch) %>%
-    select(tag_code, spawn_node) %>%
+  spawn_node = estimateFinalLoc(filter_ch) %>%
+    select(tag_code,
+           spawn_node = final_node) %>%
     distinct() %>%
     mutate(spawn_site = if_else(grepl("B0$", spawn_node) &
                                   nchar(spawn_node) >= 5,
