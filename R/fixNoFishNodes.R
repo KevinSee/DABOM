@@ -47,8 +47,7 @@ fixNoFishNodes = function(init_file = NULL,
               by = "node") %>%
     filter(!is.na(site_code)) %>%
     mutate(across(starts_with("n_tags"),
-                  tidyr::replace_na,
-                  0)) %>%
+                  ~ (tidyr::replace_na(., 0)))) %>%
     mutate(tags_det = if_else(n_tags > 0, T, F)) %>%
     left_join(parent_child %>%
                 PITcleanr::addParentChildNodes(configuration) %>%
@@ -196,12 +195,12 @@ fixNoFishNodes = function(init_file = NULL,
                                                      "W" = 1,
                                                      "H" = 2)) %>%
                               rename(upstrm_node = node),
-                            by = c("upstrm_node")) %>%
-                  group_by(site_code, origin) %>%
+                            by = c("upstrm_node"),
+                            relationship = "many-to-many") %>%
+                  group_by(site_code) %>%
                   summarise(upstrm_tags = sum(n_tags),
                             .groups = "drop"),
-                by = c("site_code",
-                       "origin")) %>%
+                by = c("site_code")) %>%
       filter(upstrm_tags == 0) %>%
       mutate(mod_str = paste0("phi_", site_code, "\\[", origin, "\\]"))
 
@@ -213,7 +212,7 @@ fixNoFishNodes = function(init_file = NULL,
         mod_file[str_which(mod_file, paste0(phi_0_nodes$mod_str[i], " ~"))] = paste0('\t ', phi_0_nodes$param[i], ' <- 0 # no upstream detections')
       }
 
-      cat(paste('\nFixed movement upstream of the following sites to 0 for at least one fish type because no detections upstream:\n\t', paste(unique(phi_0_nodes$site_code), collapse = ', '), '.\n\n'))
+      cat(paste('\nFixed movement upstream of the following sites to 0 because no detections upstream:\n\t', paste(unique(phi_0_nodes$site_code), collapse = ', '), '.\n\n'))
     }
 
   }
