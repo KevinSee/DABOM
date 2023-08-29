@@ -120,7 +120,8 @@ defineDabomColNms = function(root_site = NA,
                # node_hydro = child_hydro,
                node_rkm = child_rkm) %>%
         arrange(node_rkm,
-                desc(node))
+                node)
+                #desc(node)) # not sure why this was desc()
     }) %>%
     map(.f = function(x) {
       pull(x, node)
