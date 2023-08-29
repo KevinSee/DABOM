@@ -7,7 +7,7 @@
 #' @inheritParams createDABOMcapHist
 #'
 #' @import dplyr stringr tidyr rlang PITcleanr
-#' @import tibble enframe
+#' @importFrom tibble enframe
 #' @export
 #' @return function
 #' @examples setInitialValues()
