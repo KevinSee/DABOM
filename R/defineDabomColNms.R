@@ -8,8 +8,7 @@
 #' @param root_site determines which version of DABOM the user is running.
 #' @param parent_child parent-child table. Could be created from `buildParentChild()` from `PITcleanr` package.
 #' @param configuration configuration file. Could be created from `buildConfig()` from `PITcleanr` package.
-#' @param second_node if `root_site =` "GRA", should `bottom_sites` be defined using the second order nodes above GRA
-#' (i.e., `node_order == 2`). Default is `TRUE`; otherwise `bottom_sites` should be defined within the `defineDabomColNms()`
+#' @param second_node Default option is `TRUE` which defines the `bottom_sites` as the second order nodes above the `root_site`, (i.e., `node_order == 2`). If `FALSE`, some sites are hard-coded depending on what the `root_site` is set to.  Default is `TRUE`; otherwise `bottom_sites` should be defined within the `defineDabomColNms()`
 #' function
 #'
 #' @import dplyr purrr PITcleanr
@@ -110,18 +109,38 @@ defineDabomColNms = function(root_site = NA,
         })
     }) %>%
     map(.f = function(x) {
-      x %>%
+      # x %>%
+      #   rename(child = node) %>%
+      #   left_join(parent_child,
+      #             by = "child") %>%
+      #   distinct() %>%
+      #   filter(!is.na(parent)) %>%
+      #   PITcleanr::addParentChildNodes(configuration) %>%
+      #   select(node = child,
+      #          # node_hydro = child_hydro,
+      #          node_rkm = child_rkm) %>%
+      #   arrange(node_rkm,
+      #           desc(node))
+
+      pc <-
+        x %>%
         rename(child = node) %>%
         left_join(parent_child,
                   by = "child") %>%
         distinct() %>%
+        relocate(child,
+                 .after = parent) %>%
         filter(!is.na(parent)) %>%
-        PITcleanr::addParentChildNodes(configuration) %>%
-        select(node = child,
-               # node_hydro = child_hydro,
-               node_rkm = child_rkm) %>%
-        arrange(node_rkm,
-                desc(node))
+        PITcleanr::addParentChildNodes(configuration)
+
+      pc %>%
+        left_join(PITcleanr::buildNodeOrder(pc, direction = "u"),
+                  by = join_by(child == node)) %>%
+        arrange(path,
+                node_order,
+                desc(child)) |>
+        select(node = child)
+
     }) %>%
     map(.f = function(x) {
       pull(x, node)

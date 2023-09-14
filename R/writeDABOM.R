@@ -32,7 +32,7 @@ writeDABOM = function(file_name = NULL,
 
   # how many child sites does each parent site have?
   parent_info = parent_child %>%
-    group_by(parent, parent_rkm) %>%
+    group_by(parent) %>%
     mutate(n_child = n_distinct(child)) %>%
     ungroup()
 
@@ -187,8 +187,10 @@ writeDABOM = function(file_name = NULL,
       pull(parent)
 
     dwn_site_pc = parent_child %>%
-      filter(parent == parent_site) %>%
-      arrange(child_rkm)
+      left_join(PITcleanr::buildNodeOrder(parent_child),
+                by = join_by(child == node)) |>
+      arrange(path, node_order) %>%
+      filter(parent == parent_site)
 
     if(nrow(dwn_site_pc) == 1) {
       for(j in 1:nrow(node_df)) {

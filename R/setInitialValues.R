@@ -24,7 +24,8 @@ setInitialValues = function(filter_ch,
 
   # how many child sites does each parent site have?
   parent_info = parent_child %>%
-    group_by(parent, parent_rkm) %>%
+    # group_by(parent, parent_rkm) %>%
+    group_by(parent) %>%
     mutate(n_child = n_distinct(child))
 
   # determine parent site, and what branch number the tag must have taken
