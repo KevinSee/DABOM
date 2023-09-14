@@ -15,8 +15,11 @@
 getNodeInfo = function(parent_child = NULL,
                        configuration = NULL) {
 
+  # construct node order
+  node_order <- PITcleanr::buildNodeOrder(parent_child)
+
   # determine starting point (root_site)
-  root_site = PITcleanr::buildNodeOrder(parent_child) %>%
+  root_site <- node_order %>%
     filter(node_order == 1) %>%
     pull(node)
 
@@ -27,7 +30,8 @@ getNodeInfo = function(parent_child = NULL,
 
   # how many child sites does each parent site have?
   parent_info = parent_child %>%
-    group_by(parent, parent_rkm) %>%
+    # group_by(parent, parent_rkm) %>%
+    group_by(parent) %>%
     mutate(n_child = n_distinct(child))
 
   # get the column names of the capture history matrix
@@ -61,11 +65,13 @@ getNodeInfo = function(parent_child = NULL,
                        parent_site = parent),
               by = "site_code") %>%
     left_join(parent_child %>%
+                left_join(buildNodeOrder(parent_child),
+                          by = join_by(child == node)) |>
+                arrange(path, node_order) %>%
                 split(list(.$parent)) %>%
                 map_df(.id = "parent_site",
                        .f = function(x) {
                          x %>%
-                           arrange(child_rkm) %>%
                            mutate(child_num = 1:n()) %>%
                            select(site_code = child,
                                   child_num)

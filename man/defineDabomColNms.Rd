@@ -18,8 +18,7 @@ defineDabomColNms(
 
 \item{configuration}{configuration file. Could be created from `buildConfig()` from `PITcleanr` package.}
 
-\item{second_node}{if `root_site =` "GRA", should `bottom_sites` be defined using the second order nodes above GRA
-(i.e., `node_order == 2`). Default is `TRUE`; otherwise `bottom_sites` should be defined within the `defineDabomColNms()`
+\item{second_node}{Default option is `TRUE` which defines the `bottom_sites` as the second order nodes above the `root_site`, (i.e., `node_order == 2`). If `FALSE`, some sites are hard-coded depending on what the `root_site` is set to.  Default is `TRUE`; otherwise `bottom_sites` should be defined within the `defineDabomColNms()`
 function}
 }
 \description{
