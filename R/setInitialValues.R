@@ -60,7 +60,8 @@ setInitialValues = function(filter_ch,
                 select(spawn_node = node,
                        spawn_path = path),
               by = "spawn_node") %>%
-    separate_rows(spawn_path) %>%
+    separate_longer_delim(spawn_path,
+                          delim = " ") |>
     rename(node = spawn_path) %>%
     left_join(no %>%
                 select(node,
