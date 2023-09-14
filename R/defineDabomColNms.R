@@ -27,19 +27,20 @@ defineDabomColNms = function(root_site = NA,
 
   site_order = PITcleanr::buildNodeOrder(parent_child)
 
-  if(root_site == "GRA") {
+  if( second_node ) {
 
-    if( second_node == TRUE ) {
+    # use second order nodes
+    bottom_sites = site_order %>%
+      filter(node_order == 2) %>%
+      pull(node) |>
+      as.list()
 
-      # use second order nodes
-      tmp = site_order %>%
-        filter(node_order == 2) %>%
-        pull(node)
+    names(bottom_sites) = bottom_sites
+  }
 
-      bottom_sites = as.list(tmp)
-      names(bottom_sites) = tmp
+  if( !second_node ) {
 
-    } else if( second_node == FALSE ) {
+    if(root_site == "GRA") {
 
       # define bottom sites by hand
       bottom_sites = list(Tucannon = "LTR",
@@ -72,29 +73,29 @@ defineDabomColNms = function(root_site = NA,
                           UpperSalmon = "USE",
                           BearValley = "BRC")
 
-    } # end if second_node
-  } else if(root_site == "PRA") {
-    bottom_sites = list(BelowPriest = c("JDA", "ICH", "RSH", "PRH", "JD1", "PRO", "TMF", "PRV"),
-                        Wenatchee = "LWE",
-                        Entiat = c("ENL", "WEH", "EBO"),
-                        Methow = "LMR",
-                        Okanogan = "OKL")
-  } else if(root_site == "TUM") {
-    bottom_sites = list(Peshastin = "PES",
-                        Icicle = "ICL",
-                        Chiwaukum = "CHW",
-                        Chiwawa = "CHL",
-                        Nason = "NAL",
-                        WhiteRiver = "WTL",
-                        LittleWenatchee = "LWN")
-  } else if(root_site == "PRO") {
-    bottom_sites = list(Downstream = c("JDA", "ICH", "JD1", "PRA", "MCN"),
-                        Status = "SAT",
-                        Toppenish = "TOP",
-                        Sunnyside = "SUN")
+    } else if(root_site == "PRA") {
+      bottom_sites = list(BelowPriest = c("JDA", "ICH", "RSH", "PRH", "JD1", "PRO", "TMF", "PRV"),
+                          Wenatchee = "LWE",
+                          Entiat = c("ENL", "WEH", "EBO"),
+                          Methow = "LMR",
+                          Okanogan = "OKL")
+    } else if(root_site == "TUM") {
+      bottom_sites = list(Peshastin = "PES",
+                          Icicle = "ICL",
+                          Chiwaukum = "CHW",
+                          Chiwawa = "CHL",
+                          Nason = "NAL",
+                          WhiteRiver = "WTL",
+                          LittleWenatchee = "LWN")
+    } else if(root_site == "PRO") {
+      bottom_sites = list(Downstream = c("JDA", "ICH", "JD1", "PRA", "MCN"),
+                          Status = "SAT",
+                          Toppenish = "TOP",
+                          Sunnyside = "SUN")
 
-  } else {
-    bottom_sites = list(Start = root_site)
+    } else {
+      bottom_sites = list(Start = root_site)
+    }
   }
 
 
