@@ -65,7 +65,7 @@ getNodeInfo = function(parent_child = NULL,
                        parent_site = parent),
               by = "site_code") %>%
     left_join(parent_child %>%
-                left_join(buildNodeOrder(parent_child),
+                left_join(node_order,
                           by = join_by(child == node)) |>
                 arrange(path, node_order) %>%
                 split(list(.$parent)) %>%

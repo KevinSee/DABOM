@@ -21,8 +21,11 @@ writeDABOM = function(file_name = NULL,
 
   if(is.null(file_name)) file_name = 'DABOM.txt'
 
+  node_order = PITcleanr::buildNodeOrder(parent_child,
+                                         direction = "u")
+
   # determine starting point (root_site)
-  root_site = PITcleanr::buildNodeOrder(parent_child) %>%
+  root_site = node_order %>%
     filter(node_order == 1) %>%
     pull(node)
 
@@ -187,7 +190,7 @@ writeDABOM = function(file_name = NULL,
       pull(parent)
 
     dwn_site_pc = parent_child %>%
-      left_join(PITcleanr::buildNodeOrder(parent_child),
+      left_join(node_order,
                 by = join_by(child == node)) |>
       arrange(path, node_order) %>%
       filter(parent == parent_site)

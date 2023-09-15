@@ -25,6 +25,9 @@ defineDabomColNms = function(root_site = NA,
   # root_site = match.arg(root_site)
 
   site_order = PITcleanr::buildNodeOrder(parent_child)
+  node_order = parent_child |>
+    PITcleanr::addParentChildNodes(configuration) |>
+    PITcleanr::buildNodeOrder(direction = "u")
 
   if( second_node ) {
 
@@ -134,7 +137,7 @@ defineDabomColNms = function(root_site = NA,
         PITcleanr::addParentChildNodes(configuration)
 
       pc %>%
-        left_join(PITcleanr::buildNodeOrder(pc, direction = "u"),
+        left_join(node_order,
                   by = join_by(child == node)) %>%
         arrange(path,
                 node_order,
@@ -146,18 +149,20 @@ defineDabomColNms = function(root_site = NA,
       pull(x, node)
     })
 
-  if(root_site == "PRA") {
-    site_node_list$Wenatchee %<>%
-      c("RIA", "CLK", .)
+  if( !second_node ) {
+    if(root_site == "PRA") {
+      site_node_list$Wenatchee %<>%
+        c("RIA", "CLK", .)
 
-    site_node_list$Entiat %<>%
-      c("RRF", .)
+      site_node_list$Entiat %<>%
+        c("RRF", .)
 
-    site_node_list$Methow %<>%
-      c("WEA", .)
+      site_node_list$Methow %<>%
+        c("WEA", .)
 
-    site_node_list$Okanogan %<>%
-      c(., "FST")
+      site_node_list$Okanogan %<>%
+        c(., "FST")
+    }
   }
 
   site_node_list %<>%
