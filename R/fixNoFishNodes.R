@@ -47,8 +47,8 @@ fixNoFishNodes = function(init_file = NULL,
               by = "node") %>%
     filter(!is.na(site_code)) %>%
     mutate(across(starts_with("n_tags"),
-                  tidyr::replace_na,
-                  0)) %>%
+                  ~ tidyr::replace_na(.,
+                                      0))) %>%
     mutate(tags_det = if_else(n_tags > 0, T, F)) %>%
     left_join(parent_child %>%
                 PITcleanr::addParentChildNodes(configuration) %>%
@@ -186,17 +186,22 @@ fixNoFishNodes = function(init_file = NULL,
       select(param) %>%
       mutate(across(param,
                     str_trim)) %>%
-      mutate(site_code = str_remove(param, "phi_"),
-             site_code = str_split(site_code, "\\[", simplify = T)[,1]) %>%
-      mutate(origin = str_extract(param, "[:digit:]") %>%
-               as.numeric) %>%
+      mutate(site_str = str_remove(param, "phi_"),
+             site_code = str_split(site_str, "\\[", simplify = T)[,1],
+             origin = str_split(site_str, "\\[", simplify = T)[,2],
+             across(origin,
+                    ~ str_remove(., "\\]")),
+             across(origin,
+                    as.numeric)) %>%
+      select(-site_str) %>%
       left_join(upstrm_nodes %>%
                   left_join(node_tags_origin %>%
                               mutate(origin = recode(origin,
                                                      "W" = 1,
                                                      "H" = 2)) %>%
                               rename(upstrm_node = node),
-                            by = c("upstrm_node")) %>%
+                            by = c("upstrm_node"),
+                            relationship = "many-to-many") %>%
                   group_by(site_code, origin) %>%
                   summarise(upstrm_tags = sum(n_tags),
                             .groups = "drop"),
