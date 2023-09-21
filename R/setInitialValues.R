@@ -24,7 +24,8 @@ setInitialValues = function(filter_ch,
 
   # how many child sites does each parent site have?
   parent_info = parent_child %>%
-    group_by(parent, parent_rkm) %>%
+    # group_by(parent, parent_rkm) %>%
+    group_by(parent) %>%
     mutate(n_child = n_distinct(child))
 
   # determine parent site, and what branch number the tag must have taken
@@ -44,8 +45,9 @@ setInitialValues = function(filter_ch,
     map(.f = function(x) x + 1)
 
   # look at estimated spawn location, and the sites tag must have crossed to get there
-  spawn_node = estimateSpawnLoc(filter_ch) %>%
-    select(tag_code, spawn_node) %>%
+  spawn_node = estimateFinalLoc(filter_ch) %>%
+    select(tag_code,
+           spawn_node = final_node) %>%
     distinct() %>%
     mutate(spawn_site = if_else(grepl("_D$", spawn_node) &
                                   nchar(spawn_node) >= 5,
@@ -59,7 +61,8 @@ setInitialValues = function(filter_ch,
                 select(spawn_node = node,
                        spawn_path = path),
               by = "spawn_node") %>%
-    separate_rows(spawn_path) %>%
+    separate_longer_delim(spawn_path,
+                          delim = " ") |>
     rename(node = spawn_path) %>%
     left_join(no %>%
                 select(node,
