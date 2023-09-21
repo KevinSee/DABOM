@@ -112,21 +112,7 @@ defineDabomColNms = function(root_site = NA,
         })
     }) %>%
     map(.f = function(x) {
-      # x %>%
-      #   rename(child = node) %>%
-      #   left_join(parent_child,
-      #             by = "child") %>%
-      #   distinct() %>%
-      #   filter(!is.na(parent)) %>%
-      #   PITcleanr::addParentChildNodes(configuration) %>%
-      #   select(node = child,
-      #          # node_hydro = child_hydro,
-      #          node_rkm = child_rkm) %>%
-      #   arrange(node_rkm,
-      #           desc(node))
-
-      pc <-
-        x %>%
+      x %>%
         rename(child = node) %>%
         left_join(parent_child,
                   by = "child") %>%
@@ -134,14 +120,12 @@ defineDabomColNms = function(root_site = NA,
         relocate(child,
                  .after = parent) %>%
         filter(!is.na(parent)) %>%
-        PITcleanr::addParentChildNodes(configuration)
-
-      pc %>%
+        PITcleanr::addParentChildNodes(configuration) %>%
         left_join(node_order,
                   by = join_by(child == node)) %>%
         arrange(path,
                 node_order,
-                desc(child)) |>
+                desc(child)) %>%
         select(node = child)
 
     }) %>%
