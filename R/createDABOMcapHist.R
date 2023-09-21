@@ -32,39 +32,22 @@ createDABOMcapHist = function(filter_ch = NULL,
     !is.null(configuration)
   })
 
-  pc_nodes = PITcleanr::addParentChildNodes(parent_child,
-                                            configuration)
-
-  node_order = PITcleanr::buildNodeOrder(pc_nodes)
-  root_site = node_order %>%
-    filter(node_order == 1) %>%
-    pull(node)
-
-  col_nms = defineDabomColNms(root_site = root_site,
-                              parent_child = parent_child,
-                              configuration = configuration)
-
-  obs_nodes = filter_ch %>%
-    select(tag_code, node) %>%
-    distinct() %>%
-    mutate(seen = 1) %>%
-    tidyr::pivot_wider(names_from = "node",
-                       values_from = "seen",
-                       values_fill = 0)
+  col_nms <- PITcleanr::defineCapHistCols(parent_child = parent_child,
+                                          configuration = configuration)
 
   # include nodes that had no observations, to match the indexing in the DABOM JAGS model
-  dabom_df = tibble(obs_nodes,
-                    node_order %>%
-                      select(node) %>%
-                      filter(node != root_site,
-                             !node %in% names(obs_nodes)) %>%
-                      mutate(seen = 0) %>%
-                      distinct() %>%
-                      tidyr::pivot_wider(names_from = "node",
-                                         values_from = "seen",
-                                         values_fill = 0)) %>%
-    select(tag_code, matches(paste0("^", root_site, "$")), any_of(as.vector(unlist(col_nms))))
-
+  dabom_df <-
+    filter_ch %>%
+    select(tag_code, node) %>%
+    distinct() %>%
+    mutate(across(node,
+                  ~ factor(., levels = col_nms))) %>%
+    mutate(seen = 1) %>%
+    tidyr::pivot_wider(names_from = "node",
+                       names_sort = T,
+                       names_expand = T,
+                       values_from = "seen",
+                       values_fill = 0)
 
   # add the trap date
   dabom_df = dabom_df %>%
@@ -72,27 +55,32 @@ createDABOMcapHist = function(filter_ch = NULL,
                 select(tag_code, start_date) %>%
                 distinct(),
               by = "tag_code") %>%
-    select(tag_code, start_date,
-           everything()) %>%
+    relocate(start_date,
+             .after = tag_code) %>%
     arrange(tag_code)
-
-  if(sum(!node_order$node[!(node_order$node %in% root_site)] %in% names(dabom_df)) > 0) {
-    dabom_df[,node_order$node[!node_order$node %in% names(dabom_df)]] = NA
-    dabom_df = dabom_df %>%
-      select(tag_code, matches(paste0("^", root_site, "$")), any_of(as.vector(unlist(col_nms))))
-  }
-
-  # replace all NAs with 0s
-  dabom_df = dabom_df %>%
-    mutate(across(where(is.numeric),
-                  tidyr::replace_na,
-                  replace = 0))
 
   # should we split up into different matrices?
   if(!split_matrices) {
+
     return(dabom_df)
+
   } else {
-    dabom_list = col_nms %>%
+
+    pc_nodes = PITcleanr::addParentChildNodes(parent_child,
+                                              configuration)
+
+    node_order = PITcleanr::buildNodeOrder(pc_nodes)
+
+    root_site = node_order %>%
+      filter(node_order == 1) %>%
+      pull(node)
+
+    col_nms_list <- DABOM::defineDabomColNms(root_site = root_site,
+                                             parent_child = parent_child,
+                                             configuration = configuration,
+                                             second_node = F)
+
+    dabom_list = col_nms_list %>%
       map(.f = function(x) {
         y = dabom_df %>%
           select(one_of(x))
