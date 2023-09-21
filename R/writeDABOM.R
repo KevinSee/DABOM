@@ -30,8 +30,12 @@ writeDABOM = function(file_name = NULL,
     pull(node)
 
   # how many nodes does each site have, what are their names and what column are they contained in?
-  node_info = getNodeInfo(parent_child,
-                          configuration)
+  # node_info = DABOM::getNodeInfo(parent_child,
+  #                                configuration)
+
+  node_info = PITcleanr::getNodeInfo(parent_child,
+                                     configuration) |>
+    filter(site_code != root_site)
 
   # how many child sites does each parent site have?
   parent_info = parent_child %>%
@@ -120,6 +124,7 @@ writeDABOM = function(file_name = NULL,
 
     # how many children does parent site have?
     if(length(parent_site) > 0) {
+    # if(!is.na(parent_site)) {
       parent_n_child = parent_info %>%
         filter(parent == parent_site) %>%
         pull(n_child) %>%
@@ -140,6 +145,7 @@ writeDABOM = function(file_name = NULL,
 
     if(n_branch > 1) {
       if(length(child_num) > 0) {
+      # if(!is.na(child_num)) {
         if(parent_n_child == 1) {
           a_line = paste0("\t\t a_", site, "[i] ~ dcat( omega_", site, "[(eta_", parent_site, "[i] * fish_type[i] + 1), 1:(n_branch_", site, "+1)] ) \n")
         } else {
