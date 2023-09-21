@@ -132,7 +132,6 @@ defineDabomColNms = function(root_site = NA,
           select(node = child) %>%
           return()
       }
-
     }) %>%
     map(.f = function(x) {
       pull(x, node)
