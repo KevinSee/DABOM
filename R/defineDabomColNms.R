@@ -112,21 +112,26 @@ defineDabomColNms = function(root_site = NA,
         })
     }) %>%
     map(.f = function(x) {
-      x %>%
-        rename(child = node) %>%
-        left_join(parent_child,
-                  by = "child") %>%
-        distinct() %>%
-        relocate(child,
-                 .after = parent) %>%
-        filter(!is.na(parent)) %>%
-        PITcleanr::addParentChildNodes(configuration) %>%
-        left_join(node_order,
-                  by = join_by(child == node)) %>%
-        arrange(path,
-                node_order,
-                desc(child)) %>%
-        select(node = child)
+      if(nrow(x) == 0) {
+        tibble(node = NA_character_)
+      } else {
+        x %>%
+          rename(child = node) %>%
+          left_join(parent_child,
+                    by = "child") %>%
+          distinct() %>%
+          relocate(child,
+                   .after = parent) %>%
+          filter(!is.na(parent)) %>%
+          PITcleanr::addParentChildNodes(configuration) %>%
+          left_join(node_order,
+                    by = join_by(child == node)) %>%
+          arrange(path,
+                  node_order,
+                  desc(child)) %>%
+          select(node = child) %>%
+          return()
+      }
 
     }) %>%
     map(.f = function(x) {
