@@ -39,11 +39,8 @@ createJAGSinputs = function(filter_ch = NULL,
     pull(node)
 
   # get the column names of the capture history matrix
-  col_nms = defineDabomColNms(root_site = root_site,
-                              parent_child = parent_child,
-                              configuration = configuration) %>%
-    unlist() %>%
-    as.vector()
+  col_nms = PITcleanr::defineCapHistCols(parent_child = parent_child,
+                                         configuration = configuration)
 
   # create capture history
   cap_hist = createDABOMcapHist(filter_ch = filter_ch,

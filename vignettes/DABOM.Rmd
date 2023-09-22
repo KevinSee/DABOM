@@ -316,9 +316,9 @@ If the user is running a time-varying version of DABOM, they will need to add so
 ```{r time-vary-data, eval = F}
 # add data for time-varying movement 
 jags_data = c(jags_data,
-                addTimeVaryData(filter_ch = filter_ch,
-                                start_date = "20150301",
-                                end_date = "20150630"))
+              addTimeVaryData(filter_ch = filter_ch,
+                              start_date = "20150301",
+                              end_date = "20150630"))
 ```
 
 ## Set Parameters to Save
@@ -406,16 +406,11 @@ To estimate escapement past each detection point, DABOM requires two things: an 
 
 ### Compile Transition Probabilities
 
-Compiling the transition probabilities is both a matter of ensuring that the parameters from JAGS match the site codes of each detection point (so that movement past CHL is named as such), but also multiplying some transition probabilities together when appropriate. For instance, the ultimate probability that a tag moves past CHU is the probability of moving from TUM past CHL, and then from CHL past CHU. At this time, these multiplication steps are hard-coded into a few functions, one for each version of DABOM that currently exists:
-
-* Lower Granite Dam: `compileTransProbs_GRA()`
-* Priest Rapids Dam: `compileTransProbs_PRA()`
-* Tumwater Dam: `compileTransProbs_TUM()`
-* Prosser Dam: `compileTransProbs_PRO()`
+Compiling the transition probabilities is both a matter of ensuring that the parameters from JAGS match the site codes of each detection point (so that movement past CHL is named as such), but also multiplying some transition probabilities together when appropriate. For instance, the ultimate probability that a tag moves past CHU is the probability of moving from TUM past CHL, and then from CHL past CHU. These multiplication steps are done in the `compileTransProbs()` function, which takes the MCMC output from JAGS and uses the `parent-child` table to determine which parameters to multiply together. So it is a generic function that could be applied to any DABOM model a user writes. 
 
 ```{r}
-trans_df = compileTransProbs_TUM(dabom_mod = dabom_samp_tum,
-                                 parent_child = parent_child)
+trans_df = compileTransProbs(dabom_mod = dabom_samp_tum,
+                             parent_child = parent_child)
 ```
 
 The resulting tibble contains a column describing the MCMC chain that sample is from (`chain`) the overall iteration of that sample (`iter`), the origin, either one or two (`origin`), the parameter (`param`) which is coded such that the site code refers to the probability of moving past that site, and the value of the posterior sample (`value`). Some parameters end in `_bb`, which refers to the tags that moved past a particular branching node, but did not move into one of the subsequent branches. The "bb" stands for "black box", meaning we're not sure exactly what happened to those fish. They have spawned in an area above that branching node, but below upstream detection points, they may have died in that area (due to natural causes or fishing) or they may have moved downstream undetected and were not seen at any other detection sites. 
@@ -425,41 +420,45 @@ The resulting tibble contains a column describing the MCMC chain that sample is 
 In our example, at Tumwater Dam, every fish that moves upstream of the dam is physically moved upstream, after being identified as hatchery or wild. Therefore, the total escapement, by origin, at Tumwater is known precisely, with no standard error (for 2015, there were 1,086 natural origin Chinook and 1378 hatchery Chinook). The user can input that by setting up a tibble with origin and total escapement.  
 
 ```{r}
-tot_escp = tibble(origin = c(1,2),
-                    tot_escp = c(1086, 1378))
+tot_escp = tibble(origin_nm = c("Wild", "Hatchery"),
+                  origin = c(1,2),
+                  tot_escp = c(1086, 1378))
 ```
 
 Each of the transition probabilities can then be multiplied by this total escapement, resulting in posterior samples of escapement or abundance past each detection site. If there is any uncertainty in the total escapement, we recommend bootstrapping samples of the total escapement with the appropriate mean and standard error (using the same number of bootstrap samples as they have posterior samples of transition probabilities), labeling those bootstraps with an iteration number `iter` and joining them to the `trans_df` tibble by `iter` and `origin`. 
 
-We have included some code to help summarize those posteriors below, but the user could summarize the posterior samples however they wish.
+We have included some code to help summarize those posteriors below, but the user could summarize the posterior samples however they wish. 
 
 ```{r}
 escp_summ = trans_df %>%
-    left_join(tot_escp,
-              by = "origin") %>%
-    mutate(escp = tot_escp * value) %>%
-    group_by(location = param,
-             origin) %>%
-    summarise(mean = mean(escp),
-              median = median(escp),
-              mode = estMode(escp),
-              sd = sd(escp),
-              skew = moments::skewness(escp),
-              kurtosis = moments::kurtosis(escp),
-              lowerCI = coda::HPDinterval(coda::as.mcmc(escp))[,1],
-              upperCI = coda::HPDinterval(coda::as.mcmc(escp))[,2],
-              .groups = "drop") %>%
-    mutate(across(c(mean, median, mode, sd, matches('CI$')),
-                  ~ if_else(. < 0, 0, .))) %>%
-    mutate(across(c(mean, median, mode, sd, skew, kurtosis, matches('CI$')),
-                  round,
-                  digits = 2)) %>%
-    arrange(desc(origin), location)
+  left_join(tot_escp,
+            by = "origin") %>%
+  mutate(escp = tot_escp * value) %>%
+  group_by(location = param,
+           origin_nm,
+           origin) %>%
+  summarise(mean = mean(escp),
+            median = median(escp),
+            mode = estMode(escp),
+            sd = sd(escp),
+            skew = moments::skewness(escp),
+            kurtosis = moments::kurtosis(escp),
+            lowerCI = coda::HPDinterval(coda::as.mcmc(escp))[,1],
+            upperCI = coda::HPDinterval(coda::as.mcmc(escp))[,2],
+            .groups = "drop") %>%
+  mutate(across(c(mean, median, mode, sd, matches('CI$')),
+                ~ if_else(. < 0, 0, .))) %>%
+  mutate(across(c(mean, median, mode, sd, skew, kurtosis, matches('CI$')),
+                ~ round(., digits = 2))) %>%
+  arrange(desc(origin), location)
 ```
 
 ```{r, echo = F}
 escp_summ %>%
-  kable()
+  filter(str_detect(location, "^CH")) %>%
+  arrange(origin, location) %>%
+  kable(digits = 1,
+        caption = "Escapement summary statistics from a sample of locations.")
 ```
 
 ### Time-Varying Versions (GRA)
@@ -481,9 +480,9 @@ It is important to note that the user is responsible for ensuring that the strat
 
 # Updating a DABOM Model
 
-As new detection sites are installed, the current DABOM models may need to change. The user can modify the configuration file and parent-child table through R, or manually in other software like Excel and then read those files back into R. Many of the functions in the `DABOM` package will work correctly with these updated files, including `writeDABOM`, `fishNoFishNodes`, `setInitialValues`, `createJAGSinputs` and `setSavedParams`. The user can run the JAGS model, and even pull out summaries of the detection probabilities using `summariseDetectProbs`. 
+As new detection sites are installed, the current DABOM models may need to change. The user can modify the configuration file and parent-child table through R, or manually in other software like Excel and then read those files back into R. Once the configuration file and parent-child table are updated, the other functions in the `DABOM` package will work correctly with these updated files, including `writeDABOM`, `fishNoFishNodes`, `setInitialValues`, `createJAGSinputs` and `setSavedParams`. The user can run the JAGS model, and even pull out summaries of the detection probabilities using `summariseDetectProbs`, and generate transition probabilities using `compileTransProbs`.  
 
-***However***, to generate estimates of escapement, the user will need to modify the appropriate `compileTransProbs_XXX` function to ensure that transition probabilities at the new sites are multiplied appropriately. If the Lower Granite DABOM model is modified, especially if new initial branches are added, particular care should be taken when examining the results of `calcTribEscape_GRA`, in case further adjustments are needed.
+***However***, if the Lower Granite DABOM model is modified, especially if new initial branches are added, particular care should be taken when examining the results of `calcTribEscape_GRA`, in case further adjustments are needed.
 
 ```{r, echo = F}
 unlink(basic_mod_file)
