@@ -49,7 +49,8 @@ fixNoFishNodes = function(init_file = NULL,
               by = "node") %>%
     filter(!is.na(site_code)) %>%
     mutate(across(starts_with("n_tags"),
-                  ~ (tidyr::replace_na(., 0)))) %>%
+                  ~ tidyr::replace_na(.,
+                                      0))) %>%
     mutate(tags_det = if_else(n_tags > 0, T, F)) %>%
     left_join(parent_child %>%
                 PITcleanr::addParentChildNodes(configuration) %>%
