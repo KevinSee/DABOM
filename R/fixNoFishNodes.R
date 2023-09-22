@@ -10,6 +10,7 @@
 #' of every tag. If not supplied, every tag will be assigned "W".
 #'
 #' @inheritParams createDABOMcapHist
+#' @inheritParams createJAGSinputs
 #'
 #' @import dplyr stringr PITcleanr
 #' @export
@@ -21,6 +22,7 @@ fixNoFishNodes = function(init_file = NULL,
                           filter_ch = NULL,
                           parent_child = NULL,
                           configuration = NULL,
+                          by_origin = FALSE,
                           fish_origin = NULL) {
 
   stopifnot(exprs = {
@@ -186,41 +188,67 @@ fixNoFishNodes = function(init_file = NULL,
       select(param) %>%
       mutate(across(param,
                     str_trim)) %>%
-      mutate(site_str = str_remove(param, "phi_"),
-             site_code = str_split(site_str, "\\[", simplify = T)[,1],
-             origin = str_split(site_str, "\\[", simplify = T)[,2],
-             across(origin,
-                    ~ str_remove(., "\\]")),
-             across(origin,
-                    as.numeric)) %>%
-      select(-site_str) %>%
-      left_join(upstrm_nodes %>%
-                  left_join(node_tags_origin %>%
-                              mutate(origin = recode(origin,
-                                                     "W" = 1,
-                                                     "H" = 2)) %>%
-                              rename(upstrm_node = node),
-                            by = c("upstrm_node"),
-                            relationship = "many-to-many") %>%
-                  group_by(site_code, origin) %>%
-                  summarise(upstrm_tags = sum(n_tags),
-                            .groups = "drop"),
-                by = c("site_code",
-                       "origin")) %>%
-      filter(upstrm_tags == 0) %>%
-      mutate(mod_str = paste0("phi_", site_code, "\\[", origin, "\\]"))
+      mutate(site_code = str_remove(param, "phi_"),
+             site_code = str_split(site_code, "\\[", simplify = T)[,1]) %>%
+      mutate(origin = str_extract(param, "[:digit:]") %>%
+               as.numeric)
 
-    # str_which(mod_file, mod_str)
+    if(by_origin) {
+      phi_0_nodes <-
+        phi_0_nodes %>%
+        left_join(upstrm_nodes %>%
+                    left_join(node_tags_origin %>%
+                                mutate(origin = recode(origin,
+                                                       "W" = 1,
+                                                       "H" = 2)) %>%
+                                rename(upstrm_node = node),
+                              by = c("upstrm_node"),
+                              relationship = "many-to-many") %>%
+                    group_by(site_code,
+                             origin) %>%
+                    summarise(upstrm_tags = sum(n_tags),
+                              .groups = "drop"),
+                  by = c("site_code",
+                         "origin")) %>%
+        filter(upstrm_tags == 0) %>%
+        mutate(mod_str = paste0("phi_", site_code, "\\[", origin, "\\]"))
 
-    if(nrow(phi_0_nodes) > 0) {
+      if(nrow(phi_0_nodes) > 0) {
 
-      for(i in 1:nrow(phi_0_nodes)) {
-        mod_file[str_which(mod_file, paste0(phi_0_nodes$mod_str[i], " ~"))] = paste0('\t ', phi_0_nodes$param[i], ' <- 0 # no upstream detections')
+        for(i in 1:nrow(phi_0_nodes)) {
+          mod_file[str_which(mod_file, paste0(phi_0_nodes$mod_str[i], " ~"))] = paste0('\t ', phi_0_nodes$param[i], ' <- 0 # no upstream detections')
+        }
+
+        cat(paste('\nFixed movement upstream of the following sites to 0 for at least one fish type because no detections upstream:\n\t', paste(unique(phi_0_nodes$site_code), collapse = ', '), '.\n\n'))
       }
 
-      cat(paste('\nFixed movement upstream of the following sites to 0 for at least one fish type because no detections upstream:\n\t', paste(unique(phi_0_nodes$site_code), collapse = ', '), '.\n\n'))
-    }
+    } else {
+      phi_0_nodes <-
+        phi_0_nodes %>%
+        left_join(upstrm_nodes %>%
+                    left_join(node_tags_origin %>%
+                                mutate(origin = recode(origin,
+                                                       "W" = 1,
+                                                       "H" = 2)) %>%
+                                rename(upstrm_node = node),
+                              by = c("upstrm_node"),
+                              relationship = "many-to-many") %>%
+                    group_by(site_code) %>%
+                    summarise(upstrm_tags = sum(n_tags),
+                              .groups = "drop"),
+                  by = c("site_code")) %>%
+        filter(upstrm_tags == 0) %>%
+        mutate(mod_str = paste0("phi_", site_code, "\\[", origin, "\\]"))
 
+      if(nrow(phi_0_nodes) > 0) {
+
+        for(i in 1:nrow(phi_0_nodes)) {
+          mod_file[str_which(mod_file, paste0(phi_0_nodes$mod_str[i], " ~"))] = paste0('\t ', phi_0_nodes$param[i], ' <- 0 # no upstream detections')
+        }
+
+        cat(paste('\nFixed movement upstream of the following sites to 0 because no detections upstream:\n\t', paste(unique(phi_0_nodes$site_code), collapse = ', '), '.\n\n'))
+      }
+    }
   }
 
   writeLines(mod_file, mod_conn_new)
