@@ -9,21 +9,34 @@
 #'
 #' @import dplyr tidyr purrr stringr coda
 #' @importFrom PITcleanr buildPaths
+#' @importFrom PITcleanr getNodeInfo
 #' @export
 #' @return NULL
 #' @examples #compileTransProbs()
 
 compileTransProbs = function(dabom_mod = NULL,
-                             parent_child = NULL) {
+                             parent_child = NULL,
+                             configuration = NULL) {
 
   stopifnot(!is.null(dabom_mod),
-            !is.null(parent_child))
+            !is.null(parent_child),
+            !is.null(configuration))
 
   # make sure dabom_mod is mcmc.list
   if(class(dabom_mod) == 'jagsUI') dabom_mod = dabom_mod$samples
 
   stopifnot(!is.null(dabom_mod),
             class(dabom_mod) %in% c('mcmc', 'mcmc.list'))
+
+  node_info = PITcleanr::getNodeInfo(parent_child,
+                                     configuration) |>
+    select(parent = parent_site,
+           child = site_code,
+           brnch_num = child_num) |>
+    distinct() |>
+    arrange(parent,
+            brnch_num)
+
 
   trans_mat = as.matrix(dabom_mod,
                         iters = T,
@@ -56,12 +69,14 @@ compileTransProbs = function(dabom_mod = NULL,
       dplyr::across(
         brnch_num,
         ~ replace_na(., 1))) %>%
-    dplyr::left_join(parent_child %>%
-                       dplyr::group_by(parent) %>%
-                       dplyr::arrange(child_rkm) %>%
-                       dplyr::mutate(brnch_num = 1:n()) %>%
-                       dplyr::select(parent, child, brnch_num),
-                     by = c("parent", "brnch_num")) %>%
+    dplyr::left_join(node_info,
+                     by = join_by(parent, brnch_num)) %>%
+    # dplyr::left_join(parent_child %>%
+    #                    dplyr::group_by(parent) %>%
+    #                    dplyr::arrange(child_rkm) %>%
+    #                    dplyr::mutate(brnch_num = 1:n()) %>%
+    #                    dplyr::select(parent, child, brnch_num),
+    #                  by = c("parent", "brnch_num")) %>%
     dplyr::mutate(child = dplyr::if_else(is.na(child),
                                          paste0(parent, '_bb'),
                                          child))
