@@ -53,7 +53,6 @@ reference:
   - defineDabomColNms
   - defineRepGrps_GRA
   - estMode
-  - getNodeInfo
   - setBranchNums
 - title: Deprecated functions
   desc: |
