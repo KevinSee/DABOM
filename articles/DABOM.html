@@ -40,7 +40,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">DABOM</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.0.0</span>
       </span>
     </div>
 
@@ -79,7 +79,7 @@
       <h1 data-toc-skip>Running DABOM</h1>
                         <h4 data-toc-skip class="author">Kevin See</h4>
             
-            <h4 data-toc-skip class="date">23 June, 2023</h4>
+            <h4 data-toc-skip class="date">13 December, 2023</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/KevinSee/DABOM/blob/HEAD/vignettes/DABOM.Rmd" class="external-link"><code>vignettes/DABOM.Rmd</code></a></small>
       <div class="hidden name"><code>DABOM.Rmd</code></div>
@@ -170,17 +170,17 @@
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">ptagis_file</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
-<span>                          <span class="st">"TUM_Chinook_2015.csv"</span>,</span>
+<span>                          <span class="st">"TUM_chnk_cth_2018.csv"</span>,</span>
 <span>                          package <span class="op">=</span> <span class="st">"PITcleanr"</span>,</span>
 <span>                          mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">config_file</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
-<span>                          <span class="st">"configuration_TUM.csv"</span>,</span>
+<span>                          <span class="st">"TUM_configuration.csv"</span>,</span>
 <span>                          package <span class="op">=</span> <span class="st">"PITcleanr"</span>,</span>
 <span>                          mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">parent_child_file</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
-<span>                                <span class="st">"parent_child_TUM.csv"</span>,</span>
+<span>                                <span class="st">"TUM_parent_child.csv"</span>,</span>
 <span>                                package <span class="op">=</span> <span class="st">"PITcleanr"</span>,</span>
 <span>                                mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
@@ -235,23 +235,23 @@ Graphical representation of the parent-child table, showing which sites are upst
 <span>                                    configuration <span class="op">=</span> <span class="va">configuration</span>,</span>
 <span>                                    parent_child <span class="op">=</span> <span class="va">parent_child</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>                                      <span class="fu"><a href="https://kevinsee.github.io/PITcleanr/reference/addParentChildNodes.html" class="external-link">addParentChildNodes</a></span><span class="op">(</span>configuration <span class="op">=</span> <span class="va">configuration</span><span class="op">)</span>,</span>
-<span>                                    min_obs_date <span class="op">=</span> <span class="st">"20150301"</span>,</span>
-<span>                                    max_obs_date <span class="op">=</span> <span class="st">"20150930"</span><span class="op">)</span></span></code></pre></div>
+<span>                                    min_obs_date <span class="op">=</span> <span class="st">"20180301"</span>,</span>
+<span>                                    max_obs_date <span class="op">=</span> <span class="st">"20180930"</span><span class="op">)</span></span></code></pre></div>
 <p>The first 10 rows of the <code>prepped_ch</code> file look like:</p>
-<table style="width:100%;" class="table">
+<table class="table">
 <colgroup>
-<col width="6%">
+<col width="7%">
 <col width="2%">
 <col width="2%">
 <col width="7%">
 <col width="3%">
 <col width="9%">
 <col width="9%">
-<col width="6%">
-<col width="8%">
+<col width="4%">
+<col width="7%">
 <col width="9%">
 <col width="5%">
-<col width="12%">
+<col width="13%">
 <col width="4%">
 <col width="6%">
 <col width="6%">
@@ -275,16 +275,16 @@ Graphical representation of the parent-child table, showing which sites are upst
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left">384.3B239AD241</td>
+<td align="left">384.3B239AC47B</td>
 <td align="left">TUM</td>
 <td align="right">1</td>
 <td align="left">Recapture</td>
 <td align="right">1</td>
-<td align="left">2015-06-05 23:59:00</td>
-<td align="left">2015-06-05 23:59:00</td>
-<td align="left">0.00 mins</td>
-<td align="left">4.178667e+02 mins</td>
-<td align="left">2015-06-05 23:59:00</td>
+<td align="left">2018-06-16 15:26:31</td>
+<td align="left">2018-06-16 15:26:31</td>
+<td align="left">0 mins</td>
+<td align="left">184.0167 mins</td>
+<td align="left">2018-06-16 15:26:31</td>
 <td align="right">1</td>
 <td align="left">TUM</td>
 <td align="left">start</td>
@@ -292,157 +292,157 @@ Graphical representation of the parent-child table, showing which sites are upst
 <td align="left">TRUE</td>
 </tr>
 <tr class="even">
-<td align="left">384.3B239AD241</td>
-<td align="left">NALB0</td>
+<td align="left">384.3B239AC47B</td>
+<td align="left">UWE</td>
 <td align="right">2</td>
 <td align="left">Observation</td>
 <td align="right">1</td>
-<td align="left">2015-06-12 01:36:38</td>
-<td align="left">2015-06-12 01:36:38</td>
-<td align="left">0.00 mins</td>
-<td align="left">8.737633e+03 mins</td>
-<td align="left">2015-06-05 23:59:00</td>
+<td align="left">2018-06-23 22:03:13</td>
+<td align="left">2018-06-23 22:03:13</td>
+<td align="left">0 mins</td>
+<td align="left">10476.7000 mins</td>
+<td align="left">2018-06-16 15:26:31</td>
 <td align="right">2</td>
-<td align="left">TUM NALB0</td>
+<td align="left">TUM UWE</td>
 <td align="left">forward</td>
 <td align="left">TRUE</td>
 <td align="left">TRUE</td>
 </tr>
 <tr class="odd">
-<td align="left">384.3B239AD241</td>
-<td align="left">NALA0</td>
+<td align="left">384.3B239AC47B</td>
+<td align="left">NAL_U</td>
 <td align="right">3</td>
 <td align="left">Observation</td>
 <td align="right">1</td>
-<td align="left">2015-06-12 01:36:50</td>
-<td align="left">2015-06-12 01:36:50</td>
-<td align="left">0.00 mins</td>
-<td align="left">2.000000e-01 mins</td>
-<td align="left">2015-06-05 23:59:00</td>
-<td align="right">3</td>
-<td align="left">TUM NALB0 NALA0</td>
+<td align="left">2018-07-01 00:06:16</td>
+<td align="left">2018-07-01 00:06:16</td>
+<td align="left">0 mins</td>
+<td align="left">10203.0500 mins</td>
+<td align="left">2018-06-16 15:26:31</td>
+<td align="right">4</td>
+<td align="left">TUM UWE NAL_D NAL_U</td>
 <td align="left">forward</td>
 <td align="left">TRUE</td>
 <td align="left">TRUE</td>
 </tr>
 <tr class="even">
-<td align="left">384.3B239AD241</td>
-<td align="left">NAUB0</td>
-<td align="right">4</td>
-<td align="left">Observation</td>
+<td align="left">3DD.003B9DD720</td>
+<td align="left">TUM</td>
 <td align="right">1</td>
-<td align="left">2015-06-22 00:40:37</td>
-<td align="left">2015-06-22 00:40:37</td>
-<td align="left">0.00 mins</td>
-<td align="left">1.434378e+04 mins</td>
-<td align="left">2015-06-05 23:59:00</td>
-<td align="right">4</td>
-<td align="left">TUM NALB0 NALA0 NAUB0</td>
-<td align="left">forward</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
+<td align="left">Recapture</td>
+<td align="right">1</td>
+<td align="left">2018-06-17 09:39:26</td>
+<td align="left">2018-06-17 09:39:26</td>
+<td align="left">0 mins</td>
+<td align="left">216.6500 mins</td>
+<td align="left">2018-06-17 09:39:26</td>
+<td align="right">1</td>
+<td align="left">TUM</td>
+<td align="left">start</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
 </tr>
 <tr class="odd">
-<td align="left">384.3B239AD241</td>
-<td align="left">NAUA0</td>
-<td align="right">5</td>
-<td align="left">Observation</td>
+<td align="left">3DD.003B9DD725</td>
+<td align="left">TUM</td>
+<td align="right">1</td>
+<td align="left">Recapture</td>
+<td align="right">1</td>
+<td align="left">2018-06-19 09:33:08</td>
+<td align="left">2018-06-19 09:33:08</td>
+<td align="left">0 mins</td>
+<td align="left">722.4167 mins</td>
+<td align="left">2018-06-19 09:33:08</td>
+<td align="right">1</td>
+<td align="left">TUM</td>
+<td align="left">start</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">3DD.003B9DD725</td>
+<td align="left">CHU_U</td>
 <td align="right">2</td>
-<td align="left">2015-06-22 00:40:55</td>
-<td align="left">2015-08-21 22:17:32</td>
-<td align="left">87696.62 mins</td>
-<td align="left">3.000000e-01 mins</td>
-<td align="left">2015-06-05 23:59:00</td>
+<td align="left">Observation</td>
+<td align="right">1</td>
+<td align="left">2018-06-28 21:34:58</td>
+<td align="left">2018-06-28 21:34:58</td>
+<td align="left">0 mins</td>
+<td align="left">13681.8333 mins</td>
+<td align="left">2018-06-19 09:33:08</td>
 <td align="right">5</td>
-<td align="left">TUM NALB0 NALA0 NAUB0 NAUA0</td>
+<td align="left">TUM CHL_D CHL_U CHU_D CHU_U</td>
 <td align="left">forward</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">3DD.003B9DDAB0</td>
+<td align="left">TUM</td>
+<td align="right">1</td>
+<td align="left">Recapture</td>
+<td align="right">1</td>
+<td align="left">2018-07-17 11:51:44</td>
+<td align="left">2018-07-17 11:51:44</td>
+<td align="left">0 mins</td>
+<td align="left">183.4500 mins</td>
+<td align="left">2018-07-17 11:51:44</td>
+<td align="right">1</td>
+<td align="left">TUM</td>
+<td align="left">start</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
 </tr>
 <tr class="even">
-<td align="left">384.3B239AD241</td>
-<td align="left">NAUB0</td>
-<td align="right">6</td>
-<td align="left">Observation</td>
+<td align="left">3DD.003B9F123C</td>
+<td align="left">TUM</td>
+<td align="right">1</td>
+<td align="left">Recapture</td>
+<td align="right">1</td>
+<td align="left">2018-06-21 09:45:14</td>
+<td align="left">2018-06-21 09:45:14</td>
+<td align="left">0 mins</td>
+<td align="left">288.0167 mins</td>
+<td align="left">2018-06-21 09:45:14</td>
+<td align="right">1</td>
+<td align="left">TUM</td>
+<td align="left">start</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">3DD.003B9F123C</td>
+<td align="left">UWE</td>
 <td align="right">2</td>
-<td align="left">2015-08-21 22:18:13</td>
-<td align="left">2015-08-22 00:51:37</td>
-<td align="left">153.40 mins</td>
-<td align="left">6.833333e-01 mins</td>
-<td align="left">2015-06-05 23:59:00</td>
-<td align="right">4</td>
-<td align="left">TUM NALB0 NALA0 NAUB0</td>
-<td align="left">backward</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
-</tr>
-<tr class="odd">
-<td align="left">384.3B239AD241</td>
-<td align="left">NAUA0</td>
-<td align="right">7</td>
 <td align="left">Observation</td>
-<td align="right">3</td>
-<td align="left">2015-08-22 00:52:00</td>
-<td align="left">2015-08-23 03:30:18</td>
-<td align="left">1598.30 mins</td>
-<td align="left">3.833333e-01 mins</td>
-<td align="left">2015-06-05 23:59:00</td>
-<td align="right">5</td>
-<td align="left">TUM NALB0 NALA0 NAUB0 NAUA0</td>
+<td align="right">1</td>
+<td align="left">2018-07-01 12:55:31</td>
+<td align="left">2018-07-01 12:55:31</td>
+<td align="left">0 mins</td>
+<td align="left">14590.2833 mins</td>
+<td align="left">2018-06-21 09:45:14</td>
+<td align="right">2</td>
+<td align="left">TUM UWE</td>
 <td align="left">forward</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
 </tr>
 <tr class="even">
-<td align="left">384.3B239AD241</td>
-<td align="left">NAUB0</td>
-<td align="right">8</td>
-<td align="left">Observation</td>
+<td align="left">3DD.003BC7A654</td>
+<td align="left">TUM</td>
 <td align="right">1</td>
-<td align="left">2015-08-23 03:33:34</td>
-<td align="left">2015-08-23 03:33:34</td>
-<td align="left">0.00 mins</td>
-<td align="left">3.266667e+00 mins</td>
-<td align="left">2015-06-05 23:59:00</td>
-<td align="right">4</td>
-<td align="left">TUM NALB0 NALA0 NAUB0</td>
-<td align="left">backward</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
-</tr>
-<tr class="odd">
-<td align="left">384.3B239AD241</td>
-<td align="left">NAUA0</td>
-<td align="right">9</td>
-<td align="left">Observation</td>
+<td align="left">Recapture</td>
 <td align="right">1</td>
-<td align="left">2015-08-23 20:41:32</td>
-<td align="left">2015-08-23 20:41:32</td>
-<td align="left">0.00 mins</td>
-<td align="left">1.027967e+03 mins</td>
-<td align="left">2015-06-05 23:59:00</td>
-<td align="right">5</td>
-<td align="left">TUM NALB0 NALA0 NAUB0 NAUA0</td>
-<td align="left">forward</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
-</tr>
-<tr class="even">
-<td align="left">384.3B239AD241</td>
-<td align="left">NAUB0</td>
-<td align="right">10</td>
-<td align="left">Observation</td>
+<td align="left">2018-06-09 22:36:03</td>
+<td align="left">2018-06-09 22:36:03</td>
+<td align="left">0 mins</td>
+<td align="left">420.6000 mins</td>
+<td align="left">2018-06-09 22:36:03</td>
 <td align="right">1</td>
-<td align="left">2015-08-23 20:41:50</td>
-<td align="left">2015-08-23 20:41:50</td>
-<td align="left">0.00 mins</td>
-<td align="left">3.000000e-01 mins</td>
-<td align="left">2015-06-05 23:59:00</td>
-<td align="right">4</td>
-<td align="left">TUM NALB0 NALA0 NAUB0</td>
-<td align="left">backward</td>
-<td align="left">FALSE</td>
-<td align="left">FALSE</td>
+<td align="left">TUM</td>
+<td align="left">start</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
 </tr>
 </tbody>
 </table>
@@ -458,8 +458,8 @@ Graphical representation of the parent-child table, showing which sites are upst
 <span>                                    configuration <span class="op">=</span> <span class="va">configuration</span>,</span>
 <span>                                    parent_child <span class="op">=</span> <span class="va">parent_child</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>                                      <span class="fu"><a href="https://kevinsee.github.io/PITcleanr/reference/addParentChildNodes.html" class="external-link">addParentChildNodes</a></span><span class="op">(</span>configuration <span class="op">=</span> <span class="va">configuration</span><span class="op">)</span>,</span>
-<span>                                    min_obs_date <span class="op">=</span> <span class="st">"20150301"</span>,</span>
-<span>                                    max_obs_date <span class="op">=</span> <span class="st">"20150930"</span>,</span>
+<span>                                    min_obs_date <span class="op">=</span> <span class="st">"20180301"</span>,</span>
+<span>                                    max_obs_date <span class="op">=</span> <span class="st">"20180930"</span>,</span>
 <span>                                    save_file <span class="op">=</span> <span class="cn">T</span>,</span>
 <span>                                    file_name <span class="op">=</span> <span class="st">"C:/Users/USERNAME/Desktop/PITcleanr_output.xlsx"</span><span class="op">)</span></span>
 <span></span>
@@ -477,20 +477,20 @@ Graphical representation of the parent-child table, showing which sites are upst
 <span>                         <span class="st">"U"</span> <span class="op">=</span> <span class="st">"W"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">fish_origin</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2,019 x 2</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,406 x 2</span></span></span>
 <span><span class="co">#&gt;    tag_code       origin</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 384.3B239AD241 W     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 3D9.1BF24B20F5 W     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 3D9.1C2D76FB78 W     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 3D9.1C2D770193 W     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 3D9.1C2D91B3DE W     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 3D9.1C2D925C52 W     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 3D9.1C2D929849 W     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 3D9.1C2D93282A W     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 3D9.1C2DB9A65E H     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 3D9.1C2DC026E4 H     </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># i 2,009 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 384.3B239AC47B W     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 3DD.003B9DD720 H     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 3DD.003B9DD725 W     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 3DD.003B9DDAB0 W     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 3DD.003B9F123C H     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 3DD.003BC7A654 H     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 3DD.003BC7F0E3 H     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 3DD.003BC80A3C H     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 3DD.003BC80D81 H     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 3DD.003BC80F20 H     </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># i 1,396 more rows</span></span></span></code></pre></div>
 <p><code>DABOM</code> currently has the ability to handle up to two types of fish (e.g. hatchery and wild). Therefore, the <code>origin</code> column of <code>fish_origin</code> should only contain a maximum of two distinct entries. Note that in the example above, we have marked all the fish with “Unknown” or “U” origin as wild, to conform to this. It is fine if all the fish have the same origin (e.g. all are wild).</p>
 <p>Now our data is ready for DABOM.</p>
 </div>
@@ -526,13 +526,13 @@ Graphical representation of the parent-child table, showing which sites are upst
 <span>               configuration <span class="op">=</span> <span class="va">configuration</span>,</span>
 <span>               fish_origin <span class="op">=</span> <span class="va">fish_origin</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Fixed the following sites at 0% detection probability, because no tags were observed there:</span></span>
-<span><span class="co">#&gt;   PEUB0, PEUA0, ICUB0, ICUA0 .</span></span>
+<span><span class="co">#&gt;   CHL_D, ICU_D, ICU_U, PES_D, PES_U, PEU_D, PEU_U .</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Fixed the following nodes at 100% detection probability, because it is functioning as a single array with no upstream detections:</span></span>
 <span><span class="co">#&gt;   LNF .</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Fixed movement upstream of the following sites to 0 for at least one fish type because no detections upstream:</span></span>
+<span><span class="co">#&gt; Fixed movement upstream of the following sites to 0 because no detections upstream:</span></span>
 <span><span class="co">#&gt;   ICM, PES .</span></span></code></pre></div>
 </div>
 </div>
@@ -564,9 +564,9 @@ Graphical representation of the parent-child table, showing which sites are upst
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># add data for time-varying movement </span></span>
 <span><span class="va">jags_data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">jags_data</span>,</span>
-<span>                <span class="fu"><a href="../reference/addTimeVaryData.html">addTimeVaryData</a></span><span class="op">(</span>filter_ch <span class="op">=</span> <span class="va">filter_ch</span>,</span>
-<span>                                start_date <span class="op">=</span> <span class="st">"20150301"</span>,</span>
-<span>                                end_date <span class="op">=</span> <span class="st">"20150630"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span>              <span class="fu"><a href="../reference/addTimeVaryData.html">addTimeVaryData</a></span><span class="op">(</span>filter_ch <span class="op">=</span> <span class="va">filter_ch</span>,</span>
+<span>                              start_date <span class="op">=</span> <span class="st">"20180301"</span>,</span>
+<span>                              end_date <span class="op">=</span> <span class="st">"20180630"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="set-parameters-to-save">Set Parameters to Save<a class="anchor" aria-label="anchor" href="#set-parameters-to-save"></a>
@@ -640,8 +640,208 @@ Graphical representation of the parent-child table, showing which sites are upst
 </tr></thead>
 <tbody>
 <tr class="odd">
+<td align="left">CHL_U</td>
+<td align="right">472</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="left">CHU_D</td>
+<td align="right">316</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">CHU_U</td>
+<td align="right">269</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="left">CHW_D</td>
+<td align="right">19</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">CHW_U</td>
+<td align="right">19</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="left">ICL_D</td>
+<td align="right">1</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">ICL_U</td>
+<td align="right">1</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="left">ICM_D</td>
+<td align="right">10</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">ICM_U</td>
+<td align="right">11</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="left">LNF</td>
+<td align="right">6</td>
+<td align="right">1.000</td>
+<td align="right">1.000</td>
+<td align="right">1.000</td>
+<td align="right">0.000</td>
+<td align="right">1.000</td>
+<td align="right">1.000</td>
+</tr>
+<tr class="odd">
+<td align="left">LWN_D</td>
+<td align="right">13</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="left">LWN_U</td>
+<td align="right">12</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">NAL_D</td>
+<td align="right">116</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="left">NAL_U</td>
+<td align="right">116</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">NAU_D</td>
+<td align="right">132</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="left">NAU_U</td>
+<td align="right">130</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">TUM</td>
+<td align="right">1406</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="left">UWE</td>
+<td align="right">272</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">WTL_D</td>
+<td align="right">16</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="left">WTL_U</td>
+<td align="right">23</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="odd">
 <td align="left">CHLA0</td>
-<td align="right">1197</td>
+<td align="right">0</td>
 <td align="right">0.867</td>
 <td align="right">0.867</td>
 <td align="right">0.869</td>
@@ -651,7 +851,7 @@ Graphical representation of the parent-child table, showing which sites are upst
 </tr>
 <tr class="even">
 <td align="left">CHLB0</td>
-<td align="right">1202</td>
+<td align="right">0</td>
 <td align="right">0.871</td>
 <td align="right">0.872</td>
 <td align="right">0.872</td>
@@ -661,7 +861,7 @@ Graphical representation of the parent-child table, showing which sites are upst
 </tr>
 <tr class="odd">
 <td align="left">CHUA0</td>
-<td align="right">631</td>
+<td align="right">0</td>
 <td align="right">0.651</td>
 <td align="right">0.651</td>
 <td align="right">0.649</td>
@@ -671,7 +871,7 @@ Graphical representation of the parent-child table, showing which sites are upst
 </tr>
 <tr class="even">
 <td align="left">CHUB0</td>
-<td align="right">868</td>
+<td align="right">0</td>
 <td align="right">0.894</td>
 <td align="right">0.895</td>
 <td align="right">0.894</td>
@@ -681,7 +881,7 @@ Graphical representation of the parent-child table, showing which sites are upst
 </tr>
 <tr class="odd">
 <td align="left">CHWA0</td>
-<td align="right">10</td>
+<td align="right">0</td>
 <td align="right">0.910</td>
 <td align="right">0.933</td>
 <td align="right">0.975</td>
@@ -691,7 +891,7 @@ Graphical representation of the parent-child table, showing which sites are upst
 </tr>
 <tr class="even">
 <td align="left">CHWB0</td>
-<td align="right">10</td>
+<td align="right">0</td>
 <td align="right">0.907</td>
 <td align="right">0.932</td>
 <td align="right">0.975</td>
@@ -701,7 +901,7 @@ Graphical representation of the parent-child table, showing which sites are upst
 </tr>
 <tr class="odd">
 <td align="left">ICLA0</td>
-<td align="right">12</td>
+<td align="right">0</td>
 <td align="right">0.623</td>
 <td align="right">0.631</td>
 <td align="right">0.656</td>
@@ -711,7 +911,7 @@ Graphical representation of the parent-child table, showing which sites are upst
 </tr>
 <tr class="even">
 <td align="left">ICLB0</td>
-<td align="right">14</td>
+<td align="right">0</td>
 <td align="right">0.717</td>
 <td align="right">0.727</td>
 <td align="right">0.739</td>
@@ -721,7 +921,7 @@ Graphical representation of the parent-child table, showing which sites are upst
 </tr>
 <tr class="odd">
 <td align="left">ICMA0</td>
-<td align="right">2</td>
+<td align="right">0</td>
 <td align="right">0.640</td>
 <td align="right">0.671</td>
 <td align="right">0.901</td>
@@ -731,133 +931,13 @@ Graphical representation of the parent-child table, showing which sites are upst
 </tr>
 <tr class="even">
 <td align="left">ICMB0</td>
-<td align="right">1</td>
+<td align="right">0</td>
 <td align="right">0.433</td>
 <td align="right">0.414</td>
 <td align="right">0.319</td>
 <td align="right">0.229</td>
 <td align="right">0.056</td>
 <td align="right">0.863</td>
-</tr>
-<tr class="odd">
-<td align="left">LNF</td>
-<td align="right">3</td>
-<td align="right">1.000</td>
-<td align="right">1.000</td>
-<td align="right">1.000</td>
-<td align="right">0.000</td>
-<td align="right">1.000</td>
-<td align="right">1.000</td>
-</tr>
-<tr class="even">
-<td align="left">LWNA0</td>
-<td align="right">47</td>
-<td align="right">0.839</td>
-<td align="right">0.875</td>
-<td align="right">0.955</td>
-<td align="right">0.138</td>
-<td align="right">0.544</td>
-<td align="right">1.000</td>
-</tr>
-<tr class="odd">
-<td align="left">LWNB0</td>
-<td align="right">5</td>
-<td align="right">0.106</td>
-<td align="right">0.099</td>
-<td align="right">0.092</td>
-<td align="right">0.043</td>
-<td align="right">0.031</td>
-<td align="right">0.190</td>
-</tr>
-<tr class="even">
-<td align="left">NALA0</td>
-<td align="right">199</td>
-<td align="right">0.943</td>
-<td align="right">0.944</td>
-<td align="right">0.945</td>
-<td align="right">0.017</td>
-<td align="right">0.907</td>
-<td align="right">0.972</td>
-</tr>
-<tr class="odd">
-<td align="left">NALB0</td>
-<td align="right">175</td>
-<td align="right">0.830</td>
-<td align="right">0.831</td>
-<td align="right">0.835</td>
-<td align="right">0.025</td>
-<td align="right">0.784</td>
-<td align="right">0.879</td>
-</tr>
-<tr class="even">
-<td align="left">NAUA0</td>
-<td align="right">88</td>
-<td align="right">0.957</td>
-<td align="right">0.961</td>
-<td align="right">0.966</td>
-<td align="right">0.021</td>
-<td align="right">0.914</td>
-<td align="right">0.990</td>
-</tr>
-<tr class="odd">
-<td align="left">NAUB0</td>
-<td align="right">90</td>
-<td align="right">0.977</td>
-<td align="right">0.980</td>
-<td align="right">0.988</td>
-<td align="right">0.016</td>
-<td align="right">0.946</td>
-<td align="right">1.000</td>
-</tr>
-<tr class="even">
-<td align="left">PESA0</td>
-<td align="right">1</td>
-<td align="right">0.604</td>
-<td align="right">0.629</td>
-<td align="right">0.878</td>
-<td align="right">0.256</td>
-<td align="right">0.139</td>
-<td align="right">1.000</td>
-</tr>
-<tr class="odd">
-<td align="left">PESB0</td>
-<td align="right">1</td>
-<td align="right">0.608</td>
-<td align="right">0.635</td>
-<td align="right">0.864</td>
-<td align="right">0.258</td>
-<td align="right">0.148</td>
-<td align="right">1.000</td>
-</tr>
-<tr class="even">
-<td align="left">TUM</td>
-<td align="right">2018</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-</tr>
-<tr class="odd">
-<td align="left">WTLA0</td>
-<td align="right">121</td>
-<td align="right">0.956</td>
-<td align="right">0.958</td>
-<td align="right">0.966</td>
-<td align="right">0.019</td>
-<td align="right">0.920</td>
-<td align="right">0.988</td>
-</tr>
-<tr class="even">
-<td align="left">WTLB0</td>
-<td align="right">109</td>
-<td align="right">0.861</td>
-<td align="right">0.863</td>
-<td align="right">0.865</td>
-<td align="right">0.032</td>
-<td align="right">0.801</td>
-<td align="right">0.920</td>
 </tr>
 <tr class="odd">
 <td align="left">ICUA0</td>
@@ -880,6 +960,86 @@ Graphical representation of the parent-child table, showing which sites are upst
 <td align="right">0.000</td>
 </tr>
 <tr class="odd">
+<td align="left">LWNA0</td>
+<td align="right">0</td>
+<td align="right">0.839</td>
+<td align="right">0.875</td>
+<td align="right">0.955</td>
+<td align="right">0.138</td>
+<td align="right">0.544</td>
+<td align="right">1.000</td>
+</tr>
+<tr class="even">
+<td align="left">LWNB0</td>
+<td align="right">0</td>
+<td align="right">0.106</td>
+<td align="right">0.099</td>
+<td align="right">0.092</td>
+<td align="right">0.043</td>
+<td align="right">0.031</td>
+<td align="right">0.190</td>
+</tr>
+<tr class="odd">
+<td align="left">NALA0</td>
+<td align="right">0</td>
+<td align="right">0.943</td>
+<td align="right">0.944</td>
+<td align="right">0.945</td>
+<td align="right">0.017</td>
+<td align="right">0.907</td>
+<td align="right">0.972</td>
+</tr>
+<tr class="even">
+<td align="left">NALB0</td>
+<td align="right">0</td>
+<td align="right">0.830</td>
+<td align="right">0.831</td>
+<td align="right">0.835</td>
+<td align="right">0.025</td>
+<td align="right">0.784</td>
+<td align="right">0.879</td>
+</tr>
+<tr class="odd">
+<td align="left">NAUA0</td>
+<td align="right">0</td>
+<td align="right">0.957</td>
+<td align="right">0.961</td>
+<td align="right">0.966</td>
+<td align="right">0.021</td>
+<td align="right">0.914</td>
+<td align="right">0.990</td>
+</tr>
+<tr class="even">
+<td align="left">NAUB0</td>
+<td align="right">0</td>
+<td align="right">0.977</td>
+<td align="right">0.980</td>
+<td align="right">0.988</td>
+<td align="right">0.016</td>
+<td align="right">0.946</td>
+<td align="right">1.000</td>
+</tr>
+<tr class="odd">
+<td align="left">PESA0</td>
+<td align="right">0</td>
+<td align="right">0.604</td>
+<td align="right">0.629</td>
+<td align="right">0.878</td>
+<td align="right">0.256</td>
+<td align="right">0.139</td>
+<td align="right">1.000</td>
+</tr>
+<tr class="even">
+<td align="left">PESB0</td>
+<td align="right">0</td>
+<td align="right">0.608</td>
+<td align="right">0.635</td>
+<td align="right">0.864</td>
+<td align="right">0.258</td>
+<td align="right">0.148</td>
+<td align="right">1.000</td>
+</tr>
+<tr class="odd">
 <td align="left">PEUA0</td>
 <td align="right">0</td>
 <td align="right">0.000</td>
@@ -899,6 +1059,26 @@ Graphical representation of the parent-child table, showing which sites are upst
 <td align="right">0.000</td>
 <td align="right">0.000</td>
 </tr>
+<tr class="odd">
+<td align="left">WTLA0</td>
+<td align="right">0</td>
+<td align="right">0.956</td>
+<td align="right">0.958</td>
+<td align="right">0.966</td>
+<td align="right">0.019</td>
+<td align="right">0.920</td>
+<td align="right">0.988</td>
+</tr>
+<tr class="even">
+<td align="left">WTLB0</td>
+<td align="right">0</td>
+<td align="right">0.861</td>
+<td align="right">0.863</td>
+<td align="right">0.865</td>
+<td align="right">0.032</td>
+<td align="right">0.801</td>
+<td align="right">0.920</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -909,56 +1089,50 @@ Graphical representation of the parent-child table, showing which sites are upst
 <div class="section level4">
 <h4 id="compile-transition-probabilities">Compile Transition Probabilities<a class="anchor" aria-label="anchor" href="#compile-transition-probabilities"></a>
 </h4>
-<p>Compiling the transition probabilities is both a matter of ensuring that the parameters from JAGS match the site codes of each detection point (so that movement past CHL is named as such), but also multiplying some transition probabilities together when appropriate. For instance, the ultimate probability that a tag moves past CHU is the probability of moving from TUM past CHL, and then from CHL past CHU. At this time, these multiplication steps are hard-coded into a few functions, one for each version of DABOM that currently exists:</p>
-<ul>
-<li>Lower Granite Dam: <code><a href="../reference/compileTransProbs_GRA.html">compileTransProbs_GRA()</a></code>
-</li>
-<li>Priest Rapids Dam: <code><a href="../reference/compileTransProbs_PRA.html">compileTransProbs_PRA()</a></code>
-</li>
-<li>Tumwater Dam: <code><a href="../reference/compileTransProbs_TUM.html">compileTransProbs_TUM()</a></code>
-</li>
-<li>Prosser Dam: <code><a href="../reference/compileTransProbs_PRO.html">compileTransProbs_PRO()</a></code>
-</li>
-</ul>
+<p>Compiling the transition probabilities is both a matter of ensuring that the parameters from JAGS match the site codes of each detection point (so that movement past CHL is named as such), but also multiplying some transition probabilities together when appropriate. For instance, the ultimate probability that a tag moves past CHU is the probability of moving from TUM past CHL, and then from CHL past CHU. These multiplication steps are done in the <code><a href="../reference/compileTransProbs.html">compileTransProbs()</a></code> function, which takes the MCMC output from JAGS and uses the <code>parent-child</code> table and <code>configuration</code> file to determine which parameters to multiply together. So it is a generic function that could be applied to any DABOM model a user writes.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">trans_df</span> <span class="op">=</span> <span class="fu"><a href="../reference/compileTransProbs_TUM.html">compileTransProbs_TUM</a></span><span class="op">(</span>dabom_mod <span class="op">=</span> <span class="va">dabom_samp_tum</span>,</span>
-<span>                                 parent_child <span class="op">=</span> <span class="va">parent_child</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">trans_df</span> <span class="op">=</span> <span class="fu"><a href="../reference/compileTransProbs.html">compileTransProbs</a></span><span class="op">(</span>dabom_mod <span class="op">=</span> <span class="va">dabom_samp_tum</span>,</span>
+<span>                             parent_child <span class="op">=</span> <span class="va">parent_child</span>,</span>
+<span>                             configuration <span class="op">=</span> <span class="va">configuration</span><span class="op">)</span></span></code></pre></div>
 <p>The resulting tibble contains a column describing the MCMC chain that sample is from (<code>chain</code>) the overall iteration of that sample (<code>iter</code>), the origin, either one or two (<code>origin</code>), the parameter (<code>param</code>) which is coded such that the site code refers to the probability of moving past that site, and the value of the posterior sample (<code>value</code>). Some parameters end in <code>_bb</code>, which refers to the tags that moved past a particular branching node, but did not move into one of the subsequent branches. The “bb” stands for “black box,” meaning we’re not sure exactly what happened to those fish. They have spawned in an area above that branching node, but below upstream detection points, they may have died in that area (due to natural causes or fishing) or they may have moved downstream undetected and were not seen at any other detection sites.</p>
 </div>
 <div class="section level4">
 <h4 id="total-escapement">Total Escapement<a class="anchor" aria-label="anchor" href="#total-escapement"></a>
 </h4>
-<p>In our example, at Tumwater Dam, every fish that moves upstream of the dam is physically moved upstream, after being identified as hatchery or wild. Therefore, the total escapement, by origin, at Tumwater is known precisely, with no standard error (for 2015, there were 1,086 natural origin Chinook and 1378 hatchery Chinook). The user can input that by setting up a tibble with origin and total escapement.</p>
+<p>In our example, at Tumwater Dam, every fish that moves upstream of the dam is physically moved upstream, after being identified as hatchery or wild. Therefore, the total escapement, by origin, at Tumwater is known precisely, with no standard error (for 2018, there were 317 natural origin Chinook and 1,167 hatchery Chinook). The user can input that by setting up a tibble with origin and total escapement.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tot_escp</span> <span class="op">=</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>origin <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>,</span>
-<span>                    tot_escp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1086</span>, <span class="fl">1378</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">tot_escp</span> <span class="op">=</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>origin_nm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Wild"</span>, <span class="st">"Hatchery"</span><span class="op">)</span>,</span>
+<span>                  origin <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>,</span>
+<span>                  tot_escp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">317</span>, <span class="fl">1167</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Each of the transition probabilities can then be multiplied by this total escapement, resulting in posterior samples of escapement or abundance past each detection site. If there is any uncertainty in the total escapement, we recommend bootstrapping samples of the total escapement with the appropriate mean and standard error (using the same number of bootstrap samples as they have posterior samples of transition probabilities), labeling those bootstraps with an iteration number <code>iter</code> and joining them to the <code>trans_df</code> tibble by <code>iter</code> and <code>origin</code>.</p>
 <p>We have included some code to help summarize those posteriors below, but the user could summarize the posterior samples however they wish.</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">escp_summ</span> <span class="op">=</span> <span class="va">trans_df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span><span class="va">tot_escp</span>,</span>
-<span>              by <span class="op">=</span> <span class="st">"origin"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>escp <span class="op">=</span> <span class="va">tot_escp</span> <span class="op">*</span> <span class="va">value</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span>location <span class="op">=</span> <span class="va">param</span>,</span>
-<span>             <span class="va">origin</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span>,</span>
-<span>              median <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span>,</span>
-<span>              mode <span class="op">=</span> <span class="fu"><a href="../reference/estMode.html">estMode</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span>,</span>
-<span>              sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span>,</span>
-<span>              skew <span class="op">=</span> <span class="fu">moments</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/moments/man/skewness.html" class="external-link">skewness</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span>,</span>
-<span>              kurtosis <span class="op">=</span> <span class="fu">moments</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/moments/man/kurtosis.html" class="external-link">kurtosis</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span>,</span>
-<span>              lowerCI <span class="op">=</span> <span class="fu">coda</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/coda/man/HPDinterval.html" class="external-link">HPDinterval</a></span><span class="op">(</span><span class="fu">coda</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/coda/man/mcmc.html" class="external-link">as.mcmc</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span><span class="op">)</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>,</span>
-<span>              upperCI <span class="op">=</span> <span class="fu">coda</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/coda/man/HPDinterval.html" class="external-link">HPDinterval</a></span><span class="op">(</span><span class="fu">coda</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/coda/man/mcmc.html" class="external-link">as.mcmc</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span><span class="op">)</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>,</span>
-<span>              .groups <span class="op">=</span> <span class="st">"drop"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">mean</span>, <span class="va">median</span>, <span class="va">mode</span>, <span class="va">sd</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">matches</a></span><span class="op">(</span><span class="st">'CI$'</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>                  <span class="op">~</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="va">.</span> <span class="op">&lt;</span> <span class="fl">0</span>, <span class="fl">0</span>, <span class="va">.</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">mean</span>, <span class="va">median</span>, <span class="va">mode</span>, <span class="va">sd</span>, <span class="va">skew</span>, <span class="va">kurtosis</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">matches</a></span><span class="op">(</span><span class="st">'CI$'</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>                  <span class="va">round</span>,</span>
-<span>                  digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">origin</span><span class="op">)</span>, <span class="va">location</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span><span class="va">tot_escp</span>,</span>
+<span>            by <span class="op">=</span> <span class="st">"origin"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>escp <span class="op">=</span> <span class="va">tot_escp</span> <span class="op">*</span> <span class="va">value</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span>location <span class="op">=</span> <span class="va">param</span>,</span>
+<span>           <span class="va">origin_nm</span>,</span>
+<span>           <span class="va">origin</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span>,</span>
+<span>            median <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span>,</span>
+<span>            mode <span class="op">=</span> <span class="fu"><a href="../reference/estMode.html">estMode</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span>,</span>
+<span>            sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span>,</span>
+<span>            skew <span class="op">=</span> <span class="fu">moments</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/moments/man/skewness.html" class="external-link">skewness</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span>,</span>
+<span>            kurtosis <span class="op">=</span> <span class="fu">moments</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/moments/man/kurtosis.html" class="external-link">kurtosis</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span>,</span>
+<span>            lowerCI <span class="op">=</span> <span class="fu">coda</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/coda/man/HPDinterval.html" class="external-link">HPDinterval</a></span><span class="op">(</span><span class="fu">coda</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/coda/man/mcmc.html" class="external-link">as.mcmc</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span><span class="op">)</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>,</span>
+<span>            upperCI <span class="op">=</span> <span class="fu">coda</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/coda/man/HPDinterval.html" class="external-link">HPDinterval</a></span><span class="op">(</span><span class="fu">coda</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/coda/man/mcmc.html" class="external-link">as.mcmc</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span><span class="op">)</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>,</span>
+<span>            .groups <span class="op">=</span> <span class="st">"drop"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">mean</span>, <span class="va">median</span>, <span class="va">mode</span>, <span class="va">sd</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">matches</a></span><span class="op">(</span><span class="st">'CI$'</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                <span class="op">~</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="va">.</span> <span class="op">&lt;</span> <span class="fl">0</span>, <span class="fl">0</span>, <span class="va">.</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">mean</span>, <span class="va">median</span>, <span class="va">mode</span>, <span class="va">sd</span>, <span class="va">skew</span>, <span class="va">kurtosis</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">matches</a></span><span class="op">(</span><span class="st">'CI$'</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">.</span>, digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">origin</span><span class="op">)</span>, <span class="va">location</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
+<caption>Escapement summary statistics from a sample of locations.</caption>
 <thead><tr class="header">
 <th align="left">location</th>
+<th align="left">origin_nm</th>
 <th align="right">origin</th>
 <th align="right">mean</th>
 <th align="right">median</th>
@@ -971,364 +1145,160 @@ Graphical representation of the parent-child table, showing which sites are upst
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left">CHL</td>
-<td align="right">2</td>
-<td align="right">1124.67</td>
-<td align="right">1125.20</td>
-<td align="right">1127.11</td>
-<td align="right">15.87</td>
-<td align="right">-0.11</td>
-<td align="right">2.95</td>
-<td align="right">1093.96</td>
-<td align="right">1156.05</td>
-</tr>
-<tr class="even">
-<td align="left">CHU</td>
-<td align="right">2</td>
-<td align="right">760.91</td>
-<td align="right">761.21</td>
-<td align="right">762.42</td>
-<td align="right">20.71</td>
-<td align="right">-0.03</td>
-<td align="right">3.00</td>
-<td align="right">719.97</td>
-<td align="right">802.18</td>
-</tr>
-<tr class="odd">
 <td align="left">CHW</td>
-<td align="right">2</td>
-<td align="right">8.43</td>
-<td align="right">8.03</td>
-<td align="right">7.33</td>
-<td align="right">3.19</td>
-<td align="right">0.69</td>
-<td align="right">3.49</td>
-<td align="right">2.61</td>
-<td align="right">14.50</td>
+<td align="left">Wild</td>
+<td align="right">1</td>
+<td align="right">2.2</td>
+<td align="right">2.1</td>
+<td align="right">1.8</td>
+<td align="right">0.9</td>
+<td align="right">0.7</td>
+<td align="right">3.4</td>
+<td align="right">0.6</td>
+<td align="right">3.9</td>
 </tr>
 <tr class="even">
 <td align="left">ICL</td>
-<td align="right">2</td>
-<td align="right">17.49</td>
-<td align="right">17.10</td>
-<td align="right">15.55</td>
-<td align="right">4.54</td>
-<td align="right">0.58</td>
-<td align="right">3.70</td>
-<td align="right">9.29</td>
-<td align="right">26.31</td>
+<td align="left">Wild</td>
+<td align="right">1</td>
+<td align="right">1.9</td>
+<td align="right">1.7</td>
+<td align="right">1.6</td>
+<td align="right">0.8</td>
+<td align="right">0.8</td>
+<td align="right">3.9</td>
+<td align="right">0.5</td>
+<td align="right">3.6</td>
 </tr>
 <tr class="odd">
 <td align="left">ICL_bb</td>
-<td align="right">2</td>
-<td align="right">10.22</td>
-<td align="right">9.94</td>
-<td align="right">9.06</td>
-<td align="right">4.01</td>
-<td align="right">0.49</td>
-<td align="right">3.53</td>
-<td align="right">2.76</td>
-<td align="right">18.75</td>
-</tr>
-<tr class="even">
-<td align="left">ICM</td>
-<td align="right">2</td>
-<td align="right">4.24</td>
-<td align="right">3.49</td>
-<td align="right">2.47</td>
-<td align="right">2.86</td>
-<td align="right">1.45</td>
-<td align="right">5.80</td>
-<td align="right">0.30</td>
-<td align="right">9.79</td>
-</tr>
-<tr class="odd">
-<td align="left">ICU</td>
-<td align="right">2</td>
-<td align="right">2.11</td>
-<td align="right">1.57</td>
-<td align="right">0.59</td>
-<td align="right">1.99</td>
-<td align="right">1.97</td>
-<td align="right">9.40</td>
-<td align="right">0.00</td>
-<td align="right">5.96</td>
-</tr>
-<tr class="even">
-<td align="left">LNF</td>
-<td align="right">2</td>
-<td align="right">3.03</td>
-<td align="right">2.69</td>
-<td align="right">2.13</td>
-<td align="right">1.84</td>
-<td align="right">1.28</td>
-<td align="right">5.47</td>
-<td align="right">0.32</td>
-<td align="right">6.68</td>
-</tr>
-<tr class="odd">
-<td align="left">LWN</td>
-<td align="right">2</td>
-<td align="right">2.92</td>
-<td align="right">2.35</td>
-<td align="right">1.45</td>
-<td align="right">2.22</td>
-<td align="right">1.79</td>
-<td align="right">8.31</td>
-<td align="right">0.03</td>
-<td align="right">7.31</td>
+<td align="left">Wild</td>
+<td align="right">1</td>
+<td align="right">1.3</td>
+<td align="right">1.2</td>
+<td align="right">1.1</td>
+<td align="right">0.7</td>
+<td align="right">1.0</td>
+<td align="right">4.5</td>
+<td align="right">0.2</td>
+<td align="right">2.7</td>
 </tr>
 <tr class="even">
 <td align="left">NAL</td>
-<td align="right">2</td>
-<td align="right">39.15</td>
-<td align="right">38.82</td>
-<td align="right">38.86</td>
-<td align="right">6.76</td>
-<td align="right">0.33</td>
-<td align="right">3.03</td>
-<td align="right">26.73</td>
-<td align="right">52.78</td>
+<td align="left">Wild</td>
+<td align="right">1</td>
+<td align="right">65.7</td>
+<td align="right">65.7</td>
+<td align="right">66.5</td>
+<td align="right">4.4</td>
+<td align="right">0.1</td>
+<td align="right">2.8</td>
+<td align="right">57.4</td>
+<td align="right">74.3</td>
 </tr>
 <tr class="odd">
+<td align="left">NAL_bb</td>
+<td align="left">Wild</td>
+<td align="right">1</td>
+<td align="right">35.4</td>
+<td align="right">35.2</td>
+<td align="right">35.3</td>
+<td align="right">3.4</td>
+<td align="right">0.1</td>
+<td align="right">3.0</td>
+<td align="right">29.1</td>
+<td align="right">42.1</td>
+</tr>
+<tr class="even">
 <td align="left">NAU</td>
-<td align="right">2</td>
-<td align="right">11.35</td>
-<td align="right">10.98</td>
-<td align="right">10.54</td>
-<td align="right">3.60</td>
-<td align="right">0.64</td>
-<td align="right">3.45</td>
-<td align="right">5.12</td>
-<td align="right">18.47</td>
-</tr>
-<tr class="even">
-<td align="left">PES</td>
-<td align="right">2</td>
-<td align="right">3.13</td>
-<td align="right">2.42</td>
-<td align="right">1.64</td>
-<td align="right">3.05</td>
-<td align="right">4.77</td>
-<td align="right">46.50</td>
-<td align="right">0.04</td>
-<td align="right">7.76</td>
-</tr>
-<tr class="odd">
-<td align="left">PEU</td>
-<td align="right">2</td>
-<td align="right">1.58</td>
-<td align="right">1.02</td>
-<td align="right">0.39</td>
-<td align="right">1.94</td>
-<td align="right">4.01</td>
-<td align="right">30.58</td>
-<td align="right">0.00</td>
-<td align="right">4.68</td>
-</tr>
-<tr class="even">
-<td align="left">TUM_bb</td>
-<td align="right">2</td>
-<td align="right">107.75</td>
-<td align="right">107.50</td>
-<td align="right">105.74</td>
-<td align="right">11.50</td>
-<td align="right">-0.01</td>
-<td align="right">3.35</td>
-<td align="right">84.74</td>
-<td align="right">130.67</td>
-</tr>
-<tr class="odd">
-<td align="left">WTL</td>
-<td align="right">2</td>
-<td align="right">74.47</td>
-<td align="right">73.97</td>
-<td align="right">73.70</td>
-<td align="right">9.30</td>
-<td align="right">0.30</td>
-<td align="right">3.09</td>
-<td align="right">55.81</td>
-<td align="right">92.41</td>
-</tr>
-<tr class="even">
-<td align="left">CHL</td>
+<td align="left">Wild</td>
 <td align="right">1</td>
-<td align="right">536.92</td>
-<td align="right">537.10</td>
-<td align="right">531.10</td>
-<td align="right">18.41</td>
-<td align="right">-0.07</td>
-<td align="right">2.87</td>
-<td align="right">502.51</td>
-<td align="right">572.63</td>
+<td align="right">30.4</td>
+<td align="right">30.2</td>
+<td align="right">30.1</td>
+<td align="right">3.1</td>
+<td align="right">0.2</td>
+<td align="right">3.1</td>
+<td align="right">24.6</td>
+<td align="right">36.6</td>
 </tr>
 <tr class="odd">
-<td align="left">CHU</td>
-<td align="right">1</td>
-<td align="right">408.94</td>
-<td align="right">408.65</td>
-<td align="right">406.28</td>
-<td align="right">18.63</td>
-<td align="right">0.02</td>
-<td align="right">2.97</td>
-<td align="right">373.91</td>
-<td align="right">446.36</td>
-</tr>
-<tr class="even">
 <td align="left">CHW</td>
-<td align="right">1</td>
-<td align="right">6.39</td>
-<td align="right">5.97</td>
-<td align="right">5.38</td>
-<td align="right">2.87</td>
-<td align="right">0.85</td>
-<td align="right">3.92</td>
-<td align="right">1.70</td>
-<td align="right">12.36</td>
+<td align="left">Hatchery</td>
+<td align="right">2</td>
+<td align="right">14.8</td>
+<td align="right">14.5</td>
+<td align="right">13.2</td>
+<td align="right">3.8</td>
+<td align="right">0.6</td>
+<td align="right">3.7</td>
+<td align="right">7.9</td>
+<td align="right">22.3</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">ICL</td>
-<td align="right">1</td>
-<td align="right">7.55</td>
-<td align="right">7.18</td>
-<td align="right">6.30</td>
-<td align="right">3.06</td>
-<td align="right">0.66</td>
-<td align="right">3.39</td>
-<td align="right">2.00</td>
-<td align="right">13.41</td>
+<td align="left">Hatchery</td>
+<td align="right">2</td>
+<td align="right">7.1</td>
+<td align="right">6.8</td>
+<td align="right">6.2</td>
+<td align="right">2.7</td>
+<td align="right">0.7</td>
+<td align="right">3.5</td>
+<td align="right">2.2</td>
+<td align="right">12.3</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">ICL_bb</td>
-<td align="right">1</td>
-<td align="right">5.40</td>
-<td align="right">5.00</td>
-<td align="right">3.89</td>
-<td align="right">2.55</td>
-<td align="right">0.76</td>
-<td align="right">3.36</td>
-<td align="right">1.13</td>
-<td align="right">10.29</td>
-</tr>
-<tr class="odd">
-<td align="left">ICM</td>
-<td align="right">1</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-<td align="right">NaN</td>
-<td align="right">NaN</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
+<td align="left">Hatchery</td>
+<td align="right">2</td>
+<td align="right">4.2</td>
+<td align="right">3.9</td>
+<td align="right">3.0</td>
+<td align="right">2.0</td>
+<td align="right">0.9</td>
+<td align="right">4.0</td>
+<td align="right">0.9</td>
+<td align="right">8.3</td>
 </tr>
 <tr class="even">
-<td align="left">ICU</td>
-<td align="right">1</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-<td align="right">NaN</td>
-<td align="right">NaN</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-</tr>
-<tr class="odd">
-<td align="left">LNF</td>
-<td align="right">1</td>
-<td align="right">2.16</td>
-<td align="right">1.76</td>
-<td align="right">1.38</td>
-<td align="right">1.58</td>
-<td align="right">1.49</td>
-<td align="right">5.99</td>
-<td align="right">0.04</td>
-<td align="right">5.38</td>
-</tr>
-<tr class="even">
-<td align="left">LWN</td>
-<td align="right">1</td>
-<td align="right">71.72</td>
-<td align="right">68.15</td>
-<td align="right">66.01</td>
-<td align="right">18.80</td>
-<td align="right">2.25</td>
-<td align="right">12.00</td>
-<td align="right">42.13</td>
-<td align="right">105.85</td>
-</tr>
-<tr class="odd">
 <td align="left">NAL</td>
-<td align="right">1</td>
-<td align="right">225.15</td>
-<td align="right">225.03</td>
-<td align="right">227.89</td>
-<td align="right">15.07</td>
-<td align="right">0.12</td>
-<td align="right">2.83</td>
-<td align="right">196.61</td>
-<td align="right">254.40</td>
+<td align="left">Hatchery</td>
+<td align="right">2</td>
+<td align="right">33.1</td>
+<td align="right">32.9</td>
+<td align="right">32.9</td>
+<td align="right">5.7</td>
+<td align="right">0.3</td>
+<td align="right">3.0</td>
+<td align="right">22.6</td>
+<td align="right">44.7</td>
+</tr>
+<tr class="odd">
+<td align="left">NAL_bb</td>
+<td align="left">Hatchery</td>
+<td align="right">2</td>
+<td align="right">23.5</td>
+<td align="right">23.3</td>
+<td align="right">23.3</td>
+<td align="right">4.8</td>
+<td align="right">0.3</td>
+<td align="right">3.2</td>
+<td align="right">14.4</td>
+<td align="right">32.8</td>
 </tr>
 <tr class="even">
 <td align="left">NAU</td>
-<td align="right">1</td>
-<td align="right">104.06</td>
-<td align="right">103.60</td>
-<td align="right">103.07</td>
-<td align="right">10.80</td>
-<td align="right">0.20</td>
-<td align="right">3.07</td>
-<td align="right">84.23</td>
-<td align="right">125.24</td>
-</tr>
-<tr class="odd">
-<td align="left">PES</td>
-<td align="right">1</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-<td align="right">NaN</td>
-<td align="right">NaN</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-</tr>
-<tr class="even">
-<td align="left">PEU</td>
-<td align="right">1</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-<td align="right">NaN</td>
-<td align="right">NaN</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-</tr>
-<tr class="odd">
-<td align="left">TUM_bb</td>
-<td align="right">1</td>
-<td align="right">156.79</td>
-<td align="right">158.66</td>
-<td align="right">162.54</td>
-<td align="right">20.59</td>
-<td align="right">-1.26</td>
-<td align="right">7.36</td>
-<td align="right">118.44</td>
-<td align="right">195.17</td>
-</tr>
-<tr class="even">
-<td align="left">WTL</td>
-<td align="right">1</td>
-<td align="right">81.48</td>
-<td align="right">80.96</td>
-<td align="right">78.72</td>
-<td align="right">9.68</td>
-<td align="right">0.14</td>
-<td align="right">2.88</td>
-<td align="right">63.24</td>
-<td align="right">100.40</td>
+<td align="left">Hatchery</td>
+<td align="right">2</td>
+<td align="right">9.6</td>
+<td align="right">9.3</td>
+<td align="right">8.9</td>
+<td align="right">3.0</td>
+<td align="right">0.6</td>
+<td align="right">3.5</td>
+<td align="right">4.3</td>
+<td align="right">15.6</td>
 </tr>
 </tbody>
 </table>
@@ -1352,8 +1322,8 @@ Graphical representation of the parent-child table, showing which sites are upst
 <div class="section level2">
 <h2 id="updating-a-dabom-model">Updating a DABOM Model<a class="anchor" aria-label="anchor" href="#updating-a-dabom-model"></a>
 </h2>
-<p>As new detection sites are installed, the current DABOM models may need to change. The user can modify the configuration file and parent-child table through R, or manually in other software like Excel and then read those files back into R. Many of the functions in the <code>DABOM</code> package will work correctly with these updated files, including <code>writeDABOM</code>, <code>fishNoFishNodes</code>, <code>setInitialValues</code>, <code>createJAGSinputs</code> and <code>setSavedParams</code>. The user can run the JAGS model, and even pull out summaries of the detection probabilities using <code>summariseDetectProbs</code>.</p>
-<p><strong><em>However</em></strong>, to generate estimates of escapement, the user will need to modify the appropriate <code>compileTransProbs_XXX</code> function to ensure that transition probabilities at the new sites are multiplied appropriately. If the Lower Granite DABOM model is modified, especially if new initial branches are added, particular care should be taken when examining the results of <code>calcTribEscape_GRA</code>, in case further adjustments are needed.</p>
+<p>As new detection sites are installed, the current DABOM models may need to change. The user can modify the configuration file and parent-child table through R, or manually in other software like Excel and then read those files back into R. Once the configuration file and parent-child table are updated, the other functions in the <code>DABOM</code> package will work correctly with these updated files, including <code>writeDABOM</code>, <code>fishNoFishNodes</code>, <code>setInitialValues</code>, <code>createJAGSinputs</code> and <code>setSavedParams</code>. The user can run the JAGS model, and even pull out summaries of the detection probabilities using <code>summariseDetectProbs</code>, and generate transition probabilities using <code>compileTransProbs</code>.</p>
+<p><strong><em>However</em></strong>, if the Lower Granite DABOM model is modified, especially if new initial branches are added, particular care should be taken when examining the results of <code>calcTribEscape_GRA</code>, in case further adjustments are needed.</p>
 </div>
 <div class="section level2">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

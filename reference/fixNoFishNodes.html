@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">DABOM</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.0.0</span>
       </span>
     </div>
 
@@ -62,6 +62,7 @@
 <span>  filter_ch <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  parent_child <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  configuration <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  by_origin <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  fish_origin <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -90,6 +91,10 @@ Can be created with `buildParentChild()` function in the `PITcleanr` package.</p
 <dt>configuration</dt>
 <dd><p>is a data frame which assigns node names to unique SiteID, AntennaID, and
 site configuration ID combinations. One example can be built with the function `buildConfig`</p></dd>
+
+
+<dt>by_origin</dt>
+<dd><p>should Dirichlet vectors be created for each fish origin separately (`TRUE`), or be common to all origins (`FALSE`)? Default is `FALSE`</p></dd>
 
 
 <dt>fish_origin</dt>

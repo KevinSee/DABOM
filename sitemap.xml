@@ -49,21 +49,6 @@
     <loc>https://kevinsee.github.io/DABOM/reference/compileTransProbs.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/reference/compileTransProbs_ASOTIC.html</loc>
-  </url>
-  <url>
-    <loc>https://kevinsee.github.io/DABOM/reference/compileTransProbs_GRA.html</loc>
-  </url>
-  <url>
-    <loc>https://kevinsee.github.io/DABOM/reference/compileTransProbs_PRA.html</loc>
-  </url>
-  <url>
-    <loc>https://kevinsee.github.io/DABOM/reference/compileTransProbs_PRO.html</loc>
-  </url>
-  <url>
-    <loc>https://kevinsee.github.io/DABOM/reference/compileTransProbs_TUM.html</loc>
-  </url>
-  <url>
     <loc>https://kevinsee.github.io/DABOM/reference/createDABOMcapHist.html</loc>
   </url>
   <url>
@@ -89,9 +74,6 @@
   </url>
   <url>
     <loc>https://kevinsee.github.io/DABOM/reference/fixNoFishNodes.html</loc>
-  </url>
-  <url>
-    <loc>https://kevinsee.github.io/DABOM/reference/getNodeInfo.html</loc>
   </url>
   <url>
     <loc>https://kevinsee.github.io/DABOM/reference/index.html</loc>
