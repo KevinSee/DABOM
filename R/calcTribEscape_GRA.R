@@ -49,8 +49,8 @@ calcTribEscape_GRA = function(dabom_mod = NULL,
     select(iter, strata_num, tot_escape = value)
 
   # get movement probabilities of time-varying branches
-  trans_df = compileTransProbs_GRA(dabom_mod,
-                                   parent_child)
+  trans_df = compileTransProbs(dabom_mod,
+                               parent_child)
 
   # what is the starting point?
   root_site = parent_child %>%
@@ -64,7 +64,7 @@ calcTribEscape_GRA = function(dabom_mod = NULL,
     as_tibble() %>%
     select(matches(root_site)) %>%
     names() %>%
-    enframe(value = "param") %>%
+    tibble::enframe(value = "param") %>%
     mutate(n_comma = stringr::str_count(param, "\\,"),
            n_comma = as.integer(n_comma)) %>%
     select(n_comma) %>%

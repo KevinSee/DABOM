@@ -4,13 +4,16 @@
 \alias{compileTransProbs}
 \title{Compile Transition Probabilities}
 \usage{
-compileTransProbs(dabom_mod = NULL, parent_child = NULL)
+compileTransProbs(dabom_mod = NULL, parent_child = NULL, configuration = NULL)
 }
 \arguments{
 \item{dabom_mod}{An MCMC.list}
 
 \item{parent_child}{data frame with at least `parent` and `child` columns.
 Can be created with `buildParentChild()` function in the `PITcleanr` package.}
+
+\item{configuration}{is a data frame which assigns node names to unique SiteID, AntennaID, and
+site configuration ID combinations. One example can be built with the function `buildConfig`}
 }
 \description{
 Extracts the MCMC posteriors of transition probabilities for a DABOM model, and multiplies them appropriately.

@@ -8,6 +8,7 @@ createJAGSinputs(
   filter_ch = NULL,
   parent_child = NULL,
   configuration = NULL,
+  by_origin = FALSE,
   fish_origin = NULL
 )
 }
@@ -21,6 +22,8 @@ Can be created with `buildParentChild()` function in the `PITcleanr` package.}
 
 \item{configuration}{is a data frame which assigns node names to unique SiteID, AntennaID, and
 site configuration ID combinations. One example can be built with the function `buildConfig`}
+
+\item{by_origin}{should Dirichlet vectors be created for each fish origin separately (`TRUE`), or be common to all origins (`FALSE`)? Default is `FALSE`}
 
 \item{fish_origin}{tibble containing columns of `tag_code` and `origin`, where `origin` is either "W" for wild or "H" for hatchery}
 }

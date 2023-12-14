@@ -7,6 +7,7 @@
 #' @inheritParams createDABOMcapHist
 #'
 #' @import dplyr stringr tidyr rlang PITcleanr
+#' @importFrom tibble enframe
 #' @export
 #' @return function
 #' @examples setInitialValues()
@@ -23,7 +24,8 @@ setInitialValues = function(filter_ch,
 
   # how many child sites does each parent site have?
   parent_info = parent_child %>%
-    group_by(parent, parent_rkm) %>%
+    # group_by(parent, parent_rkm) %>%
+    group_by(parent) %>%
     mutate(n_child = n_distinct(child))
 
   # determine parent site, and what branch number the tag must have taken
@@ -47,31 +49,32 @@ setInitialValues = function(filter_ch,
     select(tag_code,
            spawn_node = final_node) %>%
     distinct() %>%
-    mutate(spawn_site = if_else(grepl("B0$", spawn_node) &
+    mutate(spawn_site = if_else(grepl("_D$", spawn_node) &
                                   nchar(spawn_node) >= 5,
-                                str_remove(spawn_node, "B0"),
+                                str_remove(spawn_node, "_D"),
                                 spawn_node),
-           spawn_site = if_else(grepl("A0$", spawn_site) &
+           spawn_site = if_else(grepl("_U$", spawn_site) &
                                   nchar(spawn_site) >= 5,
-                                str_remove(spawn_site, "A0"),
+                                str_remove(spawn_site, "_U"),
                                 spawn_site)) %>%
     left_join(no %>%
                 select(spawn_node = node,
                        spawn_path = path),
               by = "spawn_node") %>%
-    separate_rows(spawn_path) %>%
+    separate_longer_delim(spawn_path,
+                          delim = " ") |>
     rename(node = spawn_path) %>%
     left_join(no %>%
                 select(node,
                        node_order),
               by = "node") %>%
-    mutate(site_code = if_else(grepl("B0$", node) &
+    mutate(site_code = if_else(grepl("_D$", node) &
                                  nchar(node) >= 5,
-                               str_remove(node, "B0"),
+                               str_remove(node, "_D"),
                                node),
-           site_code = if_else(grepl("A0$", site_code) &
+           site_code = if_else(grepl("_U$", site_code) &
                                  nchar(site_code) >= 5,
-                               str_remove(site_code, "A0"),
+                               str_remove(site_code, "_U"),
                                site_code)) %>%
     arrange(tag_code, node_order)
 
@@ -91,8 +94,8 @@ setInitialValues = function(filter_ch,
               by = c("site_code", "lead_site")) %>%
     left_join(n_branch_list %>%
                 unlist() %>%
-                enframe(name = "site_code",
-                        value = "max_branch"),
+                tibble::enframe(name = "site_code",
+                                value = "max_branch"),
               by = "site_code") %>%
     mutate(child_num = if_else(is.na(child_num) & !is.na(max_branch),
                                as.integer(max_branch),

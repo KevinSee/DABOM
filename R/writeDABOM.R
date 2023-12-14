@@ -21,18 +21,25 @@ writeDABOM = function(file_name = NULL,
 
   if(is.null(file_name)) file_name = 'DABOM.txt'
 
+  node_order = PITcleanr::buildNodeOrder(parent_child,
+                                         direction = "u")
+
   # determine starting point (root_site)
-  root_site = PITcleanr::buildNodeOrder(parent_child) %>%
+  root_site = node_order %>%
     filter(node_order == 1) %>%
     pull(node)
 
   # how many nodes does each site have, what are their names and what column are they contained in?
-  node_info = getNodeInfo(parent_child,
-                          configuration)
+  # node_info = DABOM::getNodeInfo(parent_child,
+  #                                configuration)
+
+  node_info = PITcleanr::getNodeInfo(parent_child,
+                                     configuration) |>
+    filter(site_code != root_site)
 
   # how many child sites does each parent site have?
   parent_info = parent_child %>%
-    group_by(parent, parent_rkm) %>%
+    group_by(parent) %>%
     mutate(n_child = n_distinct(child)) %>%
     ungroup()
 
@@ -117,6 +124,7 @@ writeDABOM = function(file_name = NULL,
 
     # how many children does parent site have?
     if(length(parent_site) > 0) {
+    # if(!is.na(parent_site)) {
       parent_n_child = parent_info %>%
         filter(parent == parent_site) %>%
         pull(n_child) %>%
@@ -137,6 +145,7 @@ writeDABOM = function(file_name = NULL,
 
     if(n_branch > 1) {
       if(length(child_num) > 0) {
+      # if(!is.na(child_num)) {
         if(parent_n_child == 1) {
           a_line = paste0("\t\t a_", site, "[i] ~ dcat( omega_", site, "[(eta_", parent_site, "[i] * fish_type[i] + 1), 1:(n_branch_", site, "+1)] ) \n")
         } else {
@@ -187,8 +196,10 @@ writeDABOM = function(file_name = NULL,
       pull(parent)
 
     dwn_site_pc = parent_child %>%
-      filter(parent == parent_site) %>%
-      arrange(child_rkm)
+      left_join(node_order,
+                by = join_by(child == node)) |>
+      arrange(path, node_order) %>%
+      filter(parent == parent_site)
 
     if(nrow(dwn_site_pc) == 1) {
       for(j in 1:nrow(node_df)) {

@@ -5,6 +5,7 @@
 #' @author Kevin See
 #'
 #' @inheritParams createDABOMcapHist
+#' @param by_origin should Dirichlet vectors be created for each fish origin separately (`TRUE`), or be common to all origins (`FALSE`)? Default is `FALSE`
 #' @param fish_origin tibble containing columns of `tag_code` and `origin`, where `origin` is either "W" for wild or "H" for hatchery
 #'
 #' @import dplyr rlang stringr
@@ -15,6 +16,7 @@
 createJAGSinputs = function(filter_ch = NULL,
                             parent_child = NULL,
                             configuration = NULL,
+                            by_origin = FALSE,
                             fish_origin = NULL) {
 
   stopifnot(exprs = {
@@ -37,11 +39,8 @@ createJAGSinputs = function(filter_ch = NULL,
     pull(node)
 
   # get the column names of the capture history matrix
-  col_nms = defineDabomColNms(root_site = root_site,
-                              parent_child = parent_child,
-                              configuration = configuration) %>%
-    unlist() %>%
-    as.vector()
+  col_nms = PITcleanr::defineCapHistCols(parent_child = parent_child,
+                                         configuration = configuration)
 
   # create capture history
   cap_hist = createDABOMcapHist(filter_ch = filter_ch,
@@ -82,21 +81,40 @@ createJAGSinputs = function(filter_ch = NULL,
                 enframe(name = 'site',
                         value = 'inits') %>%
                 mutate(site = stringr::str_remove(site, '^a_')),
-              by = 'site') %>%
-    mutate(dirch_vec = purrr::map2(n_brnch,
-                                   inits,
-                                   .f = function(x, y) {
-                                     c(createDirichletVector(x,
-                                                             table(y[fish_type == 1]),
-                                                             initial_one = F,
-                                                             final_one = T),
-                                       createDirichletVector(x,
-                                                             table(y[fish_type == 2]),
-                                                             initial_one = F,
-                                                             final_one = T)) %>%
-                                       matrix(nrow = 2,
-                                              byrow = T)
-                                   }))
+              by = 'site')
+
+  if(by_origin) {
+    dirich_df <-
+      dirich_df %>%
+      mutate(dirch_vec = purrr::map2(n_brnch,
+                                     inits,
+                                     .f = function(x, y) {
+                                       c(createDirichletVector(x,
+                                                               table(y[fish_type == 1]),
+                                                               initial_one = F,
+                                                               final_one = T),
+                                         createDirichletVector(x,
+                                                               table(y[fish_type == 2]),
+                                                               initial_one = F,
+                                                               final_one = T)) %>%
+                                         matrix(nrow = 2,
+                                                byrow = T)
+                                     }))
+  } else {
+    dirich_df <-
+      dirich_df %>%
+      mutate(dirch_vec = purrr::map2(n_brnch,
+                                     inits,
+                                     .f = function(x, y) {
+                                       rep(c(createDirichletVector(x,
+                                                               table(y),
+                                                               initial_one = F,
+                                                               final_one = T)),
+                                           2) %>%
+                                         matrix(nrow = 2,
+                                                byrow = T)
+                                     }))
+  }
 
   dirich_vecs = dirich_df$dirch_vec %>%
     rlang::set_names(paste0(dirich_df$site, '_dirch_vec'))
