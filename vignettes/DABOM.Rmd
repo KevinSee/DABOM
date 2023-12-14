@@ -123,17 +123,17 @@ library(PITcleanr)
 library(tidyverse)
 
 ptagis_file = system.file("extdata",
-                          "TUM_Chinook_2015.csv",
+                          "TUM_chnk_cth_2018.csv",
                           package = "PITcleanr",
                           mustWork = TRUE)
 
 config_file = system.file("extdata",
-                          "configuration_TUM.csv",
+                          "TUM_configuration.csv",
                           package = "PITcleanr",
                           mustWork = TRUE)
 
 parent_child_file = system.file("extdata",
-                                "parent_child_TUM.csv",
+                                "TUM_parent_child.csv",
                                 package = "PITcleanr",
                                 mustWork = TRUE)
 
@@ -188,8 +188,8 @@ prepped_ch = PITcleanr::prepWrapper(cth_file = ptagis_file,
                                     configuration = configuration,
                                     parent_child = parent_child %>%
                                       addParentChildNodes(configuration = configuration),
-                                    min_obs_date = "20150301",
-                                    max_obs_date = "20150930")
+                                    min_obs_date = "20180301",
+                                    max_obs_date = "20180930")
 ```
 
 The first 10 rows of the `prepped_ch` file look like:
@@ -216,8 +216,8 @@ prepped_ch = PITcleanr::prepWrapper(cth_file = ptagis_file,
                                     configuration = configuration,
                                     parent_child = parent_child %>%
                                       addParentChildNodes(configuration = configuration),
-                                    min_obs_date = "20150301",
-                                    max_obs_date = "20150930",
+                                    min_obs_date = "20180301",
+                                    max_obs_date = "20180930",
                                     save_file = T,
                                     file_name = "C:/Users/USERNAME/Desktop/PITcleanr_output.xlsx")
 
@@ -317,8 +317,8 @@ If the user is running a time-varying version of DABOM, they will need to add so
 # add data for time-varying movement 
 jags_data = c(jags_data,
               addTimeVaryData(filter_ch = filter_ch,
-                              start_date = "20150301",
-                              end_date = "20150630"))
+                              start_date = "20180301",
+                              end_date = "20180630"))
 ```
 
 ## Set Parameters to Save
@@ -417,12 +417,12 @@ The resulting tibble contains a column describing the MCMC chain that sample is 
 
 ### Total Escapement
 
-In our example, at Tumwater Dam, every fish that moves upstream of the dam is physically moved upstream, after being identified as hatchery or wild. Therefore, the total escapement, by origin, at Tumwater is known precisely, with no standard error (for 2015, there were 1,086 natural origin Chinook and 1378 hatchery Chinook). The user can input that by setting up a tibble with origin and total escapement.  
+In our example, at Tumwater Dam, every fish that moves upstream of the dam is physically moved upstream, after being identified as hatchery or wild. Therefore, the total escapement, by origin, at Tumwater is known precisely, with no standard error (for 2018, there were 317 natural origin Chinook and 1,167 hatchery Chinook). The user can input that by setting up a tibble with origin and total escapement.  
 
 ```{r}
 tot_escp = tibble(origin_nm = c("Wild", "Hatchery"),
                   origin = c(1,2),
-                  tot_escp = c(1086, 1378))
+                  tot_escp = c(317, 1167))
 ```
 
 Each of the transition probabilities can then be multiplied by this total escapement, resulting in posterior samples of escapement or abundance past each detection site. If there is any uncertainty in the total escapement, we recommend bootstrapping samples of the total escapement with the appropriate mean and standard error (using the same number of bootstrap samples as they have posterior samples of transition probabilities), labeling those bootstraps with an iteration number `iter` and joining them to the `trans_df` tibble by `iter` and `origin`. 
