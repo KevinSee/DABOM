@@ -52,7 +52,7 @@ extractTransPost = function(dabom_mod = NULL,
                   starts_with("psi_"),
                   starts_with("phi_"))
 
-  trans_df <-
+  trans_post <-
     trans_mat |>
     tidyr::pivot_longer(cols = -c(chain, iter),
                         names_to = "param",
@@ -65,11 +65,6 @@ extractTransPost = function(dabom_mod = NULL,
                   parent = stringr::str_remove(parent, '^phi_'),
                   brnch_num = stringr::str_split(param, '\\,', simplify = T)[,2],
                   brnch_num = stringr::str_remove(brnch_num, '\\]')) |>
-    # added code to introduce time-varying strata if available
-    dplyr::mutate(strata_num = stringr::str_split(param, '\\,', simplify = T)[,3],
-                  strata_num = stringr::str_remove(strata_num, '\\]'),
-                  dplyr::across(strata_num,
-                                as.integer)) |>
     dplyr:: mutate(
       dplyr::across(
         c(brnch_num,
@@ -85,10 +80,21 @@ extractTransPost = function(dabom_mod = NULL,
                                          paste0(parent, '_bb'),
                                          child))
 
+
+  # added code to introduce time-varying strata if available
+  if(max(str_count(trans_post$param, "\\,")) > 1) {
+    trans_post <-
+      trans_post |>
+      dplyr::mutate(strata_num = stringr::str_split(param, '\\,', simplify = T)[,3],
+                    strata_num = stringr::str_remove(strata_num, '\\]'),
+                    dplyr::across(strata_num,
+                                  as.integer))
+  }
+
   # add black boxes upstream of phi locations
-  trans_df <-
-    trans_df |>
-    dplyr::bind_rows(trans_df |>
+  trans_post <-
+    trans_post |>
+    dplyr::bind_rows(trans_post |>
                        dplyr::filter(stringr::str_detect(param, "^phi")) |>
                        dplyr::mutate(child = paste0(parent, "_bb"),
                                      value = 1 - value)) |>
@@ -108,5 +114,5 @@ extractTransPost = function(dabom_mod = NULL,
                    param,
                    child)
 
-  return(trans_df)
+  return(trans_post)
 }
