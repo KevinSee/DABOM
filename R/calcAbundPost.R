@@ -60,6 +60,8 @@ calcAbundPost = function(move_post = NULL,
   }
 
 
+
+
   set.seed(17)
   total_post <-
     move_post |>
@@ -68,11 +70,13 @@ calcAbundPost = function(move_post = NULL,
     dplyr::group_by(chain) |>
     dplyr::slice_sample(n = bootstrap_samp,
                         replace = T) |>
-    dplyr::mutate(iter = 1:n()) |>
+    dplyr::mutate(new_iter = 1:n()) |>
     dplyr::ungroup() |>
     dplyr::left_join(move_post,
                      by = join_by(chain, iter),
                      relationship = "many-to-many") |>
+    dplyr::select(-iter) |>
+    dplyr::rename(iter = new_iter) |>
     dplyr::left_join(
       abund_post |>
         dplyr::select(chain, iter) |>
@@ -80,15 +84,13 @@ calcAbundPost = function(move_post = NULL,
         dplyr::group_by(chain) |>
         dplyr::slice_sample(n = bootstrap_samp,
                             replace = T) |>
-        dplyr::mutate(iter = 1:n()) |>
+        dplyr::mutate(new_iter = 1:n()) |>
         dplyr::ungroup() |>
         dplyr::left_join(abund_post,
                          by = join_by(chain, iter),
-                         relationship = "many-to-many"),
-      by = join_by(chain,
-                   iter,
-                   {{ common_vars }})
-    ) |>
+                         relationship = "many-to-many") |>
+        dplyr::select(-iter) |>
+        dplyr::rename(iter = new_iter)) |>
     dplyr::filter(!is.na(value),
                   !is.na(tot_abund)) |>
     dplyr::mutate(abund = value * tot_abund) |>
@@ -131,7 +133,8 @@ calcAbundPost = function(move_post = NULL,
   if(!is.null(time_vary_param_nm)) {
     total_post <-
       total_post |>
-      dplyr::group_by(iter,
+      dplyr::group_by(chain,
+                      iter,
                       dplyr::pick({{ .move_vars }})) |>
       dplyr::summarize(
         dplyr::across(abund,
