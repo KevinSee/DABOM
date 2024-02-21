@@ -135,5 +135,16 @@ compileTransProbs = function(trans_post = NULL,
       select(-{time_vary_param_nm})
   }
 
+  # add main branch site if ignoring time-varying parameters
+  if(!time_vary_only) {
+    trans_comp <-
+      trans_comp |>
+      left_join(site_paths |>
+                  mutate(main_branch = str_split(path_no_root, " ", simplify = T)[,1]) |>
+                  select(param = end_loc,
+                         main_branch))
+  }
+
+
   return(trans_comp)
 }
