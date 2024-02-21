@@ -4,22 +4,20 @@
 \alias{summariseDetectProbs}
 \title{Summarise Detection Probabilities}
 \usage{
-summariseDetectProbs(dabom_mod = NULL, filter_ch = NULL, cred_int_prob = 0.95)
+summariseDetectProbs(dabom_mod = NULL, filter_ch = NULL, .cred_int_prob = 0.95)
 }
 \arguments{
-\item{dabom_mod}{An MCMC.list, where the detection parameter names all end with "\code{_p}".}
+\item{dabom_mod}{An MCMC.list containing some parameters that end with "_p"}
 
 \item{filter_ch}{filtered capture history as returned by the `filterDetections()`
 function in the `PITcleanr` package, which has then been verified by a user and all
 blank or NA `user_keep_obs` entries have been completed.}
-
-\item{cred_int_prob}{A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95\%.}
 }
 \value{
 a dataframe with number of tags detected, mean, median, mode, se, cv and credible intervals of detection probability posteriors.
 }
 \description{
-Extracts the MCMC posteriors of detection probabilities for a DABOM model, and summarises the results.
+Extracts the MCMC posteriors of detection probabilities for a DABOM model, and summarizes the results.
 }
 \examples{
 \dontrun{summariseDetectProbs()}

@@ -47,14 +47,19 @@ extractTransPost = function(dabom_mod = NULL,
     dplyr::as_tibble() |>
     # pull out movement parameters
     dplyr::select(chain = CHAIN,
-                  iter = ITER,
+                  init_iter = ITER,
                   starts_with("p_pop_"),
                   starts_with("psi_"),
-                  starts_with("phi_"))
+                  starts_with("phi_")) |>
+    dplyr::mutate(iter = 1:n()) |>
+    dplyr::relocate(iter,
+                    .after = init_iter)
 
   trans_post <-
     trans_mat |>
-    tidyr::pivot_longer(cols = -c(chain, iter),
+    tidyr::pivot_longer(cols = -c(chain,
+                                  init_iter,
+                                  iter),
                         names_to = "param",
                         values_to = "value") |>
     dplyr::mutate(origin = stringr::str_split(param, '\\[', simplify = T)[,2],
@@ -99,16 +104,13 @@ extractTransPost = function(dabom_mod = NULL,
                        dplyr::mutate(child = paste0(parent, "_bb"),
                                      value = 1 - value)) |>
     dplyr::select(chain,
+                  init_iter,
                   iter,
                   param,
                   value,
                   origin,
                   child,
                   everything()) |>
-    dplyr::group_by(chain,
-                    param) |>
-    dplyr::mutate(iter = 1:n()) |>
-    dplyr::ungroup() |>
     dplyr::arrange(chain,
                    iter,
                    param,
