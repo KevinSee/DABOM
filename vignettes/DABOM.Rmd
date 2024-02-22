@@ -410,8 +410,8 @@ Compiling the transition probabilities is both a matter of ensuring that the par
 
 ```{r}
 move_post <- extractTransPost(dabom_mod = dabom_samp_tum,
-                             parent_child = parent_child,
-                             configuration = configuration)
+                              parent_child = parent_child,
+                              configuration = configuration)
 
 trans_df = compileTransProbs(trans_post = move_post,
                              parent_child = parent_child)
@@ -435,35 +435,30 @@ We have included some code to help summarize those posteriors below, but the use
 
 ```{r}
 escp_summ = trans_df %>%
-  left_join(tot_escp,
-            by = "origin") %>%
-  mutate(escp = tot_escp * value) %>%
-  group_by(location = param,
-           origin_nm,
-           origin) %>%
-  summarise(mean = mean(escp),
-            median = median(escp),
-            mode = estMode(escp),
-            sd = sd(escp),
-            skew = moments::skewness(escp),
-            kurtosis = moments::kurtosis(escp),
-            lowerCI = coda::HPDinterval(coda::as.mcmc(escp))[,1],
-            upperCI = coda::HPDinterval(coda::as.mcmc(escp))[,2],
-            .groups = "drop") %>%
-  mutate(across(c(mean, median, mode, sd, matches('CI$')),
-                ~ if_else(. < 0, 0, .))) %>%
-  mutate(across(c(mean, median, mode, sd, skew, kurtosis, matches('CI$')),
-                ~ round(., digits = 2))) %>%
-  arrange(desc(origin), location)
+    left_join(tot_escp,
+              by = "origin") %>%
+    mutate(escp = tot_escp * value) %>%
+    summarisePost(escp,
+                  location = param,
+                  origin) |>
+    mutate(across(c(mean, median, mode, sd, skew, kurtosis, matches('CI$')),
+                  ~ round(.,
+                          digits = 2))) %>%
+    arrange(desc(origin), location)
 ```
 
 ```{r, echo = F}
 escp_summ %>%
-  filter(str_detect(location, "ICL") |
+  filter(str_detect(location, "ICL$") |
            str_detect(location, "NAL") |
            str_detect(location, "NAU") |
-           str_detect(location, "CHW")) %>%
-  arrange(origin, location) %>%
+           str_detect(location, "CHL")) |> 
+  mutate(origin_nm = recode(origin,
+                            "1" = "Wild",
+                            "2" = "Hatchery")) |> 
+  relocate(origin_nm,
+           .after = origin) |> 
+  arrange(origin, location) |> 
   kable(digits = 1,
         caption = "Escapement summary statistics from a sample of locations.")
 ```
