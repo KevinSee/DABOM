@@ -20,10 +20,10 @@ devtools::load_all()
 root_site = c("GRA", 'PRA', "TUM", "PRO")[3]
 
 # determine where various test files are located
-ptagis_file_list = list(GRA = "LGR_Chinook_2014.csv",
-                        PRA = "UC_Sthd_2015.csv",
-                        TUM = "TUM_Chinook_2015.csv",
-                        PRO = "PRO_Steelhead_2019.csv")
+ptagis_file_list = list(GRA = "LGR_chnk_cth_2010.csv",
+                        PRA = "PRA_sthd_cth_2018.csv",
+                        TUM = "TUM_chnk_cth_2018.csv",
+                        PRO = "PRO_sthd_cth_2012.csv")
 
 ptagis_file = system.file("extdata",
                           ptagis_file_list[[root_site]],
@@ -31,12 +31,12 @@ ptagis_file = system.file("extdata",
                           mustWork = TRUE)
 
 parent_child_file = system.file("extdata",
-                                paste0("parent_child_", root_site, ".csv"),
+                                paste0(root_site, "_parent_child.csv"),
                                 package = "PITcleanr",
                                 mustWork = TRUE)
 
 config_file = system.file("extdata",
-                          paste0("configuration_", root_site, ".csv"),
+                          paste0(root_site, "_configuration.csv"),
                           package = "PITcleanr",
                           mustWork = TRUE)
 
@@ -112,7 +112,7 @@ tag_summ = summarizeTagData(filter_ch,
                             bio_data = fish_origin)
 
 # file path to the default and initial model
-desktop_path = file.path(path.expand('~'),'Desktop')
+desktop_path = file.path(dirname(path.expand('~')),'Desktop')
 basic_modNm = paste0(desktop_path, "/", root_site, '_DABOM.txt')
 
 writeDABOM(basic_modNm,
@@ -193,25 +193,31 @@ detect_summ = summariseDetectProbs(dabom_mod = dabom_mod,
   filter(!is.na(mean))
 
 # compile all movement probabilities, and multiply them appropriately
-# compile all movement probabilities, and multiply them appropriately
-if(root_site == "PRO") {
-  trans_df = compileTransProbs_PRO(dabom_mod,
-                                   pc)
+trans_post <-
+  extractTransPost(dabom_mod = dabom_mod,
+                   parent_child = pc,
+                   configuration = configuration)
 
+if(root_site %in% c("PRO", "PRA", 'TUM')) {
+  trans_df <-
+    compileTransProbs(trans_post,
+                      parent_child = pc,
+                      time_vary_only = FALSE)
+}
+
+
+if(root_site == "PRO") {
   tot_escp = tibble(origin = c(1,2),
                     tot_escp = c(1132, 0))
 
 } else if(root_site == "TUM") {
-  trans_df = compileTransProbs_TUM(dabom_mod,
-                                   pc)
-
   tot_escp = tibble(origin = c(1,2),
                     tot_escp = c(1086, 1378))
 
-
 } else if(root_site == "PRA") {
-  trans_df = compileTransProbs_PRA(dabom_mod,
-                                   pc)
+  # tot_escp = tibble(origin = c(1,2),
+  #                   tot_escp = c(1086, 1378))
+
 
 } else if(root_site == "GRA") {
   # trans_df = compileTransProbs_GRA(dabom_mod,
@@ -226,13 +232,9 @@ if(root_site == "PRO") {
     STADEM::readLGRtrapDB()
 
   stadem_data = STADEM::compileGRAdata(yr = spwn_yr,
-                                       spp = ptagis_file %>%
-                                         str_split("/") %>%
-                                         unlist() %>%
-                                         last() %>%
-                                         str_split("_") %>%
-                                         unlist() %>%
-                                         magrittr::extract(2),
+                                       spp = case_when(str_detect(ptagis_file_list[[root_site]], "chnk") ~ "Chinook",
+                                                       str_detect(ptagis_file_list[[root_site]], "sthd") ~ "Steelhead",
+                                                       .default = NA_character_),
                                        dam = "LWG",
                                        start_date = paste0(spwn_yr, "0301"),
                                        end_date = paste0(spwn_yr, "0817"),
@@ -242,7 +244,7 @@ if(root_site == "PRO") {
   # compile everything into a list to pass to JAGS
   jags_data_list = STADEM::prepJAGS(stadem_data[['weeklyData']])
 
-  model_file_nm = '~/Desktop/STADEM_JAGS_model.txt'
+  model_file_nm = tempfile("STADEM_JAGS_model", fileext = ".txt")
 
   stadem_mod = STADEM::runSTADEMmodel(file_name = model_file_nm,
                                       mcmc_chainLength = 40000,
@@ -255,6 +257,7 @@ if(root_site == "PRO") {
                                       win_model = "neg_bin",
                                       trap_est = T)
 
+  unlink(model_file_nm)
 
   # combine weekly escapement with other transition probabilities
   escp_summ = calcTribEscape_GRA(dabom_mod,
@@ -275,22 +278,12 @@ if(root_site %in% c("PRO", 'TUM')) {
     left_join(tot_escp,
               by = "origin") %>%
     mutate(escp = tot_escp * value) %>%
-    group_by(location = param,
-             origin) %>%
-    summarise(mean = mean(escp),
-              median = median(escp),
-              mode = estMode(escp),
-              sd = sd(escp),
-              skew = moments::skewness(escp),
-              kurtosis = moments::kurtosis(escp),
-              lowerCI = coda::HPDinterval(coda::as.mcmc(escp))[,1],
-              upperCI = coda::HPDinterval(coda::as.mcmc(escp))[,2],
-              .groups = "drop") %>%
-    mutate(across(c(mean, median, mode, sd, matches('CI$')),
-                  ~ if_else(. < 0, 0, .))) %>%
+    summarisePost(escp,
+                  location = param,
+                  origin) |>
     mutate(across(c(mean, median, mode, sd, skew, kurtosis, matches('CI$')),
-                  round,
-                  digits = 2)) %>%
+                  ~ round(.,
+                          digits = 2))) %>%
     arrange(desc(origin), location) %>%
     as.data.frame()
 }

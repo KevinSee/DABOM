@@ -391,7 +391,7 @@ If a user is interested in the estimates of detection probability, estimated at 
 # summarize detection probability estimates
 detect_summ = summariseDetectProbs(dabom_mod = dabom_samp_tum,
                                    filter_ch = filter_ch,
-                                   cred_int_prob = 0.95)
+                                   .cred_int_prob = 0.95)
 ```
 
 ```{r, echo = F}
@@ -409,9 +409,12 @@ To estimate escapement past each detection point, DABOM requires two things: an 
 Compiling the transition probabilities is both a matter of ensuring that the parameters from JAGS match the site codes of each detection point (so that movement past CHL is named as such), but also multiplying some transition probabilities together when appropriate. For instance, the ultimate probability that a tag moves past CHU is the probability of moving from TUM past CHL, and then from CHL past CHU. These multiplication steps are done in the `compileTransProbs()` function, which takes the MCMC output from JAGS and uses the `parent-child` table and `configuration` file to determine which parameters to multiply together. So it is a generic function that could be applied to any DABOM model a user writes. 
 
 ```{r}
-trans_df = compileTransProbs(dabom_mod = dabom_samp_tum,
+move_post <- extractTransPost(dabom_mod = dabom_samp_tum,
                              parent_child = parent_child,
                              configuration = configuration)
+
+trans_df = compileTransProbs(trans_post = move_post,
+                             parent_child = parent_child)
 ```
 
 The resulting tibble contains a column describing the MCMC chain that sample is from (`chain`) the overall iteration of that sample (`iter`), the origin, either one or two (`origin`), the parameter (`param`) which is coded such that the site code refers to the probability of moving past that site, and the value of the posterior sample (`value`). Some parameters end in `_bb`, which refers to the tags that moved past a particular branching node, but did not move into one of the subsequent branches. The "bb" stands for "black box", meaning we're not sure exactly what happened to those fish. They have spawned in an area above that branching node, but below upstream detection points, they may have died in that area (due to natural causes or fishing) or they may have moved downstream undetected and were not seen at any other detection sites. 
