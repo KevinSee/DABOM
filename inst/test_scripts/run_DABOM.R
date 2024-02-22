@@ -1,7 +1,7 @@
 # Author: Kevin See
 # Purpose: Test functions for preparing PTAGIS data for DABOM
 # Created: 4/8/2021
-# Last Modified: 5/10/2021
+# Last Modified: 2/21/2024
 # Notes:
 
 #-----------------------------------------------------------------
@@ -113,7 +113,9 @@ tag_summ = summarizeTagData(filter_ch,
 
 # file path to the default and initial model
 desktop_path = file.path(dirname(path.expand('~')),'Desktop')
-basic_modNm = paste0(desktop_path, "/", root_site, '_DABOM.txt')
+
+basic_modNm = file.path(desktop_path,
+                        paste0(root_site, "_DABOM.txt"))
 
 writeDABOM(basic_modNm,
            pc,
@@ -127,7 +129,8 @@ writeDABOM(basic_modNm,
 #------------------------------------------------------------------------------
 
 # filepath for specific JAGS model code for species and year
-mod_path = paste0(desktop_path, '/Test_DABOM_', root_site, '.txt')
+mod_path = file.path(desktop_path,
+                     paste0('DABOM_', root_site, '_Test.txt'))
 
 # writes species and year specific jags code
 fixNoFishNodes(init_file = basic_modNm,
@@ -182,8 +185,8 @@ dabom_mod = coda.samples(jags,
 
 
 if(root_site == "TUM") {
-  dabom_mod_tum = dabom_mod
-  use_data(dabom_mod_tum,
+  dabom_samp_tum = dabom_mod
+  use_data(dabom_samp_tum,
            version = 3)
 }
 
