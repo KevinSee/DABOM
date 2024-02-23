@@ -4,16 +4,22 @@
 \alias{compileTransProbs}
 \title{Compile Transition Probabilities}
 \usage{
-compileTransProbs(dabom_mod = NULL, parent_child = NULL, configuration = NULL)
+compileTransProbs(
+  trans_post = NULL,
+  parent_child = NULL,
+  time_vary_only = FALSE,
+  time_vary_param_nm = "strata_num"
+)
 }
 \arguments{
-\item{dabom_mod}{An MCMC.list}
+\item{trans_post}{posterior draws of transition probabilities compiled by the `extractTransPost` function}
 
 \item{parent_child}{data frame with at least `parent` and `child` columns.
 Can be created with `buildParentChild()` function in the `PITcleanr` package.}
 
-\item{configuration}{is a data frame which assigns node names to unique SiteID, AntennaID, and
-site configuration ID combinations. One example can be built with the function `buildConfig`}
+\item{time_vary_only}{Should only time-varying parameters be compiled? Default is `FALSE`, meaning time-varying parameters are excluded from results. If set to `TRUE`, non-time-varying parameters are excluded from results.}
+
+\item{time_vary_param_nm}{column name describing the time-varying strata for each location. Default value is `strata_num`.}
 }
 \description{
 Extracts the MCMC posteriors of transition probabilities for a DABOM model, and multiplies them appropriately.

@@ -21,7 +21,8 @@ Imports:
     janitor (>= 2.2.0),
     rjags (>= 4.12),
     coda (>= 0.19.4),
-    progress (>= 1.2.2)
+    progress (>= 1.2.2),
+    moments (>= 0.14)
 SystemRequirements: JAGS (http://mcmc-jags.sourceforge.net)
 URL: https://github.com/KevinSee/DABOM,
     https://kevinsee.github.io/DABOM,
