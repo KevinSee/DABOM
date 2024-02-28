@@ -17,10 +17,10 @@ devtools::load_all()
 
 #-----------------------------------------------------------------
 # pick a DABOM version to test
-root_site = c("GRA", 'PRA', "TUM", "PRO")[3]
+root_site = c("LGR", 'PRA', "TUM", "PRO")[1]
 
 # determine where various test files are located
-ptagis_file_list = list(GRA = "LGR_chnk_cth_2010.csv",
+ptagis_file_list = list(LGR = "LGR_chnk_cth_2019.csv",
                         PRA = "PRA_sthd_cth_2018.csv",
                         TUM = "TUM_chnk_cth_2018.csv",
                         PRO = "PRO_sthd_cth_2012.csv")
@@ -49,23 +49,25 @@ spwn_yr = ptagis_file %>%
   as.numeric()
 
 # set minimum observation date
-min_obs_date = if_else(root_site %in% c("TUM", 'GRA'),
+min_obs_date = if_else(root_site %in% c("TUM", 'LGR'),
                        paste0(spwn_yr, "0301"),
                        if_else(root_site %in% c("PRA", 'PRO'),
                                paste0(spwn_yr-1, "0701"),
                                NA_character_))
 
 # set maximum observation date
-max_obs_date = if_else(root_site %in% c("TUM", 'GRA'),
+max_obs_date = if_else(root_site %in% c("TUM", 'LGR'),
                        paste0(spwn_yr, "0930"),
                        if_else(root_site %in% c("PRA", 'PRO'),
                                paste0(spwn_yr, "0630"),
                                NA_character_))
 
 # read in parent-child table
-pc = read_csv(parent_child_file)
+pc = read_csv(parent_child_file,
+              show_col_types = F)
 # read in configuration file
-configuration = read_csv(config_file)
+configuration = read_csv(config_file,
+                         show_col_types = F)
 
 # add nodes to parent-child table
 pc_nodes = addParentChildNodes(pc,
@@ -101,7 +103,7 @@ fish_origin = read_csv(ptagis_file) %>%
          origin = recode(origin,
                          "U" = "W"))
 
-if(root_site %in% c("GRA", "PRO")) {
+if(root_site %in% c("LGR", "PRO")) {
   fish_origin %<>%
     mutate(origin = "W")
 }
@@ -120,7 +122,7 @@ basic_modNm = file.path(desktop_path,
 writeDABOM(basic_modNm,
            pc,
            configuration,
-           time_varying = if_else(root_site == "GRA", T, F))
+           time_varying = if_else(root_site == "LGR", T, F))
 
 #------------------------------------------------------------------------------
 # Alter default model code for species and year of
@@ -150,7 +152,7 @@ jags_data = createJAGSinputs(filter_ch = filter_ch,
                              parent_child = pc,
                              configuration = configuration,
                              fish_origin = fish_origin)
-if(root_site == "GRA") {
+if(root_site == "LGR") {
   jags_data = c(jags_data,
                 addTimeVaryData(filter_ch,
                                 start_date = paste0(spwn_yr, "0301"),
@@ -162,7 +164,7 @@ if(root_site == "GRA") {
 
 # Tell JAGS which parameters in the model that it should save.
 jags_params = setSavedParams(model_file = mod_path,
-                             time_varying = if_else(root_site == "GRA", T, F))
+                             time_varying = if_else(root_site == "LGR", T, F))
 
 
 # test running the model
@@ -187,6 +189,12 @@ dabom_mod = coda.samples(jags,
 if(root_site == "TUM") {
   dabom_samp_tum = dabom_mod
   use_data(dabom_samp_tum,
+           version = 3)
+}
+
+if(root_site == "LGR") {
+  dabom_samp_lgr = dabom_mod
+  use_data(dabom_samp_lgr,
            version = 3)
 }
 
@@ -222,45 +230,49 @@ if(root_site == "PRO") {
   #                   tot_escp = c(1086, 1378))
 
 
-} else if(root_site == "GRA") {
-  # trans_df = compileTransProbs_GRA(dabom_mod,
-  #                                  pc)
+} else if(root_site == "LGR") {
+  # get example STADEM data and MCMC results from STADEM package
+  library(STADEM)
+  data("stadem_mod")
 
-  # run STADEM model to get weekly escapement estimates
-  # of wild fish at Lower Granite
-  trap_db = system.file("extdata",
-                       "Chnk2014_TrapDatabase.csv",
-                       package = "PITcleanr",
-                       mustWork = TRUE) %>%
-    STADEM::readLGRtrapDB()
-
-  stadem_data = STADEM::compileGRAdata(yr = spwn_yr,
-                                       spp = case_when(str_detect(ptagis_file_list[[root_site]], "chnk") ~ "Chinook",
-                                                       str_detect(ptagis_file_list[[root_site]], "sthd") ~ "Steelhead",
-                                                       .default = NA_character_),
-                                       dam = "LWG",
-                                       start_date = paste0(spwn_yr, "0301"),
-                                       end_date = paste0(spwn_yr, "0817"),
-                                       damPIT = "GRA",
-                                       trap_dbase = trap_db)
-
-  # compile everything into a list to pass to JAGS
-  jags_data_list = STADEM::prepJAGS(stadem_data[['weeklyData']])
-
-  model_file_nm = tempfile("STADEM_JAGS_model", fileext = ".txt")
-
-  stadem_mod = STADEM::runSTADEMmodel(file_name = model_file_nm,
-                                      mcmc_chainLength = 40000,
-                                      mcmc_burn = 10000,
-                                      mcmc_thin = 30,
-                                      mcmc_chains = 4,
-                                      jags_data = jags_data_list,
-                                      seed = 5,
-                                      weekly_params = T,
-                                      win_model = "neg_bin",
-                                      trap_est = T)
-
-  unlink(model_file_nm)
+  # # trans_df = compileTransProbs_GRA(dabom_mod,
+  # #                                  pc)
+  #
+  # # run STADEM model to get weekly escapement estimates
+  # # of wild fish at Lower Granite
+  # trap_db = system.file("extdata",
+  #                      "Chnk2014_TrapDatabase.csv",
+  #                      package = "PITcleanr",
+  #                      mustWork = TRUE) %>%
+  #   STADEM::readLGRtrapDB()
+  #
+  # stadem_data = STADEM::compileGRAdata(yr = spwn_yr,
+  #                                      spp = case_when(str_detect(ptagis_file_list[[root_site]], "chnk") ~ "Chinook",
+  #                                                      str_detect(ptagis_file_list[[root_site]], "sthd") ~ "Steelhead",
+  #                                                      .default = NA_character_),
+  #                                      dam = "LWG",
+  #                                      start_date = paste0(spwn_yr, "0301"),
+  #                                      end_date = paste0(spwn_yr, "0817"),
+  #                                      damPIT = "GRA",
+  #                                      trap_dbase = trap_db)
+  #
+  # # compile everything into a list to pass to JAGS
+  # jags_data_list = STADEM::prepJAGS(stadem_data[['weeklyData']])
+  #
+  # model_file_nm = tempfile("STADEM_JAGS_model", fileext = ".txt")
+  #
+  # stadem_mod = STADEM::runSTADEMmodel(file_name = model_file_nm,
+  #                                     mcmc_chainLength = 40000,
+  #                                     mcmc_burn = 10000,
+  #                                     mcmc_thin = 30,
+  #                                     mcmc_chains = 4,
+  #                                     jags_data = jags_data_list,
+  #                                     seed = 5,
+  #                                     weekly_params = T,
+  #                                     win_model = "neg_bin",
+  #                                     trap_est = T)
+  #
+  # unlink(model_file_nm)
 
   # combine weekly escapement with other transition probabilities
   escp_summ = calcTribEscape_GRA(dabom_mod,
