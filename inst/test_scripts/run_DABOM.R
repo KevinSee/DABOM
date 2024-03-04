@@ -114,7 +114,9 @@ tag_summ = summarizeTagData(filter_ch,
                             bio_data = fish_origin)
 
 # file path to the default and initial model
-desktop_path = file.path(dirname(path.expand('~')),'Desktop')
+# desktop_path = file.path(dirname(path.expand('~')),'Desktop')
+desktop_path = file.path("O:Desktop")
+
 
 basic_modNm = file.path(desktop_path,
                         paste0(root_site, "_DABOM.txt"))
@@ -231,60 +233,86 @@ if(root_site == "PRO") {
 
 
 } else if(root_site == "LGR") {
+
+  main_post <-
+    compileTransProbs(trans_post,
+                      parent_child = pc,
+                      time_vary_only = T) |>
+    filter(origin == 1)
+
+  # main_summ <-
+  #   summarisePost(main_post,
+  #                 value,
+  #                 param,
+  #                 strata_num,
+  #                 origin)
+  #
+  # main_summ |>
+  #   filter(origin == 1,
+  #          median > 0) |>
+  #   ggplot(aes(x = strata_num,
+  #              y = median,
+  #              color = param,
+  #              fill = param)) +
+  #   geom_ribbon(aes(ymin = lower_ci,
+  #                   ymax = upper_ci),
+  #               color = NA,
+  #               alpha = 0.2) +
+  #   geom_line() +
+  #   theme_bw()
+
   # get example STADEM data and MCMC results from STADEM package
   library(STADEM)
   data("stadem_mod")
 
-  # # trans_df = compileTransProbs_GRA(dabom_mod,
-  # #                                  pc)
-  #
-  # # run STADEM model to get weekly escapement estimates
-  # # of wild fish at Lower Granite
-  # trap_db = system.file("extdata",
-  #                      "Chnk2014_TrapDatabase.csv",
-  #                      package = "PITcleanr",
-  #                      mustWork = TRUE) %>%
-  #   STADEM::readLGRtrapDB()
-  #
-  # stadem_data = STADEM::compileGRAdata(yr = spwn_yr,
-  #                                      spp = case_when(str_detect(ptagis_file_list[[root_site]], "chnk") ~ "Chinook",
-  #                                                      str_detect(ptagis_file_list[[root_site]], "sthd") ~ "Steelhead",
-  #                                                      .default = NA_character_),
-  #                                      dam = "LWG",
-  #                                      start_date = paste0(spwn_yr, "0301"),
-  #                                      end_date = paste0(spwn_yr, "0817"),
-  #                                      damPIT = "GRA",
-  #                                      trap_dbase = trap_db)
-  #
-  # # compile everything into a list to pass to JAGS
-  # jags_data_list = STADEM::prepJAGS(stadem_data[['weeklyData']])
-  #
-  # model_file_nm = tempfile("STADEM_JAGS_model", fileext = ".txt")
-  #
-  # stadem_mod = STADEM::runSTADEMmodel(file_name = model_file_nm,
-  #                                     mcmc_chainLength = 40000,
-  #                                     mcmc_burn = 10000,
-  #                                     mcmc_thin = 30,
-  #                                     mcmc_chains = 4,
-  #                                     jags_data = jags_data_list,
-  #                                     seed = 5,
-  #                                     weekly_params = T,
-  #                                     win_model = "neg_bin",
-  #                                     trap_est = T)
-  #
-  # unlink(model_file_nm)
+  # posteriors of STADEM abundance by strata_num
+  abund_post <-
+    STADEM::extractPost(stadem_mod,
+                        param_nms = c("X.new.wild",
+                                      "X.new.hatch")) |>
+    mutate(origin = case_when(str_detect(param, "wild") ~ 1,
+                              str_detect(param, "hatch") ~ 2,
+                              .default = NA_real_)) |>
+    rename(abund_param = param) |>
+    filter(origin == 1)
 
-  # combine weekly escapement with other transition probabilities
-  escp_summ = calcTribEscape_GRA(dabom_mod,
-                               stadem_mod,
-                               parent_child = pc,
-                               summ_results = T)
+  # escapement to each main branch across whole season
+  main_escp <-
+    calcAbundPost(move_post = main_post,
+                  abund_post = abund_post,
+                  time_vary_param_nm = "strata_num")
 
-  # get estimates for reporting groups
-  rep_grp = calcRepGrpEscape_GRA(dabom_mod,
-                       stadem_mod,
-                       parent_child = pc,
-                       spp = "Chinook")
+  summarisePost(main_escp,
+                abund,
+                param,
+                origin) |>
+    filter(mean > 0)
+
+
+  # compile tributary branch movement parameters
+  branch_post <-
+    compileTransProbs(trans_post,
+                      parent_child = pc,
+                      time_vary_only = F)
+
+  # estimate escapement to all tributary sites
+  trib_escp <-
+    calcAbundPost(branch_post,
+                  main_escp |>
+                    rename(main_branch = param,
+                           tot_abund = abund),
+                  .move_vars = c("origin",
+                                 "main_branch",
+                                 "param"),
+                  .abund_vars = c("origin",
+                                  "main_branch"))
+
+  escp_summ <-
+    summarisePost(trib_escp,
+                  abund,
+                  main_branch,
+                  param,
+                  origin)
 
 }
 
