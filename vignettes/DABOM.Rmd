@@ -426,38 +426,58 @@ In our example, at Tumwater Dam, every fish that moves upstream of the dam is ph
 ```{r}
 tot_escp = tibble(origin_nm = c("Wild", "Hatchery"),
                   origin = c(1,2),
-                  tot_escp = c(317, 1167))
+                  tot_escp = c(317, 1167),
+                  tot_escp_se = c(31.5, 122.8))
 ```
 
-Each of the transition probabilities can then be multiplied by this total escapement, resulting in posterior samples of escapement or abundance past each detection site. If there is any uncertainty in the total escapement, we recommend bootstrapping samples of the total escapement with the appropriate mean and standard error (using the same number of bootstrap samples as they have posterior samples of transition probabilities), labeling those bootstraps with an iteration number `iter` and joining them to the `trans_df` tibble by `iter` and `origin`. 
-
-We have included some code to help summarize those posteriors below, but the user could summarize the posterior samples however they wish. 
+Each of the transition probabilities can then be multiplied by this total escapement, resulting in posterior samples of escapement or abundance past each detection site. If there is any uncertainty in the total escapement, we recommend bootstrapping samples of the total escapement with the appropriate mean and standard error (using the same number of bootstrap samples as they have posterior samples of transition probabilities), labeling those bootstraps with a chain number, `chain`, and an iteration number, `iter`. 
 
 ```{r}
-escp_summ = trans_df %>%
-    left_join(tot_escp,
-              by = "origin") %>%
-    mutate(escp = tot_escp * value) %>%
-    summarisePost(escp,
-                  location = param,
-                  origin) |>
-    mutate(across(c(mean, median, mode, sd, skew, kurtosis, matches('CI$')),
-                  ~ round(.,
-                          digits = 2))) %>%
-    arrange(desc(origin), location)
+tot_escp_boot <-
+  tot_escp |> 
+  crossing(chain = unique(trans_df$chain)) |> 
+  group_by(origin_nm,
+           origin,
+           chain) |> 
+  reframe(tot_esc_samp = map2(tot_escp,
+                                tot_escp_se,
+                                .f = function(x, y) {
+                                  tibble(tot_abund = rnorm(max(trans_df$iter),
+                                                           mean = x,
+                                                           sd = y)) %>%
+                                    mutate(iter = 1:n())
+                                })) |>
+  unnest(cols = tot_esc_samp)
+```
+
+These bootstrapped estimates of total escapement function like the MCMC posterior draws of an abundance model, and can be matched with the movement posterior draws in `trans_df` to calculate abundance at each location. Use the `calcAbundPost()` function for this operation. 
+
+```{r}
+escp_post <-
+  calcAbundPost(move_post = trans_df,
+                abund_post = tot_escp_boot)
+```
+
+These draws can then be summarized using the `summarisePost()` function, or the user could summarize the posterior samples however they wish. 
+
+```{r}
+escp_summ <- summarisePost(escp_post,
+                           abund,
+                           location = param,
+                           origin_nm,
+                           origin)
 ```
 
 ```{r, echo = F}
 escp_summ %>%
+  mutate(across(c(mean, median, mode, sd, skew, kurtosis, matches('CI$')),
+                  ~ round(.,
+                          digits = 2))) %>%
+  arrange(desc(origin), location) |> 
   filter(str_detect(location, "ICL$") |
            str_detect(location, "NAL") |
            str_detect(location, "NAU") |
            str_detect(location, "CHL")) |> 
-  mutate(origin_nm = recode(origin,
-                            "1" = "Wild",
-                            "2" = "Hatchery")) |> 
-  relocate(origin_nm,
-           .after = origin) |> 
   arrange(origin, location) |> 
   kable(digits = 1,
         caption = "Escapement summary statistics from a sample of locations.")
@@ -467,24 +487,133 @@ escp_summ %>%
 
 For DABOM models with time-varying parameters (e.g. Lower Granite Dam), calculating escapement estimates is a little more complicated. Essentially the user needs to extract the movement probabilities along each initial branch for each strata (e.g. week), and multiply those by an estimate of total escapement at the release point for that strata. Those estimates by strata can then be summed for each branch across all strata, to estimate total escapement to each initial branch across the entire run. Those branch escapement estimates are then multiplied by the subsequent movement or transition probabilities within that branch to estimate escapement past all detection points within each branch. 
 
-For Lower Granite, total unique wild escapement can be estimated with the **ST**ate-space **A**dult **D**am **E**escapement **M**odel (STADEM), which interacts well with DABOM to generate all these estimates. If the user has posterior samples from a STADEM model that was set up with the same strata as DABOM, they can generate summaries of escapement estimates using the `calcTribEscape_GRA()` function. If the input `summ_results` is set to `FALSE`, the function returns a tibble with all the posterior samples that the user can then summarize as they would like. 
+Here, we start by compiling only the time-varying movement parameters.
 
-```{r, eval = F}
-# combine weekly escapement with other transition probabilities
-escp_summ = calcTribEscape_GRA(dabom_mod = dabom_samp_gra,
-                               stadem_mod = stadem_mod,
-                               stadem_param_nm = "X.new.wild",
-                               parent_child = parent_child,
-                               summ_results = T)
+```{r}
+# read in the LGR parent-child table
+pc_lgr <- 
+  system.file("extdata",
+              "LGR_parent_child.csv",
+              package = "PITcleanr",
+              mustWork = TRUE) |> 
+  read_csv(show_col_types = F)
+
+# read in the LGR configuration file
+config_lgr <-
+  system.file("extdata",
+              "LGR_configuration.csv",
+              package = "PITcleanr",
+              mustWork = TRUE) |> 
+  read_csv(show_col_types = F)
+
+# load the MCMC draws from the DABOM model for LGR
+data("dabom_samp_lgr")
+
+trans_post <- extractTransPost(dabom_mod = dabom_samp_lgr,
+                               parent_child = pc_lgr,
+                               configuration = config_lgr) |>
+  # focus only on wild fish
+  filter(origin == 1)
+
+# compile main branch movement parameters
+main_post <-
+  compileTransProbs(trans_post,
+                    parent_child = pc_lgr,
+                    time_vary_only = T,
+                    time_vary_param_nm = "strata_num")
 ```
+
+
+For Lower Granite, total unique wild escapement can be estimated with the **ST**ate-space **A**dult **D**am **E**escapement **M**odel (STADEM), which interacts well with DABOM to generate all these estimates. If the user has posterior samples from a STADEM model that was set up with the same strata as DABOM, those can be extracted by using the `extractPost()` function from the `STADEM` package.
+
+
+```{r}
+library(STADEM)
+data("stadem_mod")
+
+# posteriors of STADEM abundance by strata_num
+abund_post <-
+  STADEM::extractPost(stadem_mod,
+                      param_nms = c("X.new.wild",
+                                    "X.new.hatch")) |>
+  mutate(origin = case_when(str_detect(param, "wild") ~ 1,
+                            str_detect(param, "hatch") ~ 2,
+                            .default = NA_real_)) |>
+  rename(abund_param = param) |>
+  filter(origin == 1)
+
+# escapement to each main branch across whole season
+main_escp <-
+  calcAbundPost(move_post = main_post,
+                abund_post = abund_post,
+                time_vary_param_nm = "strata_num")
+```
+
+
+The movement probabilities within non-main branches (so those without time-varying parameters) are compiled separately.
+
+```{r}
+# compile tributary branch movement parameters
+branch_post <-
+  compileTransProbs(trans_post,
+                    parent_child = pc_lgr,
+                    time_vary_only = F)
+```
+
+These are then combined with the main-branch escapements using the `calcAbundPost()` function again. The main-branch abundance posteriors can be row-bound to the tributary abundance posteriors to track abundance across all locations. These draws can then be summarized using the `summarisePost()` function.
+
+```{r}
+# estimate escapement to all tributary sites
+trib_escp <-
+  calcAbundPost(branch_post,
+                main_escp |>
+                  rename(main_branch = param,
+                         tot_abund = abund),
+                .move_vars = c("origin",
+                               "main_branch",
+                               "param"),
+                .abund_vars = c("origin",
+                                "main_branch"))
+
+# combine main-branch and tributary draws into a single object
+all_escp_post <-
+  trib_escp |> 
+  select(-value) |> 
+  bind_rows(main_escp |> 
+              mutate(main_branch = param,
+                     tot_abund = abund)) |> 
+  arrange(chain,
+          iter,
+          origin,
+          main_branch,
+          param)
+
+all_escp_summ <-
+  all_escp_post |> 
+  summarisePost(value = abund,
+                main_branch,
+                origin,
+                param)
+```
+
+```{r}
+all_escp_summ |> 
+  filter(mean > 0, 
+         main_branch == "LLR") |> 
+  rename(location = param) |> 
+  mutate(across(mean:mode,
+                round)) |> 
+  kable(digits = 1,
+        caption = "Summary statistics of escapement estimates to all locations within one main-branch, the Lemhi River (site LLR).") |> 
+  kable_styling()
+```
+
 
 It is important to note that the user is responsible for ensuring that the strata used in STADEM and that used in DABOM are the same. The `addTimeVaryData()` function uses a function from the `STADEM` package to generate strata on a weekly basis, so as long as the inputs are the same, the strata will be identical. However, if the user wishes to use strata from a different model (not STADEM), that are not set up to be weekly (e.g. uneven lengths, split across known changes in trap rates, etc.), it is fairly easy to generate the `n_strata` and `dam_strata` inputs to JAGS without using the `addTimeVaryData()` function, but then they must also generate estimates of escapement (by origin if necessary) for each strata. Then it is also upon the user to combine those estimates (bootstrapped if necessary due to uncertainty) with the appropriate transition probability posteriors. 
 
 # Updating a DABOM Model
 
-As new detection sites are installed, the current DABOM models may need to change. The user can modify the configuration file and parent-child table through R, or manually in other software like Excel and then read those files back into R. Once the configuration file and parent-child table are updated, the other functions in the `DABOM` package will work correctly with these updated files, including `writeDABOM`, `fishNoFishNodes`, `setInitialValues`, `createJAGSinputs` and `setSavedParams`. The user can run the JAGS model, and even pull out summaries of the detection probabilities using `summariseDetectProbs`, and generate transition probabilities using `compileTransProbs`.  
-
-***However***, if the Lower Granite DABOM model is modified, especially if new initial branches are added, particular care should be taken when examining the results of `calcTribEscape_GRA`, in case further adjustments are needed.
+As new detection sites are installed, the current DABOM models may need to change. The user can modify the configuration file and parent-child table through R, or manually in other software like Excel and then read those files back into R. Once the configuration file and parent-child table are updated, the other functions in the `DABOM` package will work correctly with these updated files, including `writeDABOM`, `fishNoFishNodes`, `setInitialValues`, `createJAGSinputs` and `setSavedParams`. The user can run the JAGS model, and even pull out summaries of the detection probabilities using `summariseDetectProbs`, and generate transition probabilities using `extractTransPost` and `compileTransProbs`.  
 
 ```{r, echo = F}
 unlink(basic_mod_file)
