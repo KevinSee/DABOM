@@ -604,8 +604,7 @@ all_escp_summ |>
   mutate(across(mean:mode,
                 round)) |> 
   kable(digits = 1,
-        caption = "Summary statistics of escapement estimates to all locations within one main-branch, the Lemhi River (site LLR).") |> 
-  kable_styling()
+        caption = "Summary statistics of escapement estimates to all locations within one main-branch, the Lemhi River (site LLR).")
 ```
 
 
