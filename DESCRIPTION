@@ -22,14 +22,13 @@ Imports:
     rjags (>= 4.15),
     coda (>= 0.19.4.1),
     progress (>= 1.2.3),
-    moments (>= 0.14.1)
+    moments (>= 0.14)
 SystemRequirements: JAGS (http://mcmc-jags.sourceforge.net)
 URL: https://github.com/KevinSee/DABOM,
     https://kevinsee.github.io/DABOM,
     https://kevinsee.github.io/DABOM/
 BugReports: https://github.com/KevinSee/DABOM/issues
 Encoding: UTF-8
-LazyData: true
 RoxygenNote: 7.3.1
 Suggests: 
   knitr, 
