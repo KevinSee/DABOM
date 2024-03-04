@@ -190,14 +190,16 @@ dabom_mod = coda.samples(jags,
 
 if(root_site == "TUM") {
   dabom_samp_tum = dabom_mod
-  use_data(dabom_samp_tum,
-           version = 3)
+  usethis::use_data(dabom_samp_tum,
+                    version = 3,
+                    overwrite = T)
 }
 
 if(root_site == "LGR") {
   dabom_samp_lgr = dabom_mod
-  use_data(dabom_samp_lgr,
-           version = 3)
+  usethis::use_data(dabom_samp_lgr,
+                    version = 3,
+                    overwrite = T)
 }
 
 
