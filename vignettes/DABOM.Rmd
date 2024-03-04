@@ -120,7 +120,12 @@ The `PITcleanr` package provides an example dataset we can use to demonstrate th
 
 ```{r examp-files}
 library(PITcleanr)
-library(tidyverse)
+library(dplyr)
+library(readr)
+library(stringr)
+library(tibble)
+library(tidyr)
+library(purrr)
 
 ptagis_file = system.file("extdata",
                           "TUM_chnk_cth_2018.csv",
