@@ -1,35 +1,35 @@
 Package: DABOM
 Title: Dam Adult Branch Occupancy Model
-Version: 3.0.0
+Version: 3.0.1
 Authors@R: person("Kevin", "See", email = "Kevin.See@dfw.wa.gov", role = c("aut", "cre"))
 Maintainer: Kevin See <Kevin.See@dfw.wa.gov>
 Description: Takes verified output from PITcleanr package and runs DABOM, a hierarchical patch-occupancy model to estimate adult salmonid escapement past detection locations.
 Depends: 
-    R (>= 3.4.1)
+    R (>= 4.1.0),
 License: CC BY 4.0
 Imports:
-    dplyr (>= 1.0.0),
-    httr (>= 1.4.2),
-    lubridate (>= 1.7.9),
-    magrittr (>= 1.5),
-    forcats (>= 0.5.0),
-    stringr (>= 1.4.0),
-    purrr (>= 0.3.4),
-    readr (>= 1.3.1),
-    tidyr (>= 1.1.0),
-    tibble (>= 3.0.3),
-    janitor (>= 2.0.1),
-    rjags (>= 4-10),
-    coda (>= 0.19-3),
-    progress
+    dplyr (>= 1.1.4),
+    httr (>= 1.4.7),
+    lubridate (>= 1.9.3),
+    magrittr (>= 2.0.3),
+    forcats (>= 1.0.0),
+    stringr (>= 1.5.1),
+    purrr (>= 1.0.2),
+    readr (>= 2.1.5),
+    tidyr (>= 1.3.1),
+    tibble (>= 3.2.1),
+    janitor (>= 2.2.0),
+    rjags (>= 4.15),
+    coda (>= 0.19.4.1),
+    progress (>= 1.2.3),
+    moments (>= 0.14)
 SystemRequirements: JAGS (http://mcmc-jags.sourceforge.net)
 URL: https://github.com/KevinSee/DABOM,
     https://kevinsee.github.io/DABOM,
     https://kevinsee.github.io/DABOM/
 BugReports: https://github.com/KevinSee/DABOM/issues
 Encoding: UTF-8
-LazyData: true
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Suggests: 
   knitr, 
   rmarkdown

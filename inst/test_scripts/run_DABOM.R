@@ -1,7 +1,7 @@
 # Author: Kevin See
 # Purpose: Test functions for preparing PTAGIS data for DABOM
 # Created: 4/8/2021
-# Last Modified: 5/10/2021
+# Last Modified: 2/21/2024
 # Notes:
 
 #-----------------------------------------------------------------
@@ -17,13 +17,13 @@ devtools::load_all()
 
 #-----------------------------------------------------------------
 # pick a DABOM version to test
-root_site = c("GRA", 'PRA', "TUM", "PRO")[3]
+root_site = c("LGR", 'PRA', "TUM", "PRO")[1]
 
 # determine where various test files are located
-ptagis_file_list = list(GRA = "LGR_Chinook_2014.csv",
-                        PRA = "UC_Sthd_2015.csv",
-                        TUM = "TUM_Chinook_2015.csv",
-                        PRO = "PRO_Steelhead_2019.csv")
+ptagis_file_list = list(LGR = "LGR_chnk_cth_2019.csv",
+                        PRA = "PRA_sthd_cth_2018.csv",
+                        TUM = "TUM_chnk_cth_2018.csv",
+                        PRO = "PRO_sthd_cth_2012.csv")
 
 ptagis_file = system.file("extdata",
                           ptagis_file_list[[root_site]],
@@ -31,12 +31,12 @@ ptagis_file = system.file("extdata",
                           mustWork = TRUE)
 
 parent_child_file = system.file("extdata",
-                                paste0("parent_child_", root_site, ".csv"),
+                                paste0(root_site, "_parent_child.csv"),
                                 package = "PITcleanr",
                                 mustWork = TRUE)
 
 config_file = system.file("extdata",
-                          paste0("configuration_", root_site, ".csv"),
+                          paste0(root_site, "_configuration.csv"),
                           package = "PITcleanr",
                           mustWork = TRUE)
 
@@ -49,23 +49,25 @@ spwn_yr = ptagis_file %>%
   as.numeric()
 
 # set minimum observation date
-min_obs_date = if_else(root_site %in% c("TUM", 'GRA'),
+min_obs_date = if_else(root_site %in% c("TUM", 'LGR'),
                        paste0(spwn_yr, "0301"),
                        if_else(root_site %in% c("PRA", 'PRO'),
                                paste0(spwn_yr-1, "0701"),
                                NA_character_))
 
 # set maximum observation date
-max_obs_date = if_else(root_site %in% c("TUM", 'GRA'),
+max_obs_date = if_else(root_site %in% c("TUM", 'LGR'),
                        paste0(spwn_yr, "0930"),
                        if_else(root_site %in% c("PRA", 'PRO'),
                                paste0(spwn_yr, "0630"),
                                NA_character_))
 
 # read in parent-child table
-pc = read_csv(parent_child_file)
+pc = read_csv(parent_child_file,
+              show_col_types = F)
 # read in configuration file
-configuration = read_csv(config_file)
+configuration = read_csv(config_file,
+                         show_col_types = F)
 
 # add nodes to parent-child table
 pc_nodes = addParentChildNodes(pc,
@@ -101,7 +103,7 @@ fish_origin = read_csv(ptagis_file) %>%
          origin = recode(origin,
                          "U" = "W"))
 
-if(root_site %in% c("GRA", "PRO")) {
+if(root_site %in% c("LGR", "PRO")) {
   fish_origin %<>%
     mutate(origin = "W")
 }
@@ -112,13 +114,17 @@ tag_summ = summarizeTagData(filter_ch,
                             bio_data = fish_origin)
 
 # file path to the default and initial model
-desktop_path = file.path(path.expand('~'),'Desktop')
-basic_modNm = paste0(desktop_path, "/", root_site, '_DABOM.txt')
+# desktop_path = file.path(dirname(path.expand('~')),'Desktop')
+desktop_path = file.path("O:Desktop")
+
+
+basic_modNm = file.path(desktop_path,
+                        paste0(root_site, "_DABOM.txt"))
 
 writeDABOM(basic_modNm,
            pc,
            configuration,
-           time_varying = if_else(root_site == "GRA", T, F))
+           time_varying = if_else(root_site == "LGR", T, F))
 
 #------------------------------------------------------------------------------
 # Alter default model code for species and year of
@@ -127,7 +133,8 @@ writeDABOM(basic_modNm,
 #------------------------------------------------------------------------------
 
 # filepath for specific JAGS model code for species and year
-mod_path = paste0(desktop_path, '/Test_DABOM_', root_site, '.txt')
+mod_path = file.path(desktop_path,
+                     paste0('DABOM_', root_site, '_Test.txt'))
 
 # writes species and year specific jags code
 fixNoFishNodes(init_file = basic_modNm,
@@ -147,7 +154,7 @@ jags_data = createJAGSinputs(filter_ch = filter_ch,
                              parent_child = pc,
                              configuration = configuration,
                              fish_origin = fish_origin)
-if(root_site == "GRA") {
+if(root_site == "LGR") {
   jags_data = c(jags_data,
                 addTimeVaryData(filter_ch,
                                 start_date = paste0(spwn_yr, "0301"),
@@ -159,7 +166,7 @@ if(root_site == "GRA") {
 
 # Tell JAGS which parameters in the model that it should save.
 jags_params = setSavedParams(model_file = mod_path,
-                             time_varying = if_else(root_site == "GRA", T, F))
+                             time_varying = if_else(root_site == "LGR", T, F))
 
 
 # test running the model
@@ -182,9 +189,17 @@ dabom_mod = coda.samples(jags,
 
 
 if(root_site == "TUM") {
-  dabom_mod_tum = dabom_mod
-  use_data(dabom_mod_tum,
-           version = 3)
+  dabom_samp_tum = dabom_mod
+  usethis::use_data(dabom_samp_tum,
+                    version = 3,
+                    overwrite = T)
+}
+
+if(root_site == "LGR") {
+  dabom_samp_lgr = dabom_mod
+  usethis::use_data(dabom_samp_lgr,
+                    version = 3,
+                    overwrite = T)
 }
 
 
@@ -193,80 +208,113 @@ detect_summ = summariseDetectProbs(dabom_mod = dabom_mod,
   filter(!is.na(mean))
 
 # compile all movement probabilities, and multiply them appropriately
-# compile all movement probabilities, and multiply them appropriately
-if(root_site == "PRO") {
-  trans_df = compileTransProbs_PRO(dabom_mod,
-                                   pc)
+trans_post <-
+  extractTransPost(dabom_mod = dabom_mod,
+                   parent_child = pc,
+                   configuration = configuration)
 
+if(root_site %in% c("PRO", "PRA", 'TUM')) {
+  trans_df <-
+    compileTransProbs(trans_post,
+                      parent_child = pc,
+                      time_vary_only = FALSE)
+}
+
+
+if(root_site == "PRO") {
   tot_escp = tibble(origin = c(1,2),
                     tot_escp = c(1132, 0))
 
 } else if(root_site == "TUM") {
-  trans_df = compileTransProbs_TUM(dabom_mod,
-                                   pc)
-
   tot_escp = tibble(origin = c(1,2),
                     tot_escp = c(1086, 1378))
 
-
 } else if(root_site == "PRA") {
-  trans_df = compileTransProbs_PRA(dabom_mod,
-                                   pc)
-
-} else if(root_site == "GRA") {
-  # trans_df = compileTransProbs_GRA(dabom_mod,
-  #                                  pc)
-
-  # run STADEM model to get weekly escapement estimates
-  # of wild fish at Lower Granite
-  trap_db = system.file("extdata",
-                       "Chnk2014_TrapDatabase.csv",
-                       package = "PITcleanr",
-                       mustWork = TRUE) %>%
-    STADEM::readLGRtrapDB()
-
-  stadem_data = STADEM::compileGRAdata(yr = spwn_yr,
-                                       spp = ptagis_file %>%
-                                         str_split("/") %>%
-                                         unlist() %>%
-                                         last() %>%
-                                         str_split("_") %>%
-                                         unlist() %>%
-                                         magrittr::extract(2),
-                                       dam = "LWG",
-                                       start_date = paste0(spwn_yr, "0301"),
-                                       end_date = paste0(spwn_yr, "0817"),
-                                       damPIT = "GRA",
-                                       trap_dbase = trap_db)
-
-  # compile everything into a list to pass to JAGS
-  jags_data_list = STADEM::prepJAGS(stadem_data[['weeklyData']])
-
-  model_file_nm = '~/Desktop/STADEM_JAGS_model.txt'
-
-  stadem_mod = STADEM::runSTADEMmodel(file_name = model_file_nm,
-                                      mcmc_chainLength = 40000,
-                                      mcmc_burn = 10000,
-                                      mcmc_thin = 30,
-                                      mcmc_chains = 4,
-                                      jags_data = jags_data_list,
-                                      seed = 5,
-                                      weekly_params = T,
-                                      win_model = "neg_bin",
-                                      trap_est = T)
+  # tot_escp = tibble(origin = c(1,2),
+  #                   tot_escp = c(1086, 1378))
 
 
-  # combine weekly escapement with other transition probabilities
-  escp_summ = calcTribEscape_GRA(dabom_mod,
-                               stadem_mod,
-                               parent_child = pc,
-                               summ_results = T)
+} else if(root_site == "LGR") {
 
-  # get estimates for reporting groups
-  rep_grp = calcRepGrpEscape_GRA(dabom_mod,
-                       stadem_mod,
-                       parent_child = pc,
-                       spp = "Chinook")
+  main_post <-
+    compileTransProbs(trans_post,
+                      parent_child = pc,
+                      time_vary_only = T) |>
+    filter(origin == 1)
+
+  # main_summ <-
+  #   summarisePost(main_post,
+  #                 value,
+  #                 param,
+  #                 strata_num,
+  #                 origin)
+  #
+  # main_summ |>
+  #   filter(origin == 1,
+  #          median > 0) |>
+  #   ggplot(aes(x = strata_num,
+  #              y = median,
+  #              color = param,
+  #              fill = param)) +
+  #   geom_ribbon(aes(ymin = lower_ci,
+  #                   ymax = upper_ci),
+  #               color = NA,
+  #               alpha = 0.2) +
+  #   geom_line() +
+  #   theme_bw()
+
+  # get example STADEM data and MCMC results from STADEM package
+  library(STADEM)
+  data("stadem_mod")
+
+  # posteriors of STADEM abundance by strata_num
+  abund_post <-
+    STADEM::extractPost(stadem_mod,
+                        param_nms = c("X.new.wild",
+                                      "X.new.hatch")) |>
+    mutate(origin = case_when(str_detect(param, "wild") ~ 1,
+                              str_detect(param, "hatch") ~ 2,
+                              .default = NA_real_)) |>
+    rename(abund_param = param) |>
+    filter(origin == 1)
+
+  # escapement to each main branch across whole season
+  main_escp <-
+    calcAbundPost(move_post = main_post,
+                  abund_post = abund_post,
+                  time_vary_param_nm = "strata_num")
+
+  summarisePost(main_escp,
+                abund,
+                param,
+                origin) |>
+    filter(mean > 0)
+
+
+  # compile tributary branch movement parameters
+  branch_post <-
+    compileTransProbs(trans_post,
+                      parent_child = pc,
+                      time_vary_only = F)
+
+  # estimate escapement to all tributary sites
+  trib_escp <-
+    calcAbundPost(branch_post,
+                  main_escp |>
+                    rename(main_branch = param,
+                           tot_abund = abund),
+                  .move_vars = c("origin",
+                                 "main_branch",
+                                 "param"),
+                  .abund_vars = c("origin",
+                                  "main_branch"))
+
+  escp_summ <-
+    summarisePost(trib_escp,
+                  abund,
+                  main_branch,
+                  param,
+                  origin)
 
 }
 
@@ -275,22 +323,12 @@ if(root_site %in% c("PRO", 'TUM')) {
     left_join(tot_escp,
               by = "origin") %>%
     mutate(escp = tot_escp * value) %>%
-    group_by(location = param,
-             origin) %>%
-    summarise(mean = mean(escp),
-              median = median(escp),
-              mode = estMode(escp),
-              sd = sd(escp),
-              skew = moments::skewness(escp),
-              kurtosis = moments::kurtosis(escp),
-              lowerCI = coda::HPDinterval(coda::as.mcmc(escp))[,1],
-              upperCI = coda::HPDinterval(coda::as.mcmc(escp))[,2],
-              .groups = "drop") %>%
-    mutate(across(c(mean, median, mode, sd, matches('CI$')),
-                  ~ if_else(. < 0, 0, .))) %>%
+    summarisePost(escp,
+                  location = param,
+                  origin) |>
     mutate(across(c(mean, median, mode, sd, skew, kurtosis, matches('CI$')),
-                  round,
-                  digits = 2)) %>%
+                  ~ round(.,
+                          digits = 2))) %>%
     arrange(desc(origin), location) %>%
     as.data.frame()
 }
