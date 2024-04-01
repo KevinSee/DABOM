@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">DABOM</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.0.2</span>
       </span>
     </div>
 
@@ -56,13 +56,18 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compileTransProbs</span><span class="op">(</span>dabom_mod <span class="op">=</span> <span class="cn">NULL</span>, parent_child <span class="op">=</span> <span class="cn">NULL</span>, configuration <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compileTransProbs</span><span class="op">(</span></span>
+<span>  trans_post <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  parent_child <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  time_vary_only <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  time_vary_param_nm <span class="op">=</span> <span class="st">"strata_num"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>dabom_mod</dt>
-<dd><p>An MCMC.list</p></dd>
+    <dl><dt>trans_post</dt>
+<dd><p>posterior draws of transition probabilities compiled by the `extractTransPost` function</p></dd>
 
 
 <dt>parent_child</dt>
@@ -70,9 +75,12 @@
 Can be created with `buildParentChild()` function in the `PITcleanr` package.</p></dd>
 
 
-<dt>configuration</dt>
-<dd><p>is a data frame which assigns node names to unique SiteID, AntennaID, and
-site configuration ID combinations. One example can be built with the function `buildConfig`</p></dd>
+<dt>time_vary_only</dt>
+<dd><p>Should only time-varying parameters be compiled? Default is `FALSE`, meaning time-varying parameters are excluded from results. If set to `TRUE`, non-time-varying parameters are excluded from results.</p></dd>
+
+
+<dt>time_vary_param_nm</dt>
+<dd><p>column name describing the time-varying strata for each location. Default value is `strata_num`.</p></dd>
 
 </dl></div>
     <div id="author">

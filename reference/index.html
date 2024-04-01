@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">DABOM</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.0.2</span>
       </span>
     </div>
 
@@ -86,25 +86,29 @@
           <p class="section-desc"></p><p>Functions related to summarizing detection, movement and escapement estimates</p>
         </th>
       </tr></tbody><tbody><tr><td>
-          <p><code><a href="calcBranchEscape_GRA.html">calcBranchEscape_GRA()</a></code> </p>
+          <p><code><a href="extractDetectPost.html">extractDetectPost()</a></code> </p>
         </td>
-        <td><p>Estimate Escapement - LGD</p></td>
+        <td><p>Extract Detection Posteriors</p></td>
       </tr><tr><td>
-          <p><code><a href="calcRepGrpEscape_GRA.html">calcRepGrpEscape_GRA()</a></code> </p>
+          <p><code><a href="extractTransPost.html">extractTransPost()</a></code> </p>
         </td>
-        <td><p>Estimate Escapement for Reporting Groups - GRA</p></td>
+        <td><p>Extract Transition Posteriors</p></td>
       </tr><tr><td>
-          <p><code><a href="calcTribEscape_GRA.html">calcTribEscape_GRA()</a></code> </p>
+          <p><code><a href="compileTransProbs.html">compileTransProbs()</a></code> </p>
         </td>
-        <td><p>Estimate Escapement - LGD</p></td>
+        <td><p>Compile Transition Probabilities</p></td>
       </tr><tr><td>
           <p><code><a href="summariseDetectProbs.html">summariseDetectProbs()</a></code> </p>
         </td>
         <td><p>Summarise Detection Probabilities</p></td>
       </tr><tr><td>
-          <p><code><a href="extractTransProbs.html">extractTransProbs()</a></code> </p>
+          <p><code><a href="summarisePost.html">summarisePost()</a></code> </p>
         </td>
-        <td><p>Extract Transition Probabilities</p></td>
+        <td><p>Summarize Posteriorrs</p></td>
+      </tr><tr><td>
+          <p><code><a href="calcAbundPost.html">calcAbundPost()</a></code> </p>
+        </td>
+        <td><p>Calculate Abundance Posteriors</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h2 id="internal-functions">Internal Functions <a href="#internal-functions" class="anchor" aria-hidden="true"></a></h2>
           <p class="section-desc"></p><p>These functions are used internally, within other functions</p>
@@ -126,10 +130,6 @@
         </td>
         <td><p>Define Column Names for DABOM matrix</p></td>
       </tr><tr><td>
-          <p><code><a href="defineRepGrps_GRA.html">defineRepGrps_GRA()</a></code> </p>
-        </td>
-        <td><p>Define Report Groups - GRA</p></td>
-      </tr><tr><td>
           <p><code><a href="estMode.html">estMode()</a></code> </p>
         </td>
         <td><p>Estimate Mode of Posterior Distribution</p></td>
@@ -137,34 +137,6 @@
           <p><code><a href="setBranchNums.html">setBranchNums()</a></code> </p>
         </td>
         <td><p>Set Branch Numbers</p></td>
-      </tr></tbody><tbody><tr><th colspan="2">
-          <h2 id="deprecated-functions">Deprecated functions <a href="#deprecated-functions" class="anchor" aria-hidden="true"></a></h2>
-          <p class="section-desc"></p><p>These functions have been superseded</p>
-        </th>
-      </tr></tbody><tbody><tr><td>
-          <p><code><a href="writeDABOM_LGD.html">writeDABOM_LGD()</a></code> </p>
-        </td>
-        <td><p>Write Lower Granite Dam JAGS model</p></td>
-      </tr><tr><td>
-          <p><code><a href="writeDABOM_PRA.html">writeDABOM_PRA()</a></code> </p>
-        </td>
-        <td><p>Write Priest Rapids JAGS model</p></td>
-      </tr><tr><td>
-          <p><code><a href="writeDABOM_PRO.html">writeDABOM_PRO()</a></code> </p>
-        </td>
-        <td><p>Write Prosser JAGS model</p></td>
-      </tr><tr><td>
-          <p><code><a href="writeDABOM_TUM.html">writeDABOM_TUM()</a></code> </p>
-        </td>
-        <td><p>Write Tumwater JAGS model</p></td>
-      </tr><tr><td>
-          <p><code><a href="compileTimeVaryTransProbs.html">compileTimeVaryTransProbs()</a></code> </p>
-        </td>
-        <td><p>Compile Time-Varying Transition Probabilities</p></td>
-      </tr><tr><td>
-          <p><code><a href="compileTransProbs.html">compileTransProbs()</a></code> </p>
-        </td>
-        <td><p>Compile Transition Probabilities</p></td>
       </tr></tbody></table></div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

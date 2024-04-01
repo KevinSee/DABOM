@@ -40,7 +40,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">DABOM</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.0.2</span>
       </span>
     </div>
 
@@ -79,7 +79,7 @@
       <h1 data-toc-skip>Running DABOM</h1>
                         <h4 data-toc-skip class="author">Kevin See</h4>
             
-            <h4 data-toc-skip class="date">13 December, 2023</h4>
+            <h4 data-toc-skip class="date">01 April, 2024</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/KevinSee/DABOM/blob/HEAD/vignettes/DABOM.Rmd" class="external-link"><code>vignettes/DABOM.Rmd</code></a></small>
       <div class="hidden name"><code>DABOM.Rmd</code></div>
@@ -91,47 +91,118 @@
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>This manual describes how to run the <strong>D</strong>am <strong>A</strong>dult <strong>B</strong>ranch <strong>O</strong>ccupancy <strong>M</strong>odel (<a href="https://github.com/BiomarkABS/DABOM" class="external-link">DABOM</a>) for adult salmon returning to a watershed. The framework typically consists of PIT tagging a representative sample of the returning adults, and using the subsequent detections of those tags at various sites upstream (or possibly downstream) of the starting location to estimate escapement or abundance past each detection site. The DABOM model estimates transition (or movement) probabilities past various detection sites while accounting for imperfect detection at those sites, essentially a multi-state variation of a spatial Cormack-Jolly-Seber model. The DABOM package implements this kind of model in a Bayesian framework. Further mathematical details of the model can be found in <span class="citation">Waterhouse et al. (2020)</span> which can be found <a href="https://doi.org/10.1002/eap.2202" class="external-link">here</a>.</p>
-<p>For this vignette, we will show a DABOM example for spring Chinook crossing over Tumwater Dam and in the upper Wenatchee River. We start by directing users how to query <a href="https://www.ptagis.org/" class="external-link">PTAGIS</a> to get all detections of adults at relevant observation sites (e.g., weirs, PIT tag arrays, etc.) for a particular spawning run from a list of “valid” PIT tags. Observation data are then “cleaned up” using the <code>PITcleanr</code> R package and a final destination or spawning location is determined for each individual. <code>PITcleanr</code> can also be used to prepare detection data for use in the <code>DABOM</code> R package and model. Next, we describe how to write a JAGS model for use in <code>DABOM</code>, and finally, run <code>DABOM</code> to estimate detection and movement probabilities within the stream network. Movement probabilities can then be multiplied by an estimate of adult escapement at Tumwater Dam to estimate escapement, with uncertainty, at any observation site (or tributary) within the Wenatchee River.</p>
-<p>We estimate escapement (or abundance) for both hatchery and natural origin fish by using both types together to estimate detection probabilities, but allow movement probabilities to vary by origin, because hatchery fish are likely moving to different areas at different rates compared to natural origin fish.</p>
+<p>This manual describes how to run the <strong>D</strong>am
+<strong>A</strong>dult <strong>B</strong>ranch
+<strong>O</strong>ccupancy <strong>M</strong>odel (<a href="https://github.com/BiomarkABS/DABOM" class="external-link">DABOM</a>) for adult salmon
+returning to a watershed. The framework typically consists of PIT
+tagging a representative sample of the returning adults, and using the
+subsequent detections of those tags at various sites upstream (or
+possibly downstream) of the starting location to estimate escapement or
+abundance past each detection site. The DABOM model estimates transition
+(or movement) probabilities past various detection sites while
+accounting for imperfect detection at those sites, essentially a
+multi-state variation of a spatial Cormack-Jolly-Seber model. The DABOM
+package implements this kind of model in a Bayesian framework. Further
+mathematical details of the model can be found in <span class="citation">Waterhouse et al. (2020)</span> which can be found <a href="https://doi.org/10.1002/eap.2202" class="external-link">here</a>.</p>
+<p>For this vignette, we will show a DABOM example for spring Chinook
+crossing over Tumwater Dam and in the upper Wenatchee River. We start by
+directing users how to query <a href="https://www.ptagis.org/" class="external-link">PTAGIS</a> to get all detections of
+adults at relevant observation sites (e.g., weirs, PIT tag arrays, etc.)
+for a particular spawning run from a list of “valid” PIT tags.
+Observation data are then “cleaned up” using the <code>PITcleanr</code>
+R package and a final destination or spawning location is determined for
+each individual. <code>PITcleanr</code> can also be used to prepare
+detection data for use in the <code>DABOM</code> R package and model.
+Next, we describe how to write a JAGS model for use in
+<code>DABOM</code>, and finally, run <code>DABOM</code> to estimate
+detection and movement probabilities within the stream network. Movement
+probabilities can then be multiplied by an estimate of adult escapement
+at Tumwater Dam to estimate escapement, with uncertainty, at any
+observation site (or tributary) within the Wenatchee River.</p>
+<p>We estimate escapement (or abundance) for both hatchery and natural
+origin fish by using both types together to estimate detection
+probabilities, but allow movement probabilities to vary by origin,
+because hatchery fish are likely moving to different areas at different
+rates compared to natural origin fish.</p>
 <div class="section level3">
 <h3 id="companion-r-packages">Companion R packages<a class="anchor" aria-label="anchor" href="#companion-r-packages"></a>
 </h3>
-<p><code>DABOM</code> has two companion R packages, <a href="https://github.com/BiomarkABS/PITcleanr" class="external-link">PITcleanr</a> and <a href="https://github.com/BiomarkABS/STADEM" class="external-link">STADEM</a>. <code>PITcleanr</code> can assist the user in “cleaning” sometimes unwieldy amounts of detection data from <a href="https://ptagis.org/" class="external-link">PTAGIS</a> and preparing that detection data for <code>DABOM</code>. <code>STADEM</code> can be used to estimate adult escapement at a dam that, when combined with movement probabilities from <code>DABOM</code>, provide an estimate of abundance or escapement at locations of interest.</p>
+<p><code>DABOM</code> has two companion R packages, <a href="https://github.com/BiomarkABS/PITcleanr" class="external-link">PITcleanr</a> and <a href="https://github.com/BiomarkABS/STADEM" class="external-link">STADEM</a>.
+<code>PITcleanr</code> can assist the user in “cleaning” sometimes
+unwieldy amounts of detection data from <a href="https://ptagis.org/" class="external-link">PTAGIS</a> and preparing that detection data
+for <code>DABOM</code>. <code>STADEM</code> can be used to estimate
+adult escapement at a dam that, when combined with movement
+probabilities from <code>DABOM</code>, provide an estimate of abundance
+or escapement at locations of interest.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="set-up">Set-up<a class="anchor" aria-label="anchor" href="#set-up"></a>
 </h2>
-<p>The first step is to ensure that all appropriate software and R packages are installed on your computer. (<a href="https://cran.r-project.org/" class="external-link">R</a>) is a language and environment for statistical computing and graphics and is the workhorse for running all of the code and models described here. R packages are collections of functions and data sets developed by the R community for particular tasks. Some R packages used here are available from the general R community (<a href="https://cran.r-project.org/web/packages/available_packages_by_name.html" class="external-link">Available CRAN Packages</a>) whereas others (e.g., <code>PITcleanr</code>, <code>DABOM</code>, <code>STADEM</code>) have been developed by the package author and available on <a href="https://github.com/BiomarkABS" class="external-link">GitHub here</a>.</p>
-<p>The <code>DABOM</code> compendium can be downloaded as a zip from from this URL: <a href="https://github.com/BiomarkABS/DABOM/archive/master.zip" class="external-link uri">https://github.com/BiomarkABS/DABOM/archive/master.zip</a></p>
-<p>Or the user can install the compendium as an R package from GitHub by using Hadley Wickham’s <code>devtools</code> package:</p>
+<p>The first step is to ensure that all appropriate software and R
+packages are installed on your computer. (<a href="https://cran.r-project.org/" class="external-link">R</a>) is a language and environment
+for statistical computing and graphics and is the workhorse for running
+all of the code and models described here. R packages are collections of
+functions and data sets developed by the R community for particular
+tasks. Some R packages used here are available from the general R
+community (<a href="https://cran.r-project.org/web/packages/available_packages_by_name.html" class="external-link">Available
+CRAN Packages</a>) whereas others (e.g., <code>PITcleanr</code>,
+<code>DABOM</code>, <code>STADEM</code>) have been developed by the
+package author and available on <a href="https://github.com/BiomarkABS" class="external-link">GitHub here</a>.</p>
+<p>The <code>DABOM</code> compendium can be downloaded as a zip from
+from this URL: <a href="https://github.com/BiomarkABS/DABOM/archive/master.zip" class="external-link uri">https://github.com/BiomarkABS/DABOM/archive/master.zip</a></p>
+<p>Or the user can install the compendium as an R package from GitHub by
+using Hadley Wickham’s <code>devtools</code> package:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install and load remotes, if necessary</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"KevinSee/DABOM"</span>, </span>
 <span>                         build_vignettes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><code>devtools</code> may require the downloading and installation of Rtools. The latest version of Rtools can be found <a href="https://cran.r-project.org/bin/windows/Rtools/" class="external-link">here</a>.</p>
+<p><code>devtools</code> may require the downloading and installation of
+Rtools. The latest version of Rtools can be found <a href="https://cran.r-project.org/bin/windows/Rtools/" class="external-link">here</a>.</p>
 <p>For the latest development version:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"KevinSee/DABOM@develop"</span><span class="op">)</span></span></code></pre></div>
 <div class="section level4">
 <h4 id="jags-software">JAGS Software<a class="anchor" aria-label="anchor" href="#jags-software"></a>
 </h4>
-<p>The user will also need the <a href="http://mcmc-jags.sourceforge.net/" class="external-link">JAGS</a> software to run DABOM. They can download that from <a href="https://sourceforge.net/projects/mcmc-jags/files/" class="external-link">SourceForge</a>. JAGS (<strong>J</strong>ust <strong>A</strong>nother <strong>G</strong>ibbs <strong>S</strong>ampler) software is used by <code>DABOM</code> for Bayesian inference. Please download version &gt;= 4.0.0.</p>
+<p>The user will also need the <a href="http://mcmc-jags.sourceforge.net/" class="external-link">JAGS</a> software to run DABOM.
+They can download that from <a href="https://sourceforge.net/projects/mcmc-jags/files/" class="external-link">SourceForge</a>.
+JAGS (<strong>J</strong>ust <strong>A</strong>nother
+<strong>G</strong>ibbs <strong>S</strong>ampler) software is used by
+<code>DABOM</code> for Bayesian inference. Please download version &gt;=
+4.0.0.</p>
 </div>
 <div class="section level4">
 <h4 id="other-r-packages">Other R Packages<a class="anchor" aria-label="anchor" href="#other-r-packages"></a>
 </h4>
-<p>The user will also need to install <code>tidyverse</code>, a series of R packages that work together for data science (i.e. data cleaning and manipulation), as well as the <code>rjags</code> package to interface with JAGS. The <code>tidyverse</code> and <code>rjags</code> packages are all available from the R community and can be installed by typing the following into your R console:</p>
+<p>The user will also need to install <code>tidyverse</code>, a series
+of R packages that work together for data science (i.e. data cleaning
+and manipulation), as well as the <code>rjags</code> package to
+interface with JAGS. The <code>tidyverse</code> and <code>rjags</code>
+packages are all available from the R community and can be installed by
+typing the following into your R console:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"tidyverse"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"rjags"</span><span class="op">)</span></span></code></pre></div>
-<p><code>DABOM</code> relies on PIT tag data that has been prepared in a somewhat specific format. The R package <code>PITcleanr</code> can help the user move from raw PIT tag detections to the type of output that <code>DABOM</code> requires. Instructions for installing and using <code>PITcleanr</code> can be found on the <a href="https://biomarkabs.github.io/PITcleanr/" class="external-link">package website</a>.</p>
-<p>Hint: We have experienced errors installing the <code>PITcleanr</code> and <code>DABOM</code> packages related to <em>“Error: (converted from warning) package ‘packagenamehere’ was built under R version x.x.x”</em>. Setting the following environment variable typically suppresses the error and allows you to successfully install the packages.</p>
+<p><code>DABOM</code> relies on PIT tag data that has been prepared in a
+somewhat specific format. The R package <code>PITcleanr</code> can help
+the user move from raw PIT tag detections to the type of output that
+<code>DABOM</code> requires. Instructions for installing and using
+<code>PITcleanr</code> can be found on the <a href="https://biomarkabs.github.io/PITcleanr/" class="external-link">package website</a>.</p>
+<p>Hint: We have experienced errors installing the
+<code>PITcleanr</code> and <code>DABOM</code> packages related to
+<em>“Error: (converted from warning) package ‘packagenamehere’ was built
+under R version x.x.x”</em>. Setting the following environment variable
+typically suppresses the error and allows you to successfully install
+the packages.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>R_REMOTES_NO_ERRORS_FROM_WARNINGS <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p>When attempting to install <code>PITcleanr</code> or <code>DABOM</code> you may receive an error message similar to <em>“there is no package called ‘ggraph’”</em>. In that case, try to install the given package using the following and then attempt to install <code>PITclean</code> or <code>DABOM</code>, again.</p>
+<p>When attempting to install <code>PITcleanr</code> or
+<code>DABOM</code> you may receive an error message similar to
+<em>“there is no package called ‘ggraph’”</em>. In that case, try to
+install the given package using the following and then attempt to
+install <code>PITclean</code> or <code>DABOM</code>, again.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"ggraph"</span><span class="op">)</span> <span class="co"># to install package from R cran</span></span>
 <span><span class="co"># replace ggraph with the appropriate package name as needed</span></span></code></pre></div>
@@ -140,21 +211,27 @@
 <div class="section level2">
 <h2 id="pitcleanr-output">PITcleanr output<a class="anchor" aria-label="anchor" href="#pitcleanr-output"></a>
 </h2>
-<p>Briefly, the steps to process the data for a given run or spawn year, before being ready to run DABOM, include:</p>
+<p>Briefly, the steps to process the data for a given run or spawn year,
+before being ready to run DABOM, include:</p>
 <ol style="list-style-type: decimal">
 <li>Generate valid PIT tag list</li>
 <li>Query PTAGIS for detections</li>
-<li>Develop the “river network” describing the relationship among detection sites</li>
+<li>Develop the “river network” describing the relationship among
+detection sites</li>
 <li>Use PITcleanr to “clean up” detection data</li>
 <li>Review PITcleanr output to determine final capture histories</li>
 </ol>
-<p>Once those steps are complete, the following lead to escapement estimates:</p>
+<p>Once those steps are complete, the following lead to escapement
+estimates:</p>
 <ol style="list-style-type: decimal">
 <li>Run DABOM to estimate detection and movement probabilities</li>
 <li>Summarize DABOM results</li>
-<li>Combine DABOM movement probabilities with an estimate of adult escapement at the starting node</li>
+<li>Combine DABOM movement probabilities with an estimate of adult
+escapement at the starting node</li>
 </ol>
-<p>More details about the initial preparation steps can be found in the vignettes contained in the <code>PITcleanr</code> package. That vignette can also be accessed using:</p>
+<p>More details about the initial preparation steps can be found in the
+vignettes contained in the <code>PITcleanr</code> package. That vignette
+can also be accessed using:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/vignette.html" class="external-link">vignette</a></span><span class="op">(</span><span class="st">"DABOM_prep"</span>,</span>
 <span>         package <span class="op">=</span> <span class="st">"PITcleanr"</span><span class="op">)</span></span></code></pre></div>
@@ -164,10 +241,19 @@
 <li>a parent-child table</li>
 <li>a filtered detection history (based on a PTAGIS query)</li>
 </ul>
-<p>The <code>PITcleanr</code> package provides an example dataset we can use to demonstrate these results. The example datasets (PTAGIS query, configuration file and parent-child table) are installed on your computer when you install <code>PITcleanr</code>. We can determine where they are, and read them into R using the following code:</p>
+<p>The <code>PITcleanr</code> package provides an example dataset we can
+use to demonstrate these results. The example datasets (PTAGIS query,
+configuration file and parent-child table) are installed on your
+computer when you install <code>PITcleanr</code>. We can determine where
+they are, and read them into R using the following code:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/KevinSee/PITcleanr" class="external-link">PITcleanr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://readr.tidyverse.org" class="external-link">readr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://stringr.tidyverse.org" class="external-link">stringr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tibble.tidyverse.org/" class="external-link">tibble</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">ptagis_file</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
 <span>                          <span class="st">"TUM_chnk_cth_2018.csv"</span>,</span>
@@ -194,41 +280,112 @@
 <div class="section level3">
 <h3 id="configuration-file">Configuration File<a class="anchor" aria-label="anchor" href="#configuration-file"></a>
 </h3>
-<p>The configuration file contains all the information from PTAGIS to map a particular detection record to a “node.” This mapping must include the site code, the antenna code and the antenna configuration, all of which appear in the PTAGIS query defined above. <code>PITcleanr</code> provides a function to query all the metadata associated with PTAGIS sites, and maps each array (i.e. row of antennas) at a site onto a node. The upstream arrays are labeled with the site code plus <code>A0</code> and the downstream arrays are assigned <code>B0</code>. For sites with three arrays, the middle array is grouped with the upstream array. For sites with four arrays, the upper two arrays are mapped to <code>A0</code> and the lower two arrays are mapped to <code>B0</code>. However, the user can start with the <code>ptagis_meta</code> file and construct this mapping any way they choose.</p>
-<p>The key columns in a configuration file include the PTAGIS site code, the configuration ID (related to how the various antennas are laid out at a site), the antenna ID and the DABOM node that antenna is assigned to. The first three are included with PTAGIS queries of capture histories, and the inclusion of the node column allows <code>PITcleanr</code> to map every detection to a node.</p>
+<p>The configuration file contains all the information from PTAGIS to
+map a particular detection record to a “node”. This mapping must include
+the site code, the antenna code and the antenna configuration, all of
+which appear in the PTAGIS query defined above. <code>PITcleanr</code>
+provides a function to query all the metadata associated with PTAGIS
+sites, and maps each array (i.e. row of antennas) at a site onto a node.
+The upstream arrays are labeled with the site code plus <code>A0</code>
+and the downstream arrays are assigned <code>B0</code>. For sites with
+three arrays, the middle array is grouped with the upstream array. For
+sites with four arrays, the upper two arrays are mapped to
+<code>A0</code> and the lower two arrays are mapped to <code>B0</code>.
+However, the user can start with the <code>ptagis_meta</code> file and
+construct this mapping any way they choose.</p>
+<p>The key columns in a configuration file include the PTAGIS site code,
+the configuration ID (related to how the various antennas are laid out
+at a site), the antenna ID and the DABOM node that antenna is assigned
+to. The first three are included with PTAGIS queries of capture
+histories, and the inclusion of the node column allows
+<code>PITcleanr</code> to map every detection to a node.</p>
 </div>
 <div class="section level3">
 <h3 id="parent-child-table">Parent-Child Table<a class="anchor" aria-label="anchor" href="#parent-child-table"></a>
 </h3>
-<p>The parent-child table describes the stream network in terms of which detection locations are connected to each other. A parent-child table defines the closest previous detection location (parent) for each detection location (child). If a tag is seen at a child location, it must have moved past the parent location. For adult salmonid movement, the parent location is downstream of the child location. Each child location may only have a single parent, but a parent location may have multiple child locations due to the branching nature of the stream network.</p>
-<p>To run DABOM, a parent-child table must include the following columns:</p>
+<p>The parent-child table describes the stream network in terms of which
+detection locations are connected to each other. A parent-child table
+defines the closest previous detection location (parent) for each
+detection location (child). If a tag is seen at a child location, it
+must have moved past the parent location. For adult salmonid movement,
+the parent location is downstream of the child location. Each child
+location may only have a single parent, but a parent location may have
+multiple child locations due to the branching nature of the stream
+network.</p>
+<p>To run DABOM, a parent-child table must include the following
+columns:</p>
 <ul>
 <li>
-<code>parent</code>: generally the PTAGIS site code of the parent location</li>
+<code>parent</code>: generally the PTAGIS site code of the parent
+location</li>
 <li>
-<code>child</code>: generally the PTAGIS site code of the child location</li>
+<code>child</code>: generally the PTAGIS site code of the child
+location</li>
 <li>
-<code>parent_hydro</code>: the hydrosequence of the NHDPlus layer where the parent location is</li>
+<code>parent_hydro</code>: the hydrosequence of the NHDPlus layer
+where the parent location is</li>
 <li>
-<code>child_hydro</code>: the hydrosequence of the NHDPlus layer where the child location is</li>
+<code>child_hydro</code>: the hydrosequence of the NHDPlus layer
+where the child location is</li>
 <li>
-<code>parent_rkm</code>: the river kilometer of the parent location (generally queried from PTAGIS)</li>
+<code>parent_rkm</code>: the river kilometer of the parent location
+(generally queried from PTAGIS)</li>
 <li>
-<code>child_rkm</code>: the river kilometer of the child location (generally queried from PTAGIS)</li>
+<code>child_rkm</code>: the river kilometer of the child location
+(generally queried from PTAGIS)</li>
 </ul>
 <p>Graphically, these relationships are shown in the figure below.</p>
 <div class="figure" style="text-align: center">
 <img src="DABOM_files/figure-html/parent-child-fig-1.png" alt="Graphical representation of the parent-child table, showing which sites are upstream of others. Tags start at TUM, and move down the figure." width="700"><p class="caption">
-Graphical representation of the parent-child table, showing which sites are upstream of others. Tags start at TUM, and move down the figure.
+Graphical representation of the parent-child table, showing which sites
+are upstream of others. Tags start at TUM, and move down the figure.
 </p>
 </div>
 </div>
 <div class="section level3">
 <h3 id="filtered-capture-history">Filtered Capture History<a class="anchor" aria-label="anchor" href="#filtered-capture-history"></a>
 </h3>
-<p>One of the assumptions in the DABOM model is that fish are making a one-way upstream migration, which ends in their spawning location. At every branching site (with multiple possible upstream paths), the fish can only move up one of those paths in the model. So if a fish is detected moving past one site and later seen moving past a different site that implies the fish swam back downstream then turned up a different tributary, both of those observations cannot be kept in the model. Before running DABOM, a user will need to “clean” the detection histories of the tags and decide if there are multiple detections like those described above which one to keep.</p>
-<p><code>PITcleanr</code> can take the raw detections from PTAGIS, assign each to a node (based on the configuration file), compress them, add directionality (based on the parent-child table), and flag those tags with detections in multiple branches. For each detection, <code>PITcleanr</code> adds two columns to indicate whether each detection should be retained for DABOM: <code>auto_keep_obs</code> and <code>user_keep_obs</code>. For tags with straightforward detections (i.e. all detections appear to have one-way directional movement), the added columns <code>auto_keep_obs</code> and <code>user_keep_obs</code> will be marked <code>TRUE</code>. For tags with less straightforward movement patterns, <code>PITcleanr</code> assumes that the last detection with movement noted as “forward” or “unknown” (or “start”) is the spawning location, and attempts to mark the <code>auto_keep_obs</code> column as <code>TRUE</code> for the last detections along that movement path. For these tags, <code>prepWrapper</code> returns <code>NA</code>’s in the <code>user_keep_obs</code> column.</p>
-<p>We’ve identified the output from PTAGIS provided by <code>PITcleanr</code> (<code>ptagis_file</code>). Now we can compress those observations and prepare them for DABOM. Note that in the <code>prepWrapper</code> function, we have added the detection nodes (not just site codes) to the parent-child table, using the <code>addParentChildNodes</code> function from <code>PITcleanr</code>. The <code>prepWrapper</code> function also includes a minimum and maximum observed date (<code>min_obs_date</code> and <code>max_obs_date</code>, in <code>YYYYMMDD</code> format) so the user can filter out observations before a certain date (e.g. detections of fish marked as juveniles, detections at mainstem dams prior to reaching the release point, etc.) and after a certain date (e.g. detections of kelts swimming downstream after spawning, carcasses drifting downstream after spawning, ghost detections in subsequent years, etc.).</p>
+<p>One of the assumptions in the DABOM model is that fish are making a
+one-way upstream migration, which ends in their spawning location. At
+every branching site (with multiple possible upstream paths), the fish
+can only move up one of those paths in the model. So if a fish is
+detected moving past one site and later seen moving past a different
+site that implies the fish swam back downstream then turned up a
+different tributary, both of those observations cannot be kept in the
+model. Before running DABOM, a user will need to “clean” the detection
+histories of the tags and decide if there are multiple detections like
+those described above which one to keep.</p>
+<p><code>PITcleanr</code> can take the raw detections from PTAGIS,
+assign each to a node (based on the configuration file), compress them,
+add directionality (based on the parent-child table), and flag those
+tags with detections in multiple branches. For each detection,
+<code>PITcleanr</code> adds two columns to indicate whether each
+detection should be retained for DABOM: <code>auto_keep_obs</code> and
+<code>user_keep_obs</code>. For tags with straightforward detections
+(i.e. all detections appear to have one-way directional movement), the
+added columns <code>auto_keep_obs</code> and <code>user_keep_obs</code>
+will be marked <code>TRUE</code>. For tags with less straightforward
+movement patterns, <code>PITcleanr</code> assumes that the last
+detection with movement noted as “forward” or “unknown” (or “start”) is
+the spawning location, and attempts to mark the
+<code>auto_keep_obs</code> column as <code>TRUE</code> for the last
+detections along that movement path. For these tags,
+<code>prepWrapper</code> returns <code>NA</code>’s in the
+<code>user_keep_obs</code> column.</p>
+<p>We’ve identified the output from PTAGIS provided by
+<code>PITcleanr</code> (<code>ptagis_file</code>). Now we can compress
+those observations and prepare them for DABOM. Note that in the
+<code>prepWrapper</code> function, we have added the detection nodes
+(not just site codes) to the parent-child table, using the
+<code>addParentChildNodes</code> function from <code>PITcleanr</code>.
+The <code>prepWrapper</code> function also includes a minimum and
+maximum observed date (<code>min_obs_date</code> and
+<code>max_obs_date</code>, in <code>YYYYMMDD</code> format) so the user
+can filter out observations before a certain date (e.g. detections of
+fish marked as juveniles, detections at mainstem dams prior to reaching
+the release point, etc.) and after a certain date (e.g. detections of
+kelts swimming downstream after spawning, carcasses drifting downstream
+after spawning, ghost detections in subsequent years, etc.).</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">prepped_ch</span> <span class="op">=</span> <span class="fu">PITcleanr</span><span class="fu">::</span><span class="fu"><a href="https://kevinsee.github.io/PITcleanr/reference/prepWrapper.html" class="external-link">prepWrapper</a></span><span class="op">(</span>cth_file <span class="op">=</span> <span class="va">ptagis_file</span>,</span>
 <span>                                    file_type <span class="op">=</span> <span class="st">"PTAGIS"</span>,</span>
@@ -446,12 +603,28 @@ Graphical representation of the parent-child table, showing which sites are upst
 </tr>
 </tbody>
 </table>
-<p>The next step would be for a user to filter the prepared data for all rows with <code>user_keep_obs == NA</code>, and then fill in the <code>user_keep_obs</code> column by hand for each detection node. These decisions could be guided by the <code>auto_keep_obs</code> column (<code>PITcleanr</code>’s best guess), but could also be informed by the date of detections and the user’s biological knowledge of the system. Before sending the data along to DABOM, all the missing <code>user_keep_obs</code> rows should be filled out as either <code>TRUE</code> or <code>FALSE</code>. The user can then remove all the rows where <code>user_keep_obs == FALSE</code>. For our example, we’ll accept all the <code>auto_keep_obs</code> recommendations.</p>
+<p>The next step would be for a user to filter the prepared data for all
+rows with <code>user_keep_obs == NA</code>, and then fill in the
+<code>user_keep_obs</code> column by hand for each detection node. These
+decisions could be guided by the <code>auto_keep_obs</code> column
+(<code>PITcleanr</code>’s best guess), but could also be informed by the
+date of detections and the user’s biological knowledge of the system.
+Before sending the data along to DABOM, all the missing
+<code>user_keep_obs</code> rows should be filled out as either
+<code>TRUE</code> or <code>FALSE</code>. The user can then remove all
+the rows where <code>user_keep_obs == FALSE</code>. For our example,
+we’ll accept all the <code>auto_keep_obs</code> recommendations.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">filter_ch</span> <span class="op">=</span> <span class="va">prepped_ch</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>user_keep_obs <span class="op">=</span> <span class="va">auto_keep_obs</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">user_keep_obs</span><span class="op">)</span></span></code></pre></div>
-<p>This step may be easier to perform outside of R. The <code>prepWrapper</code> function has the ability to save the output to a .csv or .xlsx file which the user can then open with other software, such as Excel. Once the user has replaced all the <code>NA</code>s or blanks in the <code>user_keep_obs</code> column with <code>TRUE</code> or <code>FALSE</code>, they can read that file back into R. The code to do this looks like this:</p>
+<p>This step may be easier to perform outside of R. The
+<code>prepWrapper</code> function has the ability to save the output to
+a .csv or .xlsx file which the user can then open with other software,
+such as Excel. Once the user has replaced all the <code>NA</code>s or
+blanks in the <code>user_keep_obs</code> column with <code>TRUE</code>
+or <code>FALSE</code>, they can read that file back into R. The code to
+do this looks like this:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">prepped_ch</span> <span class="op">=</span> <span class="fu">PITcleanr</span><span class="fu">::</span><span class="fu"><a href="https://kevinsee.github.io/PITcleanr/reference/prepWrapper.html" class="external-link">prepWrapper</a></span><span class="op">(</span>cth_file <span class="op">=</span> <span class="va">ptagis_file</span>,</span>
 <span>                                    file_type <span class="op">=</span> <span class="st">"PTAGIS"</span>,</span>
@@ -466,7 +639,11 @@ Graphical representation of the parent-child table, showing which sites are upst
 <span><span class="co"># after the user has ensured all the user_keep_obs rows are TRUE or FALSE</span></span>
 <span><span class="va">filter_ch</span> <span class="op">=</span> <span class="fu">readxl</span><span class="fu">::</span><span class="fu"><a href="https://readxl.tidyverse.org/reference/read_excel.html" class="external-link">read_excel</a></span><span class="op">(</span><span class="st">"C:/Users/USERNAME/Desktop/PITcleanr_output.xlsx"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">user_keep_obs</span><span class="op">)</span></span></code></pre></div>
-<p>Finally, we’ll need to know the origin (hatchery or wild/naturally produced) of each tag. This involves constructing a tibble with two columns: <code>tag_code</code> and <code>origin</code>. The user might be able to do this based on data taken when tagging the fish, or it could be constructed from the PTAGIS file:</p>
+<p>Finally, we’ll need to know the origin (hatchery or wild/naturally
+produced) of each tag. This involves constructing a tibble with two
+columns: <code>tag_code</code> and <code>origin</code>. The user might
+be able to do this based on data taken when tagging the fish, or it
+could be constructed from the PTAGIS file:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fish_origin</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressMessages</a></span><span class="op">(</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_csv</a></span><span class="op">(</span><span class="va">ptagis_file</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span>tag_code <span class="op">=</span> <span class="va">`Tag Code`</span>,</span>
@@ -477,7 +654,7 @@ Graphical representation of the parent-child table, showing which sites are upst
 <span>                         <span class="st">"U"</span> <span class="op">=</span> <span class="st">"W"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">fish_origin</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,406 x 2</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,406 × 2</span></span></span>
 <span><span class="co">#&gt;    tag_code       origin</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 384.3B239AC47B W     </span></span>
@@ -490,15 +667,26 @@ Graphical representation of the parent-child table, showing which sites are upst
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 3DD.003BC80A3C H     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 3DD.003BC80D81 H     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 3DD.003BC80F20 H     </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># i 1,396 more rows</span></span></span></code></pre></div>
-<p><code>DABOM</code> currently has the ability to handle up to two types of fish (e.g. hatchery and wild). Therefore, the <code>origin</code> column of <code>fish_origin</code> should only contain a maximum of two distinct entries. Note that in the example above, we have marked all the fish with “Unknown” or “U” origin as wild, to conform to this. It is fine if all the fish have the same origin (e.g. all are wild).</p>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1,396 more rows</span></span></span></code></pre></div>
+<p><code>DABOM</code> currently has the ability to handle up to two
+types of fish (e.g. hatchery and wild). Therefore, the
+<code>origin</code> column of <code>fish_origin</code> should only
+contain a maximum of two distinct entries. Note that in the example
+above, we have marked all the fish with “Unknown” or “U” origin as wild,
+to conform to this. It is fine if all the fish have the same origin
+(e.g. all are wild).</p>
 <p>Now our data is ready for DABOM.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="write-jags-model">Write JAGS Model<a class="anchor" aria-label="anchor" href="#write-jags-model"></a>
 </h2>
-<p>The DABOM model is implemented in a Bayesian framework, using JAGS software. JAGS requires a model file (.txt format) with specific types of syntax. See the JAGS user manual for more detail about JAGS models. The <code>DABOM</code> package contains a function to write this model file, based on the relationships defined in the parent-child table, and how nodes are mapped to sites in the configuration file.</p>
+<p>The DABOM model is implemented in a Bayesian framework, using JAGS
+software. JAGS requires a model file (.txt format) with specific types
+of syntax. See the JAGS user manual for more detail about JAGS models.
+The <code>DABOM</code> package contains a function to write this model
+file, based on the relationships defined in the parent-child table, and
+how nodes are mapped to sites in the configuration file.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/KevinSee/DABOM" class="external-link">DABOM</a></span><span class="op">)</span></span>
 <span></span>
@@ -508,12 +696,45 @@ Graphical representation of the parent-child table, showing which sites are upst
 <span><span class="fu"><a href="../reference/writeDABOM.html">writeDABOM</a></span><span class="op">(</span>file_name <span class="op">=</span> <span class="va">basic_mod_file</span>,</span>
 <span>           parent_child <span class="op">=</span> <span class="va">parent_child</span>,</span>
 <span>           configuration <span class="op">=</span> <span class="va">configuration</span><span class="op">)</span></span></code></pre></div>
-<p>If the user would like the initial transition parameters (chances of moving along one of the initial branches from the starting point) to be time-varying, meaning they will shift as the season goes on, <code>writeDABOM</code> has an argument, <code>time_varying</code> which can be set to <code>TRUE</code>. This can be important when the group of tagged fish may not be representative of the total run, perhaps because the trap rate shifted over the course of the run and there exists differential run timing between fish going to those initial branches. For example, this situation often occurs at Lower Granite dam, so the initial movement parameters are allowed to shift on a weekly basis. This reduces the bias in the estimates, but will take longer to run, and does require estimates of total escapement for each strata (e.g. week) of the movement parameters.</p>
+<p>If the user would like the initial transition parameters (chances of
+moving along one of the initial branches from the starting point) to be
+time-varying, meaning they will shift as the season goes on,
+<code>writeDABOM</code> has an argument, <code>time_varying</code> which
+can be set to <code>TRUE</code>. This can be important when the group of
+tagged fish may not be representative of the total run, perhaps because
+the trap rate shifted over the course of the run and there exists
+differential run timing between fish going to those initial branches.
+For example, this situation often occurs at Lower Granite dam, so the
+initial movement parameters are allowed to shift on a weekly basis. This
+reduces the bias in the estimates, but will take longer to run, and does
+require estimates of total escapement for each strata (e.g. week) of the
+movement parameters.</p>
 <div class="section level3">
 <h3 id="modify-jags-model">Modify JAGS Model<a class="anchor" aria-label="anchor" href="#modify-jags-model"></a>
 </h3>
-<p>Often the user will have a parent-child table based on all the detection sites they are interested in using. However, there may have been no fish detected at some of those sites that year. Rather than let the model churn away on estimating parameters that have no data to inform them, we have devised a function to “turn off” some parameters. Some of these parameters are specific to the origin of the fish, such as turning off movement parameters past a particular site only for hatchery fish, if no hatchery fish were observed there, so the <code>fish_origin</code> input is required.</p>
-<p>This includes setting the detection probability to 0 for nodes that had no detections (or were not in place during the fishes’ migration), setting the detection probability to 100% for nodes that function as single arrays with no upstream detection sites (because there is no way to estimate detection probability there), and fixing some movement probabilities to 0 if no tags were observed along that branch. Setting the detection probability to 100% may lead to a conservative estimate of escapement past that particular site (i.e. escapement was <em>at least</em> this much), but since many terminal sites are further upstream in the watershed, where most detection probabilities are likely close to 100% already, this may not be a bad assumption to make. The function <code>fixNoFishNodes</code> updates the initial JAGS file with these improvements, writes a new JAGS .txt file, and sends a message to the user about what it has done.</p>
+<p>Often the user will have a parent-child table based on all the
+detection sites they are interested in using. However, there may have
+been no fish detected at some of those sites that year. Rather than let
+the model churn away on estimating parameters that have no data to
+inform them, we have devised a function to “turn off” some parameters.
+Some of these parameters are specific to the origin of the fish, such as
+turning off movement parameters past a particular site only for hatchery
+fish, if no hatchery fish were observed there, so the
+<code>fish_origin</code> input is required.</p>
+<p>This includes setting the detection probability to 0 for nodes that
+had no detections (or were not in place during the fishes’ migration),
+setting the detection probability to 100% for nodes that function as
+single arrays with no upstream detection sites (because there is no way
+to estimate detection probability there), and fixing some movement
+probabilities to 0 if no tags were observed along that branch. Setting
+the detection probability to 100% may lead to a conservative estimate of
+escapement past that particular site (i.e. escapement was <em>at
+least</em> this much), but since many terminal sites are further
+upstream in the watershed, where most detection probabilities are likely
+close to 100% already, this may not be a bad assumption to make. The
+function <code>fixNoFishNodes</code> updates the initial JAGS file with
+these improvements, writes a new JAGS .txt file, and sends a message to
+the user about what it has done.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># filepath for specific JAGS model code for species and year</span></span>
 <span><span class="va">final_mod_file</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"DABOM_final"</span>, fileext <span class="op">=</span> <span class="st">".txt"</span><span class="op">)</span></span>
@@ -539,11 +760,17 @@ Graphical representation of the parent-child table, showing which sites are upst
 <div class="section level2">
 <h2 id="run-jags-model">Run JAGS Model<a class="anchor" aria-label="anchor" href="#run-jags-model"></a>
 </h2>
-<p>To run the JAGS model, we need to set some initial values, create inputs in a format conducive to JAGS, and set which parameters we would like to track.</p>
+<p>To run the JAGS model, we need to set some initial values, create
+inputs in a format conducive to JAGS, and set which parameters we would
+like to track.</p>
 <div class="section level3">
 <h3 id="set-initial-values">Set Initial Values<a class="anchor" aria-label="anchor" href="#set-initial-values"></a>
 </h3>
-<p>The only initial values we need to set are for where tags are in the system, based on their observed detections. Otherwise, JAGS could randomly assign them an initial value of being in one tributary, when they are actually observed in another, which will cause JAGS to throw an error and crash.</p>
+<p>The only initial values we need to set are for where tags are in the
+system, based on their observed detections. Otherwise, JAGS could
+randomly assign them an initial value of being in one tributary, when
+they are actually observed in another, which will cause JAGS to throw an
+error and crash.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Creates a function to spit out initial values for MCMC chains</span></span>
 <span><span class="va">init_fnc</span> <span class="op">=</span> <span class="fu"><a href="../reference/setInitialValues.html">setInitialValues</a></span><span class="op">(</span>filter_ch <span class="op">=</span> <span class="va">filter_ch</span>,</span>
@@ -553,14 +780,22 @@ Graphical representation of the parent-child table, showing which sites are upst
 <div class="section level3">
 <h3 id="create-jags-input">Create JAGS Input<a class="anchor" aria-label="anchor" href="#create-jags-input"></a>
 </h3>
-<p>JAGS requires the data to be input in the form of a list. The <code>writeDABOM</code> function has also assumed a particular format and names for the data inputs. So <code>DABOM</code> has a function to transform the data into the right format expected by JAGS:</p>
+<p>JAGS requires the data to be input in the form of a list. The
+<code>writeDABOM</code> function has also assumed a particular format
+and names for the data inputs. So <code>DABOM</code> has a function to
+transform the data into the right format expected by JAGS:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create all the input data for the JAGS model</span></span>
 <span><span class="va">jags_data</span> <span class="op">=</span> <span class="fu"><a href="../reference/createJAGSinputs.html">createJAGSinputs</a></span><span class="op">(</span>filter_ch <span class="op">=</span> <span class="va">filter_ch</span>,</span>
 <span>                             parent_child <span class="op">=</span> <span class="va">parent_child</span>,</span>
 <span>                             configuration <span class="op">=</span> <span class="va">configuration</span>,</span>
 <span>                             fish_origin <span class="op">=</span> <span class="va">fish_origin</span><span class="op">)</span></span></code></pre></div>
-<p>If the user is running a time-varying version of DABOM, they will need to add some additional data as input, namely the number of temporal strata (i.e. weeks) and which strata each tag falls into (i.e. which week did they cross the initial dam?). This can be done after running <code>createJAGSinputs</code>, by using the <code>addTimeVaryData</code> function:</p>
+<p>If the user is running a time-varying version of DABOM, they will
+need to add some additional data as input, namely the number of temporal
+strata (i.e. weeks) and which strata each tag falls into (i.e. which
+week did they cross the initial dam?). This can be done after running
+<code>createJAGSinputs</code>, by using the <code>addTimeVaryData</code>
+function:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># add data for time-varying movement </span></span>
 <span><span class="va">jags_data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">jags_data</span>,</span>
@@ -571,21 +806,42 @@ Graphical representation of the parent-child table, showing which sites are upst
 <div class="section level3">
 <h3 id="set-parameters-to-save">Set Parameters to Save<a class="anchor" aria-label="anchor" href="#set-parameters-to-save"></a>
 </h3>
-<p>The user needs to tell JAGS which parameters to track and save posterior samples for. Otherwise, the MCMC algorithms will run, but the output will be blank. Based on the model file, <code>DABOM</code> will pull out all the detection and movement parameters to track:</p>
+<p>The user needs to tell JAGS which parameters to track and save
+posterior samples for. Otherwise, the MCMC algorithms will run, but the
+output will be blank. Based on the model file, <code>DABOM</code> will
+pull out all the detection and movement parameters to track:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Tell JAGS which parameters in the model that it should save.</span></span>
 <span><span class="va">jags_params</span> <span class="op">=</span> <span class="fu"><a href="../reference/setSavedParams.html">setSavedParams</a></span><span class="op">(</span>model_file <span class="op">=</span> <span class="va">final_mod_file</span><span class="op">)</span></span></code></pre></div>
-<p>If the user is running a time-varying version of DABOM, the function <code>setSavedParams</code> does have an input, <code>time_varying</code>, which can be set to <code>TRUE</code>. This will add the variance parameter related to the random walk of those time-varying movement parameters, in case the user is interested in tracking that.</p>
+<p>If the user is running a time-varying version of DABOM, the function
+<code>setSavedParams</code> does have an input,
+<code>time_varying</code>, which can be set to <code>TRUE</code>. This
+will add the variance parameter related to the random walk of those
+time-varying movement parameters, in case the user is interested in
+tracking that.</p>
 </div>
 <div class="section level3">
 <h3 id="run-mcmc">Run MCMC<a class="anchor" aria-label="anchor" href="#run-mcmc"></a>
 </h3>
-<p>R users have developed several different packages that can be used to connect to the JAGS software and run the MCMC algorithm. Here, we will present example code that uses the <code>rjags</code> package, which was written by the author of the JAGS software. First, the user runs an adaptation or burn-in phase, which requires the path to the JAGS model file, the input data, any initial values function, the number of MCMC chains to run and the number of adaptation iterations to run. To test that the model is working, a user may set <code>n.chains = 1</code> and <code>n.adapt</code> to a small number like 5, but to actually run the model we recommend:</p>
+<p>R users have developed several different packages that can be used to
+connect to the JAGS software and run the MCMC algorithm. Here, we will
+present example code that uses the <code>rjags</code> package, which was
+written by the author of the JAGS software. First, the user runs an
+adaptation or burn-in phase, which requires the path to the JAGS model
+file, the input data, any initial values function, the number of MCMC
+chains to run and the number of adaptation iterations to run. To test
+that the model is working, a user may set <code>n.chains = 1</code> and
+<code>n.adapt</code> to a small number like 5, but to actually run the
+model we recommend:</p>
 <ul>
 <li><code>n.chains = 4</code></li>
 <li><code>n.adapt = 5000</code></li>
 </ul>
-<p>To make the results fully reproducible, we recommend setting the random number generator seed in R, using the <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> function. This will ensure the same MCMC results on a particular computer, although the results may still differ on different machines.</p>
+<p>To make the results fully reproducible, we recommend setting the
+random number generator seed in R, using the <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code>
+function. This will ensure the same MCMC results on a particular
+computer, although the results may still differ on different
+machines.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mcmc-jags.sourceforge.io" class="external-link">rjags</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span></span>
@@ -595,16 +851,27 @@ Graphical representation of the parent-child table, showing which sites are upst
 <span>                  inits <span class="op">=</span> <span class="va">init_fnc</span>,</span>
 <span>                  n.chains <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>                  n.adapt <span class="op">=</span> <span class="fl">5000</span><span class="op">)</span></span></code></pre></div>
-<p>If this code returns a message <code>Warning message: Adaptation incomplete</code>, this indicates further burn-in iterations should be run, which the user can do by “updating” the <code>jags</code> object using this code (and setting the <code>n.iter</code> parameter to something large enough):</p>
+<p>If this code returns a message
+<code>Warning message: Adaptation incomplete</code>, this indicates
+further burn-in iterations should be run, which the user can do by
+“updating” the <code>jags</code> object using this code (and setting the
+<code>n.iter</code> parameter to something large enough):</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span><span class="va">jags</span>, </span>
 <span>       n.iter <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></code></pre></div>
-<p>Finally, once the adaptation or burn-in phase is complete, the user can take MCMC samples of the posteriors by using the <code>coda.samples</code> function. This is where the user tells JAGS which parameters to track. The user can also set a thinning paramater, <code>thin</code>, which will save every nth sample, instead of all of them. This is useful to avoid autocorrelations in the MCMC output. Again, we would recommend the following settings:</p>
+<p>Finally, once the adaptation or burn-in phase is complete, the user
+can take MCMC samples of the posteriors by using the
+<code>coda.samples</code> function. This is where the user tells JAGS
+which parameters to track. The user can also set a thinning paramater,
+<code>thin</code>, which will save every nth sample, instead of all of
+them. This is useful to avoid autocorrelations in the MCMC output.
+Again, we would recommend the following settings:</p>
 <ul>
 <li><code>n.iter = 5000</code></li>
 <li><code>thin = 10</code></li>
 </ul>
-<p>Across four chains, this results in (5000 samples / 10 (every 10th sample) * 4 chains) 2000 samples of the posteriors.</p>
+<p>Across four chains, this results in (5000 samples / 10 (every 10th
+sample) * 4 chains) 2000 samples of the posteriors.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dabom_samp_tum</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/rjags/man/coda.samples.html" class="external-link">coda.samples</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">jags</span>,</span>
 <span>                              variable.names <span class="op">=</span> <span class="va">jags_params</span>,</span>
@@ -615,19 +882,43 @@ Graphical representation of the parent-child table, showing which sites are upst
 <div class="section level2">
 <h2 id="results">Results<a class="anchor" aria-label="anchor" href="#results"></a>
 </h2>
-<p>We have included an example of posterior samples with the <code>DABOM</code> package, to save the user time when testing the package. It can be accessed by running:</p>
+<p>We have included an example of posterior samples with the
+<code>DABOM</code> package, to save the user time when testing the
+package. It can be accessed by running:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"dabom_samp_tum"</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="detection-probability-estimates">Detection Probability Estimates<a class="anchor" aria-label="anchor" href="#detection-probability-estimates"></a>
 </h3>
-<p>If a user is interested in the estimates of detection probability, estimated at every node in the DABOM model, the <code>DABOM</code> package provides a simple function to extract these, <code><a href="../reference/summariseDetectProbs.html">summariseDetectProbs()</a></code>. The output includes the number of distinct tags observed at each node, as well as the mean, median, mode and standard deviation of the posterior distribution. It also includes the highest posterior density interval (HPDI) of whatever <span class="math inline">\(\alpha\)</span>-level the user desires (using the <code>cred_int_prob</code> argument), the default value of which is 95%. The HPDI is the narrowest interval of the posterior distribution that contains the <span class="math inline">\(\alpha\)</span>-level mass, and is the Bayesian equivalent of a confidence interval.</p>
+<p>If a user is interested in the estimates of detection probability,
+estimated at every node in the DABOM model, the <code>DABOM</code>
+package provides a simple function to extract these,
+<code><a href="../reference/summariseDetectProbs.html">summariseDetectProbs()</a></code>. The output includes the number of
+distinct tags observed at each node, as well as the mean, median, mode
+and standard deviation of the posterior distribution. It also includes
+the highest posterior density interval (HPDI) of whatever <span class="math inline">\(\alpha\)</span>-level the user desires (using the
+<code>cred_int_prob</code> argument), the default value of which is 95%.
+The HPDI is the narrowest interval of the posterior distribution that
+contains the <span class="math inline">\(\alpha\)</span>-level mass, and
+is the Bayesian equivalent of a confidence interval.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># summarize detection probability estimates</span></span>
 <span><span class="va">detect_summ</span> <span class="op">=</span> <span class="fu"><a href="../reference/summariseDetectProbs.html">summariseDetectProbs</a></span><span class="op">(</span>dabom_mod <span class="op">=</span> <span class="va">dabom_samp_tum</span>,</span>
 <span>                                   filter_ch <span class="op">=</span> <span class="va">filter_ch</span>,</span>
-<span>                                   cred_int_prob <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span></span></code></pre></div>
+<span>                                   .cred_int_prob <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
+<colgroup>
+<col width="8%">
+<col width="9%">
+<col width="8%">
+<col width="9%">
+<col width="8%">
+<col width="8%">
+<col width="9%">
+<col width="12%">
+<col width="12%">
+<col width="12%">
+</colgroup>
 <thead><tr class="header">
 <th align="left">node</th>
 <th align="right">n_tags</th>
@@ -635,99 +926,119 @@ Graphical representation of the parent-child table, showing which sites are upst
 <th align="right">median</th>
 <th align="right">mode</th>
 <th align="right">sd</th>
-<th align="right">lowerCI</th>
-<th align="right">upperCI</th>
+<th align="right">skew</th>
+<th align="right">kurtosis</th>
+<th align="right">lower_ci</th>
+<th align="right">upper_ci</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td align="left">CHL_U</td>
 <td align="right">472</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
+<td align="right">0.474</td>
+<td align="right">0.474</td>
+<td align="right">0.470</td>
+<td align="right">0.017</td>
+<td align="right">0.008</td>
+<td align="right">2.796</td>
+<td align="right">0.440</td>
+<td align="right">0.504</td>
 </tr>
 <tr class="even">
 <td align="left">CHU_D</td>
 <td align="right">316</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
+<td align="right">0.637</td>
+<td align="right">0.638</td>
+<td align="right">0.643</td>
+<td align="right">0.029</td>
+<td align="right">-0.059</td>
+<td align="right">2.810</td>
+<td align="right">0.579</td>
+<td align="right">0.693</td>
 </tr>
 <tr class="odd">
 <td align="left">CHU_U</td>
 <td align="right">269</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
+<td align="right">0.543</td>
+<td align="right">0.543</td>
+<td align="right">0.535</td>
+<td align="right">0.028</td>
+<td align="right">-0.118</td>
+<td align="right">2.948</td>
+<td align="right">0.489</td>
+<td align="right">0.599</td>
 </tr>
 <tr class="even">
 <td align="left">CHW_D</td>
 <td align="right">19</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
+<td align="right">0.952</td>
+<td align="right">0.965</td>
+<td align="right">0.987</td>
+<td align="right">0.044</td>
+<td align="right">-1.674</td>
+<td align="right">6.976</td>
+<td align="right">0.866</td>
+<td align="right">1.000</td>
 </tr>
 <tr class="odd">
 <td align="left">CHW_U</td>
 <td align="right">19</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
+<td align="right">0.951</td>
+<td align="right">0.965</td>
+<td align="right">0.986</td>
+<td align="right">0.046</td>
+<td align="right">-1.713</td>
+<td align="right">7.086</td>
+<td align="right">0.861</td>
+<td align="right">1.000</td>
 </tr>
 <tr class="even">
 <td align="left">ICL_D</td>
 <td align="right">1</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
+<td align="right">0.097</td>
+<td align="right">0.083</td>
+<td align="right">0.062</td>
+<td align="right">0.065</td>
+<td align="right">1.167</td>
+<td align="right">4.587</td>
+<td align="right">0.003</td>
+<td align="right">0.230</td>
 </tr>
 <tr class="odd">
 <td align="left">ICL_U</td>
 <td align="right">1</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
+<td align="right">0.099</td>
+<td align="right">0.088</td>
+<td align="right">0.050</td>
+<td align="right">0.063</td>
+<td align="right">1.108</td>
+<td align="right">4.733</td>
+<td align="right">0.002</td>
+<td align="right">0.220</td>
 </tr>
 <tr class="even">
 <td align="left">ICM_D</td>
 <td align="right">10</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
+<td align="right">0.839</td>
+<td align="right">0.859</td>
+<td align="right">0.912</td>
+<td align="right">0.101</td>
+<td align="right">-0.933</td>
+<td align="right">3.878</td>
+<td align="right">0.650</td>
+<td align="right">0.995</td>
 </tr>
 <tr class="odd">
 <td align="left">ICM_U</td>
 <td align="right">11</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
+<td align="right">0.918</td>
+<td align="right">0.938</td>
+<td align="right">0.980</td>
+<td align="right">0.076</td>
+<td align="right">-1.580</td>
+<td align="right">6.371</td>
+<td align="right">0.770</td>
+<td align="right">1.000</td>
 </tr>
 <tr class="even">
 <td align="left">LNF</td>
@@ -736,68 +1047,82 @@ Graphical representation of the parent-child table, showing which sites are upst
 <td align="right">1.000</td>
 <td align="right">1.000</td>
 <td align="right">0.000</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
 <td align="right">1.000</td>
 <td align="right">1.000</td>
 </tr>
 <tr class="odd">
 <td align="left">LWN_D</td>
 <td align="right">13</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
+<td align="right">0.623</td>
+<td align="right">0.632</td>
+<td align="right">0.657</td>
+<td align="right">0.126</td>
+<td align="right">-0.245</td>
+<td align="right">2.781</td>
+<td align="right">0.391</td>
+<td align="right">0.872</td>
 </tr>
 <tr class="even">
 <td align="left">LWN_U</td>
 <td align="right">12</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
+<td align="right">0.577</td>
+<td align="right">0.584</td>
+<td align="right">0.592</td>
+<td align="right">0.126</td>
+<td align="right">-0.148</td>
+<td align="right">2.690</td>
+<td align="right">0.354</td>
+<td align="right">0.832</td>
 </tr>
 <tr class="odd">
 <td align="left">NAL_D</td>
 <td align="right">116</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
+<td align="right">0.450</td>
+<td align="right">0.450</td>
+<td align="right">0.451</td>
+<td align="right">0.034</td>
+<td align="right">-0.019</td>
+<td align="right">3.054</td>
+<td align="right">0.385</td>
+<td align="right">0.515</td>
 </tr>
 <tr class="even">
 <td align="left">NAL_U</td>
 <td align="right">116</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
+<td align="right">0.450</td>
+<td align="right">0.450</td>
+<td align="right">0.443</td>
+<td align="right">0.035</td>
+<td align="right">0.024</td>
+<td align="right">2.873</td>
+<td align="right">0.385</td>
+<td align="right">0.517</td>
 </tr>
 <tr class="odd">
 <td align="left">NAU_D</td>
 <td align="right">132</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
+<td align="right">0.985</td>
+<td align="right">0.987</td>
+<td align="right">0.991</td>
+<td align="right">0.011</td>
+<td align="right">-1.426</td>
+<td align="right">5.930</td>
+<td align="right">0.964</td>
+<td align="right">1.000</td>
 </tr>
 <tr class="even">
 <td align="left">NAU_U</td>
 <td align="right">130</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
+<td align="right">0.969</td>
+<td align="right">0.972</td>
+<td align="right">0.979</td>
+<td align="right">0.015</td>
+<td align="right">-1.097</td>
+<td align="right">5.145</td>
+<td align="right">0.938</td>
+<td align="right">0.994</td>
 </tr>
 <tr class="odd">
 <td align="left">TUM</td>
@@ -808,276 +1133,128 @@ Graphical representation of the parent-child table, showing which sites are upst
 <td align="right">NA</td>
 <td align="right">NA</td>
 <td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
 </tr>
 <tr class="even">
 <td align="left">UWE</td>
 <td align="right">272</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
+<td align="right">0.765</td>
+<td align="right">0.765</td>
+<td align="right">0.764</td>
+<td align="right">0.022</td>
+<td align="right">-0.168</td>
+<td align="right">3.155</td>
+<td align="right">0.725</td>
+<td align="right">0.811</td>
 </tr>
 <tr class="odd">
 <td align="left">WTL_D</td>
 <td align="right">16</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
+<td align="right">0.624</td>
+<td align="right">0.627</td>
+<td align="right">0.631</td>
+<td align="right">0.097</td>
+<td align="right">-0.190</td>
+<td align="right">2.806</td>
+<td align="right">0.441</td>
+<td align="right">0.811</td>
 </tr>
 <tr class="even">
 <td align="left">WTL_U</td>
 <td align="right">23</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-</tr>
-<tr class="odd">
-<td align="left">CHLA0</td>
-<td align="right">0</td>
-<td align="right">0.867</td>
-<td align="right">0.867</td>
-<td align="right">0.869</td>
-<td align="right">0.009</td>
-<td align="right">0.848</td>
-<td align="right">0.885</td>
-</tr>
-<tr class="even">
-<td align="left">CHLB0</td>
-<td align="right">0</td>
-<td align="right">0.871</td>
-<td align="right">0.872</td>
-<td align="right">0.872</td>
-<td align="right">0.009</td>
-<td align="right">0.853</td>
-<td align="right">0.888</td>
-</tr>
-<tr class="odd">
-<td align="left">CHUA0</td>
-<td align="right">0</td>
-<td align="right">0.651</td>
-<td align="right">0.651</td>
-<td align="right">0.649</td>
-<td align="right">0.016</td>
-<td align="right">0.618</td>
-<td align="right">0.682</td>
-</tr>
-<tr class="even">
-<td align="left">CHUB0</td>
-<td align="right">0</td>
-<td align="right">0.894</td>
-<td align="right">0.895</td>
-<td align="right">0.894</td>
-<td align="right">0.012</td>
-<td align="right">0.870</td>
-<td align="right">0.917</td>
-</tr>
-<tr class="odd">
-<td align="left">CHWA0</td>
-<td align="right">0</td>
-<td align="right">0.910</td>
-<td align="right">0.933</td>
-<td align="right">0.975</td>
-<td align="right">0.081</td>
-<td align="right">0.740</td>
-<td align="right">1.000</td>
-</tr>
-<tr class="even">
-<td align="left">CHWB0</td>
-<td align="right">0</td>
-<td align="right">0.907</td>
-<td align="right">0.932</td>
-<td align="right">0.975</td>
-<td align="right">0.085</td>
-<td align="right">0.735</td>
-<td align="right">1.000</td>
-</tr>
-<tr class="odd">
-<td align="left">ICLA0</td>
-<td align="right">0</td>
-<td align="right">0.623</td>
-<td align="right">0.631</td>
-<td align="right">0.656</td>
-<td align="right">0.104</td>
-<td align="right">0.429</td>
-<td align="right">0.829</td>
-</tr>
-<tr class="even">
-<td align="left">ICLB0</td>
-<td align="right">0</td>
-<td align="right">0.717</td>
-<td align="right">0.727</td>
-<td align="right">0.739</td>
-<td align="right">0.096</td>
-<td align="right">0.528</td>
-<td align="right">0.892</td>
-</tr>
-<tr class="odd">
-<td align="left">ICMA0</td>
-<td align="right">0</td>
-<td align="right">0.640</td>
-<td align="right">0.671</td>
+<td align="right">0.886</td>
 <td align="right">0.901</td>
-<td align="right">0.243</td>
-<td align="right">0.197</td>
-<td align="right">0.999</td>
-</tr>
-<tr class="even">
-<td align="left">ICMB0</td>
-<td align="right">0</td>
-<td align="right">0.433</td>
-<td align="right">0.414</td>
-<td align="right">0.319</td>
-<td align="right">0.229</td>
-<td align="right">0.056</td>
-<td align="right">0.863</td>
+<td align="right">0.918</td>
+<td align="right">0.073</td>
+<td align="right">-1.042</td>
+<td align="right">4.063</td>
+<td align="right">0.740</td>
+<td align="right">0.993</td>
 </tr>
 <tr class="odd">
-<td align="left">ICUA0</td>
+<td align="left">CHL_D</td>
 <td align="right">0</td>
 <td align="right">0.000</td>
 <td align="right">0.000</td>
 <td align="right">0.000</td>
 <td align="right">0.000</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
 <td align="right">0.000</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="even">
-<td align="left">ICUB0</td>
+<td align="left">ICU_D</td>
 <td align="right">0</td>
 <td align="right">0.000</td>
 <td align="right">0.000</td>
 <td align="right">0.000</td>
 <td align="right">0.000</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
 <td align="right">0.000</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="odd">
-<td align="left">LWNA0</td>
-<td align="right">0</td>
-<td align="right">0.839</td>
-<td align="right">0.875</td>
-<td align="right">0.955</td>
-<td align="right">0.138</td>
-<td align="right">0.544</td>
-<td align="right">1.000</td>
-</tr>
-<tr class="even">
-<td align="left">LWNB0</td>
-<td align="right">0</td>
-<td align="right">0.106</td>
-<td align="right">0.099</td>
-<td align="right">0.092</td>
-<td align="right">0.043</td>
-<td align="right">0.031</td>
-<td align="right">0.190</td>
-</tr>
-<tr class="odd">
-<td align="left">NALA0</td>
-<td align="right">0</td>
-<td align="right">0.943</td>
-<td align="right">0.944</td>
-<td align="right">0.945</td>
-<td align="right">0.017</td>
-<td align="right">0.907</td>
-<td align="right">0.972</td>
-</tr>
-<tr class="even">
-<td align="left">NALB0</td>
-<td align="right">0</td>
-<td align="right">0.830</td>
-<td align="right">0.831</td>
-<td align="right">0.835</td>
-<td align="right">0.025</td>
-<td align="right">0.784</td>
-<td align="right">0.879</td>
-</tr>
-<tr class="odd">
-<td align="left">NAUA0</td>
-<td align="right">0</td>
-<td align="right">0.957</td>
-<td align="right">0.961</td>
-<td align="right">0.966</td>
-<td align="right">0.021</td>
-<td align="right">0.914</td>
-<td align="right">0.990</td>
-</tr>
-<tr class="even">
-<td align="left">NAUB0</td>
-<td align="right">0</td>
-<td align="right">0.977</td>
-<td align="right">0.980</td>
-<td align="right">0.988</td>
-<td align="right">0.016</td>
-<td align="right">0.946</td>
-<td align="right">1.000</td>
-</tr>
-<tr class="odd">
-<td align="left">PESA0</td>
-<td align="right">0</td>
-<td align="right">0.604</td>
-<td align="right">0.629</td>
-<td align="right">0.878</td>
-<td align="right">0.256</td>
-<td align="right">0.139</td>
-<td align="right">1.000</td>
-</tr>
-<tr class="even">
-<td align="left">PESB0</td>
-<td align="right">0</td>
-<td align="right">0.608</td>
-<td align="right">0.635</td>
-<td align="right">0.864</td>
-<td align="right">0.258</td>
-<td align="right">0.148</td>
-<td align="right">1.000</td>
-</tr>
-<tr class="odd">
-<td align="left">PEUA0</td>
+<td align="left">ICU_U</td>
 <td align="right">0</td>
 <td align="right">0.000</td>
 <td align="right">0.000</td>
 <td align="right">0.000</td>
 <td align="right">0.000</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
 <td align="right">0.000</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="even">
-<td align="left">PEUB0</td>
+<td align="left">PES_D</td>
 <td align="right">0</td>
 <td align="right">0.000</td>
 <td align="right">0.000</td>
 <td align="right">0.000</td>
 <td align="right">0.000</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
 <td align="right">0.000</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="odd">
-<td align="left">WTLA0</td>
+<td align="left">PES_U</td>
 <td align="right">0</td>
-<td align="right">0.956</td>
-<td align="right">0.958</td>
-<td align="right">0.966</td>
-<td align="right">0.019</td>
-<td align="right">0.920</td>
-<td align="right">0.988</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
 </tr>
 <tr class="even">
-<td align="left">WTLB0</td>
+<td align="left">PEU_D</td>
 <td align="right">0</td>
-<td align="right">0.861</td>
-<td align="right">0.863</td>
-<td align="right">0.865</td>
-<td align="right">0.032</td>
-<td align="right">0.801</td>
-<td align="right">0.920</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
+</tr>
+<tr class="odd">
+<td align="left">PEU_U</td>
+<td align="right">0</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
 </tr>
 </tbody>
 </table>
@@ -1085,51 +1262,120 @@ Graphical representation of the parent-child table, showing which sites are upst
 <div class="section level3">
 <h3 id="estimate-escapement">Estimate Escapement<a class="anchor" aria-label="anchor" href="#estimate-escapement"></a>
 </h3>
-<p>To estimate escapement past each detection point, DABOM requires two things: an estimate of the movement or transition probability past that point, and an estimate of the total escapement somewhere in the stream network. Most of the time, that estimate of total escapement is provided at the tagging or release site (e.g. Tumwater Dam), and we’ll assume that’s what is available for this example.</p>
+<p>To estimate escapement past each detection point, DABOM requires two
+things: an estimate of the movement or transition probability past that
+point, and an estimate of the total escapement somewhere in the stream
+network. Most of the time, that estimate of total escapement is provided
+at the tagging or release site (e.g. Tumwater Dam), and we’ll assume
+that’s what is available for this example.</p>
 <div class="section level4">
 <h4 id="compile-transition-probabilities">Compile Transition Probabilities<a class="anchor" aria-label="anchor" href="#compile-transition-probabilities"></a>
 </h4>
-<p>Compiling the transition probabilities is both a matter of ensuring that the parameters from JAGS match the site codes of each detection point (so that movement past CHL is named as such), but also multiplying some transition probabilities together when appropriate. For instance, the ultimate probability that a tag moves past CHU is the probability of moving from TUM past CHL, and then from CHL past CHU. These multiplication steps are done in the <code><a href="../reference/compileTransProbs.html">compileTransProbs()</a></code> function, which takes the MCMC output from JAGS and uses the <code>parent-child</code> table and <code>configuration</code> file to determine which parameters to multiply together. So it is a generic function that could be applied to any DABOM model a user writes.</p>
+<p>Compiling the transition probabilities is both a matter of ensuring
+that the parameters from JAGS match the site codes of each detection
+point (so that movement past CHL is named as such), but also multiplying
+some transition probabilities together when appropriate. For instance,
+the ultimate probability that a tag moves past CHU is the probability of
+moving from TUM past CHL, and then from CHL past CHU. These
+multiplication steps are done in the <code><a href="../reference/compileTransProbs.html">compileTransProbs()</a></code>
+function, which takes the MCMC output from JAGS and uses the
+<code>parent-child</code> table and <code>configuration</code> file to
+determine which parameters to multiply together. So it is a generic
+function that could be applied to any DABOM model a user writes.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">trans_df</span> <span class="op">=</span> <span class="fu"><a href="../reference/compileTransProbs.html">compileTransProbs</a></span><span class="op">(</span>dabom_mod <span class="op">=</span> <span class="va">dabom_samp_tum</span>,</span>
-<span>                             parent_child <span class="op">=</span> <span class="va">parent_child</span>,</span>
-<span>                             configuration <span class="op">=</span> <span class="va">configuration</span><span class="op">)</span></span></code></pre></div>
-<p>The resulting tibble contains a column describing the MCMC chain that sample is from (<code>chain</code>) the overall iteration of that sample (<code>iter</code>), the origin, either one or two (<code>origin</code>), the parameter (<code>param</code>) which is coded such that the site code refers to the probability of moving past that site, and the value of the posterior sample (<code>value</code>). Some parameters end in <code>_bb</code>, which refers to the tags that moved past a particular branching node, but did not move into one of the subsequent branches. The “bb” stands for “black box,” meaning we’re not sure exactly what happened to those fish. They have spawned in an area above that branching node, but below upstream detection points, they may have died in that area (due to natural causes or fishing) or they may have moved downstream undetected and were not seen at any other detection sites.</p>
+<code class="sourceCode R"><span><span class="va">move_post</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extractTransPost.html">extractTransPost</a></span><span class="op">(</span>dabom_mod <span class="op">=</span> <span class="va">dabom_samp_tum</span>,</span>
+<span>                              parent_child <span class="op">=</span> <span class="va">parent_child</span>,</span>
+<span>                              configuration <span class="op">=</span> <span class="va">configuration</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">trans_df</span> <span class="op">=</span> <span class="fu"><a href="../reference/compileTransProbs.html">compileTransProbs</a></span><span class="op">(</span>trans_post <span class="op">=</span> <span class="va">move_post</span>,</span>
+<span>                             parent_child <span class="op">=</span> <span class="va">parent_child</span><span class="op">)</span></span></code></pre></div>
+<p>The resulting tibble contains a column describing the MCMC chain that
+sample is from (<code>chain</code>) the overall iteration of that sample
+(<code>iter</code>), the origin, either one or two
+(<code>origin</code>), the parameter (<code>param</code>) which is coded
+such that the site code refers to the probability of moving past that
+site, and the value of the posterior sample (<code>value</code>). Some
+parameters end in <code>_bb</code>, which refers to the tags that moved
+past a particular branching node, but did not move into one of the
+subsequent branches. The “bb” stands for “black box”, meaning we’re not
+sure exactly what happened to those fish. They have spawned in an area
+above that branching node, but below upstream detection points, they may
+have died in that area (due to natural causes or fishing) or they may
+have moved downstream undetected and were not seen at any other
+detection sites.</p>
 </div>
 <div class="section level4">
 <h4 id="total-escapement">Total Escapement<a class="anchor" aria-label="anchor" href="#total-escapement"></a>
 </h4>
-<p>In our example, at Tumwater Dam, every fish that moves upstream of the dam is physically moved upstream, after being identified as hatchery or wild. Therefore, the total escapement, by origin, at Tumwater is known precisely, with no standard error (for 2018, there were 317 natural origin Chinook and 1,167 hatchery Chinook). The user can input that by setting up a tibble with origin and total escapement.</p>
+<p>In our example, at Tumwater Dam, every fish that moves upstream of
+the dam is physically moved upstream, after being identified as hatchery
+or wild. Therefore, the total escapement, by origin, at Tumwater is
+known precisely, with no standard error (for 2018, there were 317
+natural origin Chinook and 1,167 hatchery Chinook). The user can input
+that by setting up a tibble with origin and total escapement.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tot_escp</span> <span class="op">=</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>origin_nm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Wild"</span>, <span class="st">"Hatchery"</span><span class="op">)</span>,</span>
 <span>                  origin <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>,</span>
-<span>                  tot_escp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">317</span>, <span class="fl">1167</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Each of the transition probabilities can then be multiplied by this total escapement, resulting in posterior samples of escapement or abundance past each detection site. If there is any uncertainty in the total escapement, we recommend bootstrapping samples of the total escapement with the appropriate mean and standard error (using the same number of bootstrap samples as they have posterior samples of transition probabilities), labeling those bootstraps with an iteration number <code>iter</code> and joining them to the <code>trans_df</code> tibble by <code>iter</code> and <code>origin</code>.</p>
-<p>We have included some code to help summarize those posteriors below, but the user could summarize the posterior samples however they wish.</p>
+<span>                  tot_escp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">317</span>, <span class="fl">1167</span><span class="op">)</span>,</span>
+<span>                  tot_escp_se <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">31.5</span>, <span class="fl">122.8</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Each of the transition probabilities can then be multiplied by this
+total escapement, resulting in posterior samples of escapement or
+abundance past each detection site. If there is any uncertainty in the
+total escapement, we recommend bootstrapping samples of the total
+escapement with the appropriate mean and standard error (using the same
+number of bootstrap samples as they have posterior samples of transition
+probabilities), labeling those bootstraps with a chain number,
+<code>chain</code>, and an iteration number, <code>iter</code>.</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">escp_summ</span> <span class="op">=</span> <span class="va">trans_df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span><span class="va">tot_escp</span>,</span>
-<span>            by <span class="op">=</span> <span class="st">"origin"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>escp <span class="op">=</span> <span class="va">tot_escp</span> <span class="op">*</span> <span class="va">value</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span>location <span class="op">=</span> <span class="va">param</span>,</span>
-<span>           <span class="va">origin_nm</span>,</span>
-<span>           <span class="va">origin</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span>,</span>
-<span>            median <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span>,</span>
-<span>            mode <span class="op">=</span> <span class="fu"><a href="../reference/estMode.html">estMode</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span>,</span>
-<span>            sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span>,</span>
-<span>            skew <span class="op">=</span> <span class="fu">moments</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/moments/man/skewness.html" class="external-link">skewness</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span>,</span>
-<span>            kurtosis <span class="op">=</span> <span class="fu">moments</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/moments/man/kurtosis.html" class="external-link">kurtosis</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span>,</span>
-<span>            lowerCI <span class="op">=</span> <span class="fu">coda</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/coda/man/HPDinterval.html" class="external-link">HPDinterval</a></span><span class="op">(</span><span class="fu">coda</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/coda/man/mcmc.html" class="external-link">as.mcmc</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span><span class="op">)</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>,</span>
-<span>            upperCI <span class="op">=</span> <span class="fu">coda</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/coda/man/HPDinterval.html" class="external-link">HPDinterval</a></span><span class="op">(</span><span class="fu">coda</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/coda/man/mcmc.html" class="external-link">as.mcmc</a></span><span class="op">(</span><span class="va">escp</span><span class="op">)</span><span class="op">)</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>,</span>
-<span>            .groups <span class="op">=</span> <span class="st">"drop"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">mean</span>, <span class="va">median</span>, <span class="va">mode</span>, <span class="va">sd</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">matches</a></span><span class="op">(</span><span class="st">'CI$'</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>                <span class="op">~</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="va">.</span> <span class="op">&lt;</span> <span class="fl">0</span>, <span class="fl">0</span>, <span class="va">.</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">mean</span>, <span class="va">median</span>, <span class="va">mode</span>, <span class="va">sd</span>, <span class="va">skew</span>, <span class="va">kurtosis</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">matches</a></span><span class="op">(</span><span class="st">'CI$'</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>                <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">.</span>, digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">origin</span><span class="op">)</span>, <span class="va">location</span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<caption>Escapement summary statistics from a sample of locations.</caption>
+<code class="sourceCode R"><span><span class="va">tot_escp_boot</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">tot_escp</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/expand.html" class="external-link">crossing</a></span><span class="op">(</span>chain <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">trans_df</span><span class="op">$</span><span class="va">chain</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">origin_nm</span>,</span>
+<span>           <span class="va">origin</span>,</span>
+<span>           <span class="va">chain</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/reframe.html" class="external-link">reframe</a></span><span class="op">(</span>tot_esc_samp <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html" class="external-link">map2</a></span><span class="op">(</span><span class="va">tot_escp</span>,</span>
+<span>                                <span class="va">tot_escp_se</span>,</span>
+<span>                                .f <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span> <span class="op">{</span></span>
+<span>                                  <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>tot_abund <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">trans_df</span><span class="op">$</span><span class="va">iter</span><span class="op">)</span>,</span>
+<span>                                                           mean <span class="op">=</span> <span class="va">x</span>,</span>
+<span>                                                           sd <span class="op">=</span> <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>                                    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>iter <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span>                                <span class="op">}</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span>cols <span class="op">=</span> <span class="va">tot_esc_samp</span><span class="op">)</span></span></code></pre></div>
+<p>These bootstrapped estimates of total escapement function like the
+MCMC posterior draws of an abundance model, and can be matched with the
+movement posterior draws in <code>trans_df</code> to calculate abundance
+at each location. Use the <code><a href="../reference/calcAbundPost.html">calcAbundPost()</a></code> function for this
+operation.</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">escp_post</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="../reference/calcAbundPost.html">calcAbundPost</a></span><span class="op">(</span>move_post <span class="op">=</span> <span class="va">trans_df</span>,</span>
+<span>                abund_post <span class="op">=</span> <span class="va">tot_escp_boot</span><span class="op">)</span></span></code></pre></div>
+<p>These draws can then be summarized using the
+<code><a href="../reference/summarisePost.html">summarisePost()</a></code> function, or the user could summarize the
+posterior samples however they wish.</p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">escp_summ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summarisePost.html">summarisePost</a></span><span class="op">(</span><span class="va">escp_post</span>,</span>
+<span>                           <span class="va">abund</span>,</span>
+<span>                           location <span class="op">=</span> <span class="va">param</span>,</span>
+<span>                           <span class="va">origin_nm</span>,</span>
+<span>                           <span class="va">origin</span><span class="op">)</span></span></code></pre></div>
+<table style="width:100%;" class="table">
+<caption>Escapement summary statistics from a sample of
+locations.</caption>
+<colgroup>
+<col width="10%">
+<col width="12%">
+<col width="8%">
+<col width="7%">
+<col width="8%">
+<col width="7%">
+<col width="6%">
+<col width="6%">
+<col width="10%">
+<col width="10%">
+<col width="10%">
+</colgroup>
 <thead><tr class="header">
 <th align="left">location</th>
 <th align="left">origin_nm</th>
@@ -1140,165 +1386,165 @@ Graphical representation of the parent-child table, showing which sites are upst
 <th align="right">sd</th>
 <th align="right">skew</th>
 <th align="right">kurtosis</th>
-<th align="right">lowerCI</th>
-<th align="right">upperCI</th>
+<th align="right">lower_ci</th>
+<th align="right">upper_ci</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left">CHW</td>
+<td align="left">CHL</td>
 <td align="left">Wild</td>
 <td align="right">1</td>
-<td align="right">2.2</td>
-<td align="right">2.1</td>
-<td align="right">1.8</td>
-<td align="right">0.9</td>
-<td align="right">0.7</td>
-<td align="right">3.4</td>
-<td align="right">0.6</td>
-<td align="right">3.9</td>
+<td align="right">216.9</td>
+<td align="right">216.6</td>
+<td align="right">219.8</td>
+<td align="right">24.3</td>
+<td align="right">0.1</td>
+<td align="right">3.0</td>
+<td align="right">170.4</td>
+<td align="right">265.9</td>
 </tr>
 <tr class="even">
+<td align="left">CHL_bb</td>
+<td align="left">Wild</td>
+<td align="right">1</td>
+<td align="right">77.6</td>
+<td align="right">77.0</td>
+<td align="right">75.7</td>
+<td align="right">14.6</td>
+<td align="right">0.2</td>
+<td align="right">2.9</td>
+<td align="right">50.1</td>
+<td align="right">107.1</td>
+</tr>
+<tr class="odd">
 <td align="left">ICL</td>
 <td align="left">Wild</td>
 <td align="right">1</td>
-<td align="right">1.9</td>
-<td align="right">1.7</td>
+<td align="right">1.8</td>
 <td align="right">1.6</td>
 <td align="right">0.8</td>
-<td align="right">0.8</td>
-<td align="right">3.9</td>
-<td align="right">0.5</td>
-<td align="right">3.6</td>
-</tr>
-<tr class="odd">
-<td align="left">ICL_bb</td>
-<td align="left">Wild</td>
-<td align="right">1</td>
 <td align="right">1.3</td>
-<td align="right">1.2</td>
-<td align="right">1.1</td>
-<td align="right">0.7</td>
-<td align="right">1.0</td>
-<td align="right">4.5</td>
-<td align="right">0.2</td>
-<td align="right">2.7</td>
+<td align="right">1.6</td>
+<td align="right">7.5</td>
+<td align="right">0.1</td>
+<td align="right">4.3</td>
 </tr>
 <tr class="even">
 <td align="left">NAL</td>
 <td align="left">Wild</td>
 <td align="right">1</td>
-<td align="right">65.7</td>
-<td align="right">65.7</td>
-<td align="right">66.5</td>
-<td align="right">4.4</td>
-<td align="right">0.1</td>
-<td align="right">2.8</td>
-<td align="right">57.4</td>
-<td align="right">74.3</td>
+<td align="right">52.2</td>
+<td align="right">51.7</td>
+<td align="right">50.2</td>
+<td align="right">8.8</td>
+<td align="right">0.3</td>
+<td align="right">2.9</td>
+<td align="right">35.5</td>
+<td align="right">69.5</td>
 </tr>
 <tr class="odd">
 <td align="left">NAL_bb</td>
 <td align="left">Wild</td>
 <td align="right">1</td>
-<td align="right">35.4</td>
-<td align="right">35.2</td>
-<td align="right">35.3</td>
-<td align="right">3.4</td>
-<td align="right">0.1</td>
-<td align="right">3.0</td>
-<td align="right">29.1</td>
-<td align="right">42.1</td>
+<td align="right">22.2</td>
+<td align="right">21.7</td>
+<td align="right">19.6</td>
+<td align="right">5.7</td>
+<td align="right">0.6</td>
+<td align="right">3.2</td>
+<td align="right">12.0</td>
+<td align="right">33.6</td>
 </tr>
 <tr class="even">
 <td align="left">NAU</td>
 <td align="left">Wild</td>
 <td align="right">1</td>
-<td align="right">30.4</td>
-<td align="right">30.2</td>
-<td align="right">30.1</td>
+<td align="right">30.0</td>
+<td align="right">29.6</td>
+<td align="right">28.8</td>
+<td align="right">5.9</td>
+<td align="right">0.3</td>
 <td align="right">3.1</td>
-<td align="right">0.2</td>
-<td align="right">3.1</td>
-<td align="right">24.6</td>
-<td align="right">36.6</td>
+<td align="right">18.9</td>
+<td align="right">41.5</td>
 </tr>
 <tr class="odd">
-<td align="left">CHW</td>
+<td align="left">CHL</td>
 <td align="left">Hatchery</td>
 <td align="right">2</td>
-<td align="right">14.8</td>
-<td align="right">14.5</td>
-<td align="right">13.2</td>
-<td align="right">3.8</td>
-<td align="right">0.6</td>
-<td align="right">3.7</td>
-<td align="right">7.9</td>
-<td align="right">22.3</td>
+<td align="right">830.8</td>
+<td align="right">830.6</td>
+<td align="right">826.5</td>
+<td align="right">88.6</td>
+<td align="right">0.0</td>
+<td align="right">2.9</td>
+<td align="right">654.6</td>
+<td align="right">999.8</td>
 </tr>
 <tr class="even">
+<td align="left">CHL_bb</td>
+<td align="left">Hatchery</td>
+<td align="right">2</td>
+<td align="right">453.2</td>
+<td align="right">452.4</td>
+<td align="right">452.5</td>
+<td align="right">52.5</td>
+<td align="right">0.1</td>
+<td align="right">3.0</td>
+<td align="right">349.4</td>
+<td align="right">554.3</td>
+</tr>
+<tr class="odd">
 <td align="left">ICL</td>
 <td align="left">Hatchery</td>
 <td align="right">2</td>
-<td align="right">7.1</td>
-<td align="right">6.8</td>
-<td align="right">6.2</td>
-<td align="right">2.7</td>
-<td align="right">0.7</td>
-<td align="right">3.5</td>
-<td align="right">2.2</td>
-<td align="right">12.3</td>
-</tr>
-<tr class="odd">
-<td align="left">ICL_bb</td>
-<td align="left">Hatchery</td>
-<td align="right">2</td>
-<td align="right">4.2</td>
-<td align="right">3.9</td>
-<td align="right">3.0</td>
-<td align="right">2.0</td>
-<td align="right">0.9</td>
-<td align="right">4.0</td>
-<td align="right">0.9</td>
-<td align="right">8.3</td>
+<td align="right">19.8</td>
+<td align="right">19.2</td>
+<td align="right">17.9</td>
+<td align="right">5.1</td>
+<td align="right">0.5</td>
+<td align="right">3.3</td>
+<td align="right">10.9</td>
+<td align="right">30.7</td>
 </tr>
 <tr class="even">
 <td align="left">NAL</td>
 <td align="left">Hatchery</td>
 <td align="right">2</td>
-<td align="right">33.1</td>
-<td align="right">32.9</td>
-<td align="right">32.9</td>
-<td align="right">5.7</td>
-<td align="right">0.3</td>
+<td align="right">217.0</td>
+<td align="right">215.9</td>
+<td align="right">213.7</td>
+<td align="right">27.6</td>
+<td align="right">0.2</td>
 <td align="right">3.0</td>
-<td align="right">22.6</td>
-<td align="right">44.7</td>
+<td align="right">165.1</td>
+<td align="right">270.8</td>
 </tr>
 <tr class="odd">
 <td align="left">NAL_bb</td>
 <td align="left">Hatchery</td>
 <td align="right">2</td>
-<td align="right">23.5</td>
-<td align="right">23.3</td>
-<td align="right">23.3</td>
-<td align="right">4.8</td>
+<td align="right">108.8</td>
+<td align="right">107.9</td>
+<td align="right">104.6</td>
+<td align="right">17.5</td>
 <td align="right">0.3</td>
-<td align="right">3.2</td>
-<td align="right">14.4</td>
-<td align="right">32.8</td>
+<td align="right">3.1</td>
+<td align="right">75.9</td>
+<td align="right">143.4</td>
 </tr>
 <tr class="even">
 <td align="left">NAU</td>
 <td align="left">Hatchery</td>
 <td align="right">2</td>
-<td align="right">9.6</td>
-<td align="right">9.3</td>
-<td align="right">8.9</td>
-<td align="right">3.0</td>
-<td align="right">0.6</td>
-<td align="right">3.5</td>
-<td align="right">4.3</td>
-<td align="right">15.6</td>
+<td align="right">108.2</td>
+<td align="right">107.4</td>
+<td align="right">104.5</td>
+<td align="right">15.5</td>
+<td align="right">0.3</td>
+<td align="right">3.1</td>
+<td align="right">77.7</td>
+<td align="right">137.8</td>
 </tr>
 </tbody>
 </table>
@@ -1306,31 +1552,324 @@ Graphical representation of the parent-child table, showing which sites are upst
 <div class="section level4">
 <h4 id="time-varying-versions-gra">Time-Varying Versions (GRA)<a class="anchor" aria-label="anchor" href="#time-varying-versions-gra"></a>
 </h4>
-<p>For DABOM models with time-varying parameters (e.g. Lower Granite Dam), calculating escapement estimates is a little more complicated. Essentially the user needs to extract the movement probabilities along each initial branch for each strata (e.g. week), and multiply those by an estimate of total escapement at the release point for that strata. Those estimates by strata can then be summed for each branch across all strata, to estimate total escapement to each initial branch across the entire run. Those branch escapement estimates are then multiplied by the subsequent movement or transition probabilities within that branch to estimate escapement past all detection points within each branch.</p>
-<p>For Lower Granite, total unique wild escapement can be estimated with the <strong>ST</strong>ate-space <strong>A</strong>dult <strong>D</strong>am <strong>E</strong>escapement <strong>M</strong>odel (STADEM), which interacts well with DABOM to generate all these estimates. If the user has posterior samples from a STADEM model that was set up with the same strata as DABOM, they can generate summaries of escapement estimates using the <code><a href="../reference/calcTribEscape_GRA.html">calcTribEscape_GRA()</a></code> function. If the input <code>summ_results</code> is set to <code>FALSE</code>, the function returns a tibble with all the posterior samples that the user can then summarize as they would like.</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># combine weekly escapement with other transition probabilities</span></span>
-<span><span class="va">escp_summ</span> <span class="op">=</span> <span class="fu"><a href="../reference/calcTribEscape_GRA.html">calcTribEscape_GRA</a></span><span class="op">(</span>dabom_mod <span class="op">=</span> <span class="va">dabom_samp_gra</span>,</span>
-<span>                               stadem_mod <span class="op">=</span> <span class="va">stadem_mod</span>,</span>
-<span>                               stadem_param_nm <span class="op">=</span> <span class="st">"X.new.wild"</span>,</span>
-<span>                               parent_child <span class="op">=</span> <span class="va">parent_child</span>,</span>
-<span>                               summ_results <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
-<p>It is important to note that the user is responsible for ensuring that the strata used in STADEM and that used in DABOM are the same. The <code><a href="../reference/addTimeVaryData.html">addTimeVaryData()</a></code> function uses a function from the <code>STADEM</code> package to generate strata on a weekly basis, so as long as the inputs are the same, the strata will be identical. However, if the user wishes to use strata from a different model (not STADEM), that are not set up to be weekly (e.g. uneven lengths, split across known changes in trap rates, etc.), it is fairly easy to generate the <code>n_strata</code> and <code>dam_strata</code> inputs to JAGS without using the <code><a href="../reference/addTimeVaryData.html">addTimeVaryData()</a></code> function, but then they must also generate estimates of escapement (by origin if necessary) for each strata. Then it is also upon the user to combine those estimates (bootstrapped if necessary due to uncertainty) with the appropriate transition probability posteriors.</p>
+<p>For DABOM models with time-varying parameters (e.g. Lower Granite
+Dam), calculating escapement estimates is a little more complicated.
+Essentially the user needs to extract the movement probabilities along
+each initial branch for each strata (e.g. week), and multiply those by
+an estimate of total escapement at the release point for that strata.
+Those estimates by strata can then be summed for each branch across all
+strata, to estimate total escapement to each initial branch across the
+entire run. Those branch escapement estimates are then multiplied by the
+subsequent movement or transition probabilities within that branch to
+estimate escapement past all detection points within each branch.</p>
+<p>Here, we start by compiling only the time-varying movement
+parameters.</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># read in the LGR parent-child table</span></span>
+<span><span class="va">pc_lgr</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
+<span>              <span class="st">"LGR_parent_child.csv"</span>,</span>
+<span>              package <span class="op">=</span> <span class="st">"PITcleanr"</span>,</span>
+<span>              mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_csv</a></span><span class="op">(</span>show_col_types <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># read in the LGR configuration file</span></span>
+<span><span class="va">config_lgr</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
+<span>              <span class="st">"LGR_configuration.csv"</span>,</span>
+<span>              package <span class="op">=</span> <span class="st">"PITcleanr"</span>,</span>
+<span>              mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_csv</a></span><span class="op">(</span>show_col_types <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># load the MCMC draws from the DABOM model for LGR</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"dabom_samp_lgr"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">trans_post</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extractTransPost.html">extractTransPost</a></span><span class="op">(</span>dabom_mod <span class="op">=</span> <span class="va">dabom_samp_lgr</span>,</span>
+<span>                               parent_child <span class="op">=</span> <span class="va">pc_lgr</span>,</span>
+<span>                               configuration <span class="op">=</span> <span class="va">config_lgr</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># focus only on wild fish</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">origin</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># compile main branch movement parameters</span></span>
+<span><span class="va">main_post</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="../reference/compileTransProbs.html">compileTransProbs</a></span><span class="op">(</span><span class="va">trans_post</span>,</span>
+<span>                    parent_child <span class="op">=</span> <span class="va">pc_lgr</span>,</span>
+<span>                    time_vary_only <span class="op">=</span> <span class="cn">T</span>,</span>
+<span>                    time_vary_param_nm <span class="op">=</span> <span class="st">"strata_num"</span><span class="op">)</span></span></code></pre></div>
+<p>For Lower Granite, total unique wild escapement can be estimated with
+the <strong>ST</strong>ate-space <strong>A</strong>dult
+<strong>D</strong>am <strong>E</strong>escapement <strong>M</strong>odel
+(STADEM), which interacts well with DABOM to generate all these
+estimates. If the user has posterior samples from a STADEM model that
+was set up with the same strata as DABOM, those can be extracted by
+using the <code><a href="https://kevinsee.github.io/STADEM/reference/extractPost.html" class="external-link">extractPost()</a></code> function from the
+<code>STADEM</code> package.</p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/KevinSee/STADEM" class="external-link">STADEM</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"stadem_mod"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># posteriors of STADEM abundance by strata_num</span></span>
+<span><span class="va">abund_post</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu">STADEM</span><span class="fu">::</span><span class="fu"><a href="https://kevinsee.github.io/STADEM/reference/extractPost.html" class="external-link">extractPost</a></span><span class="op">(</span><span class="va">stadem_mod</span>,</span>
+<span>                      param_nms <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"X.new.wild"</span>,</span>
+<span>                                    <span class="st">"X.new.hatch"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>origin <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">param</span>, <span class="st">"wild"</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>,</span>
+<span>                            <span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">param</span>, <span class="st">"hatch"</span><span class="op">)</span> <span class="op">~</span> <span class="fl">2</span>,</span>
+<span>                            .default <span class="op">=</span> <span class="cn">NA_real_</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>abund_param <span class="op">=</span> <span class="va">param</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">origin</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># escapement to each main branch across whole season</span></span>
+<span><span class="va">main_escp</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="../reference/calcAbundPost.html">calcAbundPost</a></span><span class="op">(</span>move_post <span class="op">=</span> <span class="va">main_post</span>,</span>
+<span>                abund_post <span class="op">=</span> <span class="va">abund_post</span>,</span>
+<span>                time_vary_param_nm <span class="op">=</span> <span class="st">"strata_num"</span><span class="op">)</span></span></code></pre></div>
+<p>The movement probabilities within non-main branches (so those without
+time-varying parameters) are compiled separately.</p>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># compile tributary branch movement parameters</span></span>
+<span><span class="va">branch_post</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="../reference/compileTransProbs.html">compileTransProbs</a></span><span class="op">(</span><span class="va">trans_post</span>,</span>
+<span>                    parent_child <span class="op">=</span> <span class="va">pc_lgr</span>,</span>
+<span>                    time_vary_only <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
+<p>These are then combined with the main-branch escapements using the
+<code><a href="../reference/calcAbundPost.html">calcAbundPost()</a></code> function again. The main-branch abundance
+posteriors can be row-bound to the tributary abundance posteriors to
+track abundance across all locations. These draws can then be summarized
+using the <code><a href="../reference/summarisePost.html">summarisePost()</a></code> function.</p>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># estimate escapement to all tributary sites</span></span>
+<span><span class="va">trib_escp</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="../reference/calcAbundPost.html">calcAbundPost</a></span><span class="op">(</span><span class="va">branch_post</span>,</span>
+<span>                <span class="va">main_escp</span> <span class="op">|&gt;</span></span>
+<span>                  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>main_branch <span class="op">=</span> <span class="va">param</span>,</span>
+<span>                         tot_abund <span class="op">=</span> <span class="va">abund</span><span class="op">)</span>,</span>
+<span>                .move_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"origin"</span>,</span>
+<span>                               <span class="st">"main_branch"</span>,</span>
+<span>                               <span class="st">"param"</span><span class="op">)</span>,</span>
+<span>                .abund_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"origin"</span>,</span>
+<span>                                <span class="st">"main_branch"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># combine main-branch and tributary draws into a single object</span></span>
+<span><span class="va">all_escp_post</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">trib_escp</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">value</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">main_escp</span> <span class="op">|&gt;</span> </span>
+<span>              <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>main_branch <span class="op">=</span> <span class="va">param</span>,</span>
+<span>                     tot_abund <span class="op">=</span> <span class="va">abund</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">chain</span>,</span>
+<span>          <span class="va">iter</span>,</span>
+<span>          <span class="va">origin</span>,</span>
+<span>          <span class="va">main_branch</span>,</span>
+<span>          <span class="va">param</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">all_escp_summ</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">all_escp_post</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/summarisePost.html">summarisePost</a></span><span class="op">(</span>value <span class="op">=</span> <span class="va">abund</span>,</span>
+<span>                <span class="va">main_branch</span>,</span>
+<span>                <span class="va">origin</span>,</span>
+<span>                <span class="va">param</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">all_escp_summ</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">mean</span> <span class="op">&gt;</span> <span class="fl">0</span>, </span>
+<span>         <span class="va">main_branch</span> <span class="op">==</span> <span class="st">"LLR"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>location <span class="op">=</span> <span class="va">param</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="va">mean</span><span class="op">:</span><span class="va">mode</span>,</span>
+<span>                <span class="va">round</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">kable</span><span class="op">(</span>digits <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>        caption <span class="op">=</span> <span class="st">"Summary statistics of escapement estimates to all locations within one main-branch, the Lemhi River (site LLR)."</span><span class="op">)</span></span></code></pre></div>
+<table style="width:100%;" class="table">
+<caption>Summary statistics of escapement estimates to all locations
+within one main-branch, the Lemhi River (site LLR).</caption>
+<colgroup>
+<col width="14%">
+<col width="8%">
+<col width="10%">
+<col width="6%">
+<col width="8%">
+<col width="6%">
+<col width="6%">
+<col width="6%">
+<col width="10%">
+<col width="10%">
+<col width="10%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">main_branch</th>
+<th align="right">origin</th>
+<th align="left">location</th>
+<th align="right">mean</th>
+<th align="right">median</th>
+<th align="right">mode</th>
+<th align="right">sd</th>
+<th align="right">skew</th>
+<th align="right">kurtosis</th>
+<th align="right">lower_ci</th>
+<th align="right">upper_ci</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">LLR</td>
+<td align="right">1</td>
+<td align="left">EVL</td>
+<td align="right">113</td>
+<td align="right">112</td>
+<td align="right">108</td>
+<td align="right">18.8</td>
+<td align="right">0.2</td>
+<td align="right">2.9</td>
+<td align="right">77.3</td>
+<td align="right">149.7</td>
+</tr>
+<tr class="even">
+<td align="left">LLR</td>
+<td align="right">1</td>
+<td align="left">EVL_bb</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">3.3</td>
+<td align="right">2.4</td>
+<td align="right">10.6</td>
+<td align="right">0.0</td>
+<td align="right">9.6</td>
+</tr>
+<tr class="odd">
+<td align="left">LLR</td>
+<td align="right">1</td>
+<td align="left">EVU</td>
+<td align="right">110</td>
+<td align="right">109</td>
+<td align="right">112</td>
+<td align="right">18.4</td>
+<td align="right">0.3</td>
+<td align="right">3.0</td>
+<td align="right">77.0</td>
+<td align="right">147.9</td>
+</tr>
+<tr class="even">
+<td align="left">LLR</td>
+<td align="right">1</td>
+<td align="left">EVU_bb</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">2.7</td>
+<td align="right">1.7</td>
+<td align="right">6.8</td>
+<td align="right">0.0</td>
+<td align="right">8.1</td>
+</tr>
+<tr class="odd">
+<td align="left">LLR</td>
+<td align="right">1</td>
+<td align="left">HYC</td>
+<td align="right">52</td>
+<td align="right">51</td>
+<td align="right">49</td>
+<td align="right">12.4</td>
+<td align="right">0.4</td>
+<td align="right">3.0</td>
+<td align="right">30.8</td>
+<td align="right">77.4</td>
+</tr>
+<tr class="even">
+<td align="left">LLR</td>
+<td align="right">1</td>
+<td align="left">LLR</td>
+<td align="right">153</td>
+<td align="right">153</td>
+<td align="right">155</td>
+<td align="right">22.0</td>
+<td align="right">0.2</td>
+<td align="right">2.8</td>
+<td align="right">112.0</td>
+<td align="right">197.3</td>
+</tr>
+<tr class="odd">
+<td align="left">LLR</td>
+<td align="right">1</td>
+<td align="left">LLR_bb</td>
+<td align="right">41</td>
+<td align="right">40</td>
+<td align="right">38</td>
+<td align="right">10.7</td>
+<td align="right">0.5</td>
+<td align="right">3.3</td>
+<td align="right">20.8</td>
+<td align="right">61.9</td>
+</tr>
+<tr class="even">
+<td align="left">LLR</td>
+<td align="right">1</td>
+<td align="left">LRW</td>
+<td align="right">55</td>
+<td align="right">54</td>
+<td align="right">54</td>
+<td align="right">12.9</td>
+<td align="right">0.5</td>
+<td align="right">3.2</td>
+<td align="right">32.3</td>
+<td align="right">81.9</td>
+</tr>
+<tr class="odd">
+<td align="left">LLR</td>
+<td align="right">1</td>
+<td align="left">LRW_bb</td>
+<td align="right">55</td>
+<td align="right">54</td>
+<td align="right">54</td>
+<td align="right">12.9</td>
+<td align="right">0.5</td>
+<td align="right">3.2</td>
+<td align="right">32.3</td>
+<td align="right">81.9</td>
+</tr>
+</tbody>
+</table>
+<p>It is important to note that the user is responsible for ensuring
+that the strata used in STADEM and that used in DABOM are the same. The
+<code><a href="../reference/addTimeVaryData.html">addTimeVaryData()</a></code> function uses a function from the
+<code>STADEM</code> package to generate strata on a weekly basis, so as
+long as the inputs are the same, the strata will be identical. However,
+if the user wishes to use strata from a different model (not STADEM),
+that are not set up to be weekly (e.g. uneven lengths, split across
+known changes in trap rates, etc.), it is fairly easy to generate the
+<code>n_strata</code> and <code>dam_strata</code> inputs to JAGS without
+using the <code><a href="../reference/addTimeVaryData.html">addTimeVaryData()</a></code> function, but then they must
+also generate estimates of escapement (by origin if necessary) for each
+strata. Then it is also upon the user to combine those estimates
+(bootstrapped if necessary due to uncertainty) with the appropriate
+transition probability posteriors.</p>
 </div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="updating-a-dabom-model">Updating a DABOM Model<a class="anchor" aria-label="anchor" href="#updating-a-dabom-model"></a>
 </h2>
-<p>As new detection sites are installed, the current DABOM models may need to change. The user can modify the configuration file and parent-child table through R, or manually in other software like Excel and then read those files back into R. Once the configuration file and parent-child table are updated, the other functions in the <code>DABOM</code> package will work correctly with these updated files, including <code>writeDABOM</code>, <code>fishNoFishNodes</code>, <code>setInitialValues</code>, <code>createJAGSinputs</code> and <code>setSavedParams</code>. The user can run the JAGS model, and even pull out summaries of the detection probabilities using <code>summariseDetectProbs</code>, and generate transition probabilities using <code>compileTransProbs</code>.</p>
-<p><strong><em>However</em></strong>, if the Lower Granite DABOM model is modified, especially if new initial branches are added, particular care should be taken when examining the results of <code>calcTribEscape_GRA</code>, in case further adjustments are needed.</p>
+<p>As new detection sites are installed, the current DABOM models may
+need to change. The user can modify the configuration file and
+parent-child table through R, or manually in other software like Excel
+and then read those files back into R. Once the configuration file and
+parent-child table are updated, the other functions in the
+<code>DABOM</code> package will work correctly with these updated files,
+including <code>writeDABOM</code>, <code>fishNoFishNodes</code>,
+<code>setInitialValues</code>, <code>createJAGSinputs</code> and
+<code>setSavedParams</code>. The user can run the JAGS model, and even
+pull out summaries of the detection probabilities using
+<code>summariseDetectProbs</code>, and generate transition probabilities
+using <code>extractTransPost</code> and
+<code>compileTransProbs</code>.</p>
 </div>
 <div class="section level2">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-Waterhouse2020" class="csl-entry">
-Waterhouse, Lynn, Jody White, Kevin See, and Andrew Murdoch. 2020. <span>“A Bayesian Nested Patch Occupancy Model to Estimate Steelhead Movement and Abundance.”</span> <em>Ecological Applications</em> 30 (8). <a href="https://doi.org/10.1002/eap.2202" class="external-link">https://doi.org/10.1002/eap.2202</a>.
+Waterhouse, Lynn, Jody White, Kevin See, and Andrew Murdoch. 2020.
+<span>“A Bayesian Nested Patch Occupancy Model to Estimate Steelhead
+Movement and Abundance.”</span> <em>Ecological Applications</em> 30 (8).
+<a href="https://doi.org/10.1002/eap.2202" class="external-link">https://doi.org/10.1002/eap.2202</a>.
 </div>
 </div>
 </div>

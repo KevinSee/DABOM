@@ -34,16 +34,7 @@
     <loc>https://kevinsee.github.io/DABOM/reference/addTimeVaryData.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/reference/calcBranchEscape_GRA.html</loc>
-  </url>
-  <url>
-    <loc>https://kevinsee.github.io/DABOM/reference/calcRepGrpEscape_GRA.html</loc>
-  </url>
-  <url>
-    <loc>https://kevinsee.github.io/DABOM/reference/calcTribEscape_GRA.html</loc>
-  </url>
-  <url>
-    <loc>https://kevinsee.github.io/DABOM/reference/compileTimeVaryTransProbs.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/reference/calcAbundPost.html</loc>
   </url>
   <url>
     <loc>https://kevinsee.github.io/DABOM/reference/compileTransProbs.html</loc>
@@ -64,13 +55,13 @@
     <loc>https://kevinsee.github.io/DABOM/reference/defineDabomColNms.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/reference/defineRepGrps_GRA.html</loc>
-  </url>
-  <url>
     <loc>https://kevinsee.github.io/DABOM/reference/estMode.html</loc>
   </url>
   <url>
-    <loc>https://kevinsee.github.io/DABOM/reference/extractTransProbs.html</loc>
+    <loc>https://kevinsee.github.io/DABOM/reference/extractDetectPost.html</loc>
+  </url>
+  <url>
+    <loc>https://kevinsee.github.io/DABOM/reference/extractTransPost.html</loc>
   </url>
   <url>
     <loc>https://kevinsee.github.io/DABOM/reference/fixNoFishNodes.html</loc>
@@ -91,18 +82,9 @@
     <loc>https://kevinsee.github.io/DABOM/reference/summariseDetectProbs.html</loc>
   </url>
   <url>
+    <loc>https://kevinsee.github.io/DABOM/reference/summarisePost.html</loc>
+  </url>
+  <url>
     <loc>https://kevinsee.github.io/DABOM/reference/writeDABOM.html</loc>
-  </url>
-  <url>
-    <loc>https://kevinsee.github.io/DABOM/reference/writeDABOM_LGD.html</loc>
-  </url>
-  <url>
-    <loc>https://kevinsee.github.io/DABOM/reference/writeDABOM_PRA.html</loc>
-  </url>
-  <url>
-    <loc>https://kevinsee.github.io/DABOM/reference/writeDABOM_PRO.html</loc>
-  </url>
-  <url>
-    <loc>https://kevinsee.github.io/DABOM/reference/writeDABOM_TUM.html</loc>
   </url>
 </urlset>
