@@ -10,6 +10,7 @@ library(tidyverse)
 library(lubridate)
 library(magrittr)
 library(usethis)
+library(here)
 library(PITcleanr)
 # library(DABOM)
 library(rjags)
@@ -17,7 +18,7 @@ devtools::load_all()
 
 #-----------------------------------------------------------------
 # pick a DABOM version to test
-root_site = c("LGR", 'PRA', "TUM", "PRO")[1]
+root_site = c("LGR", 'PRA', "TUM", "PRO")[3]
 
 # determine where various test files are located
 ptagis_file_list = list(LGR = "LGR_chnk_cth_2019.csv",
@@ -190,14 +191,37 @@ dabom_mod = coda.samples(jags,
 
 if(root_site == "TUM") {
   dabom_samp_tum = dabom_mod
-  use_data(dabom_samp_tum,
-           version = 3)
+  usethis::use_data(dabom_samp_tum,
+                    version = 3,
+                    overwrite = T)
 }
 
 if(root_site == "LGR") {
   dabom_samp_lgr = dabom_mod
-  use_data(dabom_samp_lgr,
-           version = 3)
+  # save whole mcmc.list object
+  write_rds(dabom_samp_lgr,
+            file = here("analysis/data/derived_data/dabom_samp_lgr_all.rds"))
+  # select a sample of rows, save as a package object
+  set.seed(12)
+  dabom_samp_lgr <-
+    dabom_samp_lgr |>
+    as.matrix(chains = T) |>
+    as_tibble() |>
+    group_by(CHAIN) |>
+    slice_sample(n = 100) |>
+    ungroup() |>
+    group_by(CHAIN) |>
+    group_split(.keep = F) |>
+    map(.f = as.mcmc) |>
+    as.mcmc.list()
+
+  # object.size(dabom_samp_lgr) |>
+  #   format("Mb")
+
+  usethis::use_data(dabom_samp_lgr,
+                    version = 3,
+                    overwrite = T)
+
 }
 
 
@@ -210,6 +234,14 @@ trans_post <-
   extractTransPost(dabom_mod = dabom_mod,
                    parent_child = pc,
                    configuration = configuration)
+
+# if(root_site == "LGR") {
+#   trans_post_lgr = trans_post
+#   usethis::use_data(trans_post,
+#                     version = 3,
+#                     overwrite = T)
+# }
+
 
 if(root_site %in% c("PRO", "PRA", 'TUM')) {
   trans_df <-
