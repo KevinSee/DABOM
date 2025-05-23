@@ -7,7 +7,7 @@
 #' @param .data A data frame or data frame extension (e.g. a tibble) containing a column called `value`
 #' @param value name of the column containing posterior values. Default is `value`.
 #' @param ... <tidy-select> Columns to group by (e.g. `origin`, `param`, etc.)
-#' #' @param .cred_int_prob A numeric scalar in the interval (0,1) giving what higest posterior density portion of the posterior the credible interval should cover. The default value is 95\%.
+#' @param .cred_int_prob A numeric scalar in the interval (0,1) giving what highest posterior density portion of the posterior the credible interval should cover. The default value is 95\%.
 
 #'
 #' @import dplyr moments coda
